@@ -1426,6 +1426,7 @@
          settingsError: "Competition settings could not be saved. Please try again.",
          backendUnavailable: "The backend is unavailable. Settings were not changed. Redeploy the Apps Script web app.",
          organizerRequired: "Organizer authorization is required.",
+         organizerInvalidKey: "The organizer key was rejected. Check Apps Script ADMIN_KEY and try again.",
          confirmDelete: "Delete this submission permanently? It will not be shown publicly.",
          demoBadge: "DEMO PREVIEW",
          conceptArt: "concept art",
@@ -1494,6 +1495,7 @@
          settingsError: "تعذر حفظ إعدادات المسابقة. حاول مرة أخرى.",
          backendUnavailable: "الخادم غير متاح. لم يتم تغيير الإعدادات. أعد نشر تطبيق Apps Script.",
          organizerRequired: "يلزم إدخال رمز صلاحية المنظم.",
+         organizerInvalidKey: "تم رفض رمز المنظم. تحقق من ADMIN_KEY في Apps Script وحاول مرة أخرى.",
          confirmDelete: "حذف هذه المشاركة نهائيًا؟ لن تظهر للجمهور.",
          demoBadge: "تصور تجريبي",
          conceptArt: "تصور بصري",
@@ -1771,9 +1773,12 @@
     }
 
     function showOrganizerError(error) {
-      const message = /backend unavailable|404|502|503|504/i.test(error?.message || "")
-        ? t("backendUnavailable")
-        : t("settingsError");
+      const errorMessage = error?.message || "";
+      const message = /unauthorized|invalid organizer key/i.test(errorMessage)
+        ? t("organizerInvalidKey")
+        : /backend unavailable|404|502|503|504/i.test(errorMessage)
+          ? t("backendUnavailable")
+          : t("settingsError");
       organizerStatus.textContent = message;
       organizerStatus.classList.add("is-error");
     }
