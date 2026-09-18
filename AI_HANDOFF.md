@@ -247,8 +247,16 @@ Before coding, inspect the latest `main` branch and the live deployment state. T
 - GitHub Pages deployment is separate from Apps Script deployment.
 - Apps Script changes require copying the backend into Apps Script and deploying a new version.
 
+### Deployment verification — 2026-09-19
+
+- GitHub Pages is serving the latest frontend commit `573aad3253487783a80c22f8cb455932c4f73665`; the Pages workflow completed successfully.
+
+- The Apps Script health endpoint is live and returns `{ ok: true, service: "Imagine Saudi 2050", status: "ready" }`.
+
+- The live `/exec?action=visions` response currently includes only `submissionsOpen` and `votingOpen`; it does not include the new deadline fields from the current backend source. The Apps Script deployment is therefore behind GitHub and still needs the latest backend copied and deployed.
+
 ### Next recommended step
 
-Copy the updated backend into Apps Script, deploy a new web-app version, and verify the public countdown/results response through the live /exec endpoint. Then confirm GitHub Pages serves the new frontend.
+Copy the current `google-apps-script.gs` from `main` into Apps Script, deploy a new web-app version while preserving the existing `/exec` URL, then verify both `/exec?action=health` and `/exec?action=visions`. The visions response should expose `submissionDeadline` and `votingDeadline` in `settings` (empty values are acceptable). After that, recheck GitHub Pages and test the organizer deadline/countdown controls.
 
 ---
