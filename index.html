@@ -881,33 +881,29 @@
       pointer-events: none;
     }
     .hero-brandscape-logo-cloud {
-      grid-column: 1 / -1;
-      grid-row: 1;
-      display: grid;
-      grid-template-columns: repeat(3, minmax(0, 1fr));
-      grid-template-rows: repeat(2, minmax(0, 1fr));
-      align-items: center;
-      justify-items: center;
-      width: 100%;
-      height: 100%;
-      padding: 0 7%;
-      gap: 10px 16px;
+      position: absolute;
+      top: 0;
+      right: 0;
+      left: 0;
+      height: 54%;
+      pointer-events: none;
     }
     .hero-brandscape::before { display: none; }
     .hero-brandscape-logo {
+      position: absolute;
       display: block;
-      width: min(100%, 118px);
+      width: clamp(58px, 9vw, 112px);
       height: auto;
       opacity: .1;
       filter: grayscale(1) brightness(2.1) contrast(.72);
       mix-blend-mode: screen;
     }
-    .hero-brandscape-logo:nth-child(1) { opacity: .09; transform: translate(-8px, 5px) rotate(-11deg) scale(.92); }
-    .hero-brandscape-logo:nth-child(2) { opacity: .14; transform: translate(4px, -5px) rotate(7deg) scale(1.04); }
-    .hero-brandscape-logo:nth-child(3) { opacity: .075; transform: translate(9px, 7px) rotate(-3deg) scale(.86); }
-    .hero-brandscape-logo:nth-child(4) { opacity: .12; transform: translate(-6px, -4px) rotate(13deg) scale(.98); }
-    .hero-brandscape-logo:nth-child(5) { opacity: .14; transform: translate(8px, 2px) rotate(-8deg) scale(1.08); }
-    .hero-brandscape-logo:nth-child(6) { opacity: .07; transform: translate(-10px, -6px) rotate(5deg) scale(.9); }
+    .hero-brandscape-logo:nth-child(1) { top: 4%; right: 6%; opacity: .09; transform: rotate(-11deg) scale(.92); }
+    .hero-brandscape-logo:nth-child(2) { top: 29%; right: 34%; opacity: .14; transform: rotate(7deg) scale(1.04); }
+    .hero-brandscape-logo:nth-child(3) { top: 8%; right: 68%; opacity: .075; transform: rotate(-3deg) scale(.86); }
+    .hero-brandscape-logo:nth-child(4) { top: 57%; right: 16%; opacity: .12; transform: rotate(13deg) scale(.98); }
+    .hero-brandscape-logo:nth-child(5) { top: 68%; right: 53%; opacity: .14; transform: rotate(-8deg) scale(1.08); }
+    .hero-brandscape-logo:nth-child(6) { top: 43%; right: 78%; opacity: .07; transform: rotate(5deg) scale(.9); }
     .hero-brandscape-number {
       grid-column: 2;
       grid-row: 2;
@@ -969,13 +965,13 @@
     @media (max-width: 800px) {
       .hero-brandscape { top: 0; right: -42px; width: 68%; height: 330px; padding: 14px 0 10px 20px; opacity: .8; }
       html[dir="rtl"] .hero-brandscape { right: auto; left: -42px; padding-right: 20px; padding-left: 0; }
-      .hero-brandscape-logo { width: min(100%, 92px); }
+      .hero-brandscape-logo { width: clamp(52px, 10vw, 86px); }
       .hero-brandscape-logo-cloud { gap: 7px 10px; padding: 0 4%; }
     }
     @media (max-width: 520px) {
       .hero-brandscape { right: -78px; width: 86%; height: 275px; opacity: .62; }
       html[dir="rtl"] .hero-brandscape { right: auto; left: -78px; }
-      .hero-brandscape-logo { width: min(100%, 72px); }
+      .hero-brandscape-logo { width: clamp(46px, 12vw, 68px); }
       .hero-brandscape-map { width: 105px; }
       .hero-brandscape-number { font-size: 7.2rem; }
     }
