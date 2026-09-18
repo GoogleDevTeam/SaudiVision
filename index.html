@@ -3,38 +3,42 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <meta name="theme-color" content="#050505" />
+  <meta name="theme-color" content="#073B35" />
   <title>Imagine Saudi 2050 — Future Vision Competition</title>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet" />
   <style>
     :root {
-      --ink: #f6f7fb;
-      --muted: #9ba1b3;
-      --dim: #646a7b;
-      --line: rgba(255, 255, 255, 0.11);
-      --panel: rgba(16, 18, 27, 0.72);
-      --panel-strong: rgba(22, 25, 36, 0.88);
-      --blue: #4285f4;
-      --green: #34a853;
-      --yellow: #fbbc05;
-      --red: #ea4335;
-      --cyan: #48e0da;
-      --radius: 22px;
+      --ink: #F7F4EC;
+      --muted: #D8D0ED;
+      --dim: #A9BDB5;
+      --line: rgba(216, 208, 237, 0.18);
+      --panel: rgba(4, 43, 37, 0.78);
+      --panel-strong: rgba(7, 59, 53, 0.94);
+      --blue: #2C7562;
+      --green: #2C7562;
+      --yellow: #D8D0ED;
+      --red: #9B8AC4;
+      --cyan: #9B8AC4;
+      --dark-green: #073B35;
+      --lavender: #9B8AC4;
+      --light-lavender: #D8D0ED;
+      --off-white: #F7F4EC;
+      --radius: 20px;
     }
 
     * { box-sizing: border-box; }
-    html { min-height: 100%; background: #050505; }
+    html { min-height: 100%; background: #073B35; }
     body {
       min-height: 100vh;
       margin: 0;
       overflow-x: hidden;
       color: var(--ink);
       background:
-        radial-gradient(circle at 88% -10%, rgba(66, 133, 244, 0.19), transparent 28rem),
-        radial-gradient(circle at 4% 55%, rgba(52, 168, 83, 0.11), transparent 25rem),
-        #050505;
+        radial-gradient(circle at 88% -10%, rgba(155, 138, 196, 0.25), transparent 28rem),
+        radial-gradient(circle at 4% 55%, rgba(44, 117, 98, 0.28), transparent 25rem),
+        #073B35;
       font-family: "Space Grotesk", "Cairo", sans-serif;
     }
 
@@ -75,10 +79,10 @@
       height: 43px;
       place-items: center;
       position: relative;
-      border: 1px solid rgba(66, 133, 244, .55);
+      border: 1px solid rgba(216, 208, 237, .48);
       border-radius: 13px;
-      background: rgba(66, 133, 244, .11);
-      box-shadow: inset 0 0 18px rgba(66, 133, 244, .14), 0 0 22px rgba(66, 133, 244, .12);
+      background: rgba(44, 117, 98, .24);
+      box-shadow: inset 0 0 18px rgba(155, 138, 196, .14), 0 0 22px rgba(155, 138, 196, .12);
     }
 
     .brand-mark::after {
@@ -116,23 +120,23 @@
     .language-toggle {
       min-width: 58px;
       padding: 7px 10px;
-      border: 1px solid rgba(72, 224, 218, .35);
+      border: 1px solid rgba(216, 208, 237, .35);
       border-radius: 8px;
       cursor: pointer;
-      background: rgba(72, 224, 218, .08);
+      background: rgba(155, 138, 196, .12);
       color: var(--cyan);
       font-family: "Cairo", sans-serif;
       font-size: .7rem;
       font-weight: 700;
       transition: background .2s ease, transform .2s ease;
     }
-    .language-toggle:hover { background: rgba(72, 224, 218, .17); transform: translateY(-2px); }
+    .language-toggle:hover { background: rgba(155, 138, 196, .24); transform: translateY(-2px); }
     .live-dot {
       width: 8px;
       height: 8px;
       border-radius: 50%;
       background: var(--green);
-      box-shadow: 0 0 0 5px rgba(52, 168, 83, .13), 0 0 16px var(--green);
+      box-shadow: 0 0 0 5px rgba(44, 117, 98, .25), 0 0 16px var(--green);
       animation: pulse 2s infinite;
     }
     .status-text { color: var(--muted); font-size: .75rem; letter-spacing: .06em; text-transform: uppercase; }
@@ -161,16 +165,16 @@
     }
     .organizer-details summary::-webkit-details-marker { display: none; }
     .organizer-details summary::before { margin-right: 7px; content: "⚙"; color: var(--cyan); }
-    .organizer-details[open] summary, .organizer-details summary:hover { border-color: rgba(72, 224, 218, .45); color: var(--ink); }
+    .organizer-details[open] summary, .organizer-details summary:hover { border-color: rgba(216, 208, 237, .45); color: var(--ink); }
     .organizer-panel {
       display: grid;
       grid-template-columns: repeat(2, minmax(0, 1fr));
       gap: 12px;
       margin-top: 10px;
       padding: 15px;
-      border: 1px solid rgba(72, 224, 218, .2);
+      border: 1px solid rgba(216, 208, 237, .2);
       border-radius: 15px;
-      background: rgba(16, 18, 27, .9);
+      background: rgba(4, 43, 37, .94);
     }
     .control-card {
       display: flex;
@@ -190,7 +194,7 @@
       inset: 0;
       border-radius: 50px;
       cursor: pointer;
-      background: #292d3a;
+      background: #0C5147;
       transition: background .2s ease;
     }
     .toggle-track::before {
@@ -200,12 +204,12 @@
       top: 3px;
       left: 3px;
       border-radius: 50%;
-      background: #8f95a5;
+      background: #A9BDB5;
       content: "";
       transition: transform .2s ease, background .2s ease;
     }
-    .toggle input:checked + .toggle-track { background: rgba(52, 168, 83, .45); }
-    .toggle input:checked + .toggle-track::before { background: #7ee19a; transform: translateX(19px); }
+    .toggle input:checked + .toggle-track { background: rgba(44, 117, 98, .65); }
+    .toggle input:checked + .toggle-track::before { background: var(--off-white); transform: translateX(19px); }
     .organizer-status {
       grid-column: 1 / -1;
       margin: 0;
@@ -213,6 +217,52 @@
       font-family: "Cairo", sans-serif;
       font-size: .68rem;
     }
+    .review-panel {
+      grid-column: 1 / -1;
+      padding: 14px;
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      background: rgba(3, 35, 31, .48);
+    }
+    .review-header { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+    .review-header h3 { margin: 0; font-size: .78rem; }
+    .review-header p { margin: 4px 0 0; color: var(--dim); font-family: "Cairo", sans-serif; font-size: .67rem; }
+    .review-refresh {
+      padding: 7px 9px;
+      border: 1px solid rgba(216, 208, 237, .3);
+      border-radius: 8px;
+      cursor: pointer;
+      background: rgba(155, 138, 196, .11);
+      color: var(--cyan);
+      font: inherit;
+      font-size: .66rem;
+    }
+    .review-queue { display: grid; gap: 8px; margin-top: 11px; }
+    .review-empty { margin: 0; color: var(--dim); font-family: "Cairo", sans-serif; font-size: .7rem; }
+    .review-item {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      padding: 10px;
+      border: 1px solid rgba(255,255,255,.08);
+      border-radius: 9px;
+      background: rgba(255,255,255,.025);
+    }
+    .review-item strong { display: block; font-size: .74rem; }
+    .review-item span { display: block; max-width: 650px; margin-top: 3px; overflow: hidden; color: var(--muted); font-family: "Cairo", sans-serif; font-size: .66rem; text-overflow: ellipsis; white-space: nowrap; }
+    .review-actions { display: flex; flex: 0 0 auto; gap: 6px; }
+    .review-action {
+      padding: 6px 8px;
+      border: 1px solid currentColor;
+      border-radius: 7px;
+      cursor: pointer;
+      background: transparent;
+      font: inherit;
+      font-size: .63rem;
+    }
+    .review-action.approve { color: var(--light-lavender); }
+    .review-action.delete { color: #E6B6D2; }
 
     .hero {
       position: relative;
@@ -230,9 +280,9 @@
       right: 12%;
       width: 180px;
       height: 180px;
-      border: 1px solid rgba(72, 224, 218, .16);
+      border: 1px solid rgba(155, 138, 196, .2);
       border-radius: 50%;
-      box-shadow: 0 0 0 22px rgba(72, 224, 218, .025), 0 0 0 44px rgba(72, 224, 218, .02);
+      box-shadow: 0 0 0 22px rgba(155, 138, 196, .05), 0 0 0 44px rgba(155, 138, 196, .035);
       content: "";
       animation: orbit 14s linear infinite;
     }
@@ -249,7 +299,7 @@
     .hero h1 .gradient-word {
       display: block;
       color: transparent;
-      background: linear-gradient(100deg, var(--blue) 5%, #9b8eff 42%, var(--cyan) 94%);
+      background: linear-gradient(100deg, var(--green) 5%, var(--lavender, #9B8AC4) 48%, var(--light-lavender, #D8D0ED) 94%);
       -webkit-background-clip: text;
       background-clip: text;
     }
@@ -268,10 +318,10 @@
       min-width: 258px;
       padding: 22px 24px;
       overflow: hidden;
-      border: 1px solid rgba(66, 133, 244, .43);
+      border: 1px solid rgba(216, 208, 237, .36);
       border-radius: var(--radius);
-      background: linear-gradient(135deg, rgba(66, 133, 244, .14), rgba(52, 168, 83, .06));
-      box-shadow: inset 0 0 30px rgba(66, 133, 244, .06), 0 0 32px rgba(66, 133, 244, .08);
+      background: linear-gradient(135deg, rgba(155, 138, 196, .18), rgba(44, 117, 98, .16));
+      box-shadow: inset 0 0 30px rgba(216, 208, 237, .06), 0 0 32px rgba(155, 138, 196, .11);
     }
 
     .counter::before {
@@ -295,7 +345,7 @@
       font-weight: 700;
       letter-spacing: -.06em;
       line-height: 1;
-      text-shadow: 0 0 22px rgba(66, 133, 244, .75);
+      text-shadow: 0 0 22px rgba(155, 138, 196, .65);
     }
     .counter-note { display: block; margin-top: 12px; color: var(--green); font-size: .72rem; }
 
@@ -313,7 +363,7 @@
       overflow: hidden;
       border: 1px solid var(--line);
       border-radius: 18px;
-      background: rgba(16, 18, 27, .58);
+      background: rgba(4, 43, 37, .72);
       animation: float-card 7s ease-in-out infinite;
     }
     .flow-step:nth-child(2) { animation-delay: -2.2s; }
@@ -335,13 +385,13 @@
       margin-bottom: 15px;
       place-items: center;
       border-radius: 9px;
-      background: rgba(66, 133, 244, .18);
+      background: rgba(44, 117, 98, .28);
       color: var(--blue);
       font-size: .75rem;
       font-weight: 700;
     }
-    .flow-step:nth-child(2) .flow-number { background: rgba(251, 188, 5, .16); color: var(--yellow); }
-    .flow-step:nth-child(3) .flow-number { background: rgba(52, 168, 83, .16); color: var(--green); }
+    .flow-step:nth-child(2) .flow-number { background: rgba(155, 138, 196, .2); color: var(--light-lavender, #D8D0ED); }
+    .flow-step:nth-child(3) .flow-number { background: rgba(44, 117, 98, .22); color: var(--light-lavender, #D8D0ED); }
     .flow-step h2 { margin: 0 0 7px; font-size: .98rem; }
     .flow-step p {
       max-width: 280px;
@@ -359,10 +409,10 @@
       align-items: stretch;
       margin-bottom: 48px;
       padding: 26px;
-      border: 1px solid rgba(72, 224, 218, .24);
+      border: 1px solid rgba(216, 208, 237, .24);
       border-radius: var(--radius);
       background:
-        radial-gradient(circle at 90% 0%, rgba(72, 224, 218, .12), transparent 22rem),
+        radial-gradient(circle at 90% 0%, rgba(155, 138, 196, .16), transparent 22rem),
         var(--panel);
       animation: rise-in .9s .22s both;
     }
@@ -379,7 +429,7 @@
       border: 1px solid rgba(255,255,255,.13);
       border-radius: 11px;
       outline: none;
-      background: rgba(4, 5, 10, .64);
+      background: rgba(3, 35, 31, .72);
       color: var(--ink);
       font: inherit;
       font-size: .8rem;
@@ -389,9 +439,9 @@
     .field textarea { min-height: 92px; padding: 11px 12px; resize: vertical; }
     .field input:focus, .field select:focus, .field textarea:focus {
       border-color: var(--cyan);
-      box-shadow: 0 0 0 3px rgba(72, 224, 218, .1);
+      box-shadow: 0 0 0 3px rgba(155, 138, 196, .14);
     }
-    .field select option { background: #11131b; }
+    .field select option { background: #073B35; }
     .submit-actions { display: flex; align-items: center; justify-content: space-between; gap: 12px; grid-column: 1 / -1; }
     .form-note { color: var(--dim); font-family: "Cairo", sans-serif; font-size: .68rem; }
     .generate-button, .vote-button {
@@ -404,15 +454,15 @@
     }
     .generate-button {
       padding: 12px 17px;
-      background: linear-gradient(100deg, var(--blue), var(--cyan));
-      color: #041012;
+      background: linear-gradient(100deg, var(--lavender), var(--light-lavender));
+      color: var(--dark-green);
       font-size: .76rem;
     }
-    .generate-button:hover, .vote-button:hover:not(:disabled) { box-shadow: 0 7px 20px rgba(72, 224, 218, .2); transform: translateY(-2px); }
+    .generate-button:hover, .vote-button:hover:not(:disabled) { box-shadow: 0 7px 20px rgba(155, 138, 196, .28); transform: translateY(-2px); }
     .generate-button:disabled { cursor: wait; opacity: .65; }
     .vote-row { display: flex; align-items: center; justify-content: flex-end; gap: 9px; margin-top: 17px; }
-    .vote-button { padding: 8px 11px; background: rgba(66, 133, 244, .13); color: #9ac0ff; font-size: .7rem; }
-    .vote-button.voted { background: rgba(52, 168, 83, .16); color: #7ee19a; }
+    .vote-button { padding: 8px 11px; background: rgba(155, 138, 196, .16); color: var(--light-lavender); font-size: .7rem; }
+    .vote-button.voted { background: rgba(44, 117, 98, .35); color: var(--off-white); }
     .vote-button:disabled { cursor: default; }
     .vote-count { color: var(--dim); font-size: .69rem; }
     .closed-message {
@@ -457,14 +507,14 @@
     }
     .vision-card:hover {
       z-index: 2;
-      border-color: rgba(72, 224, 218, .5);
-      box-shadow: 0 18px 55px rgba(0,0,0,.38), 0 0 24px rgba(72, 224, 218, .09);
+      border-color: rgba(216, 208, 237, .46);
+      box-shadow: 0 18px 55px rgba(2, 24, 21, .42), 0 0 24px rgba(155, 138, 196, .12);
       transform: translateY(-7px);
     }
     .vision-card:nth-child(3n) { animation-duration: .95s; }
     .vision-card:nth-child(3n + 1) { animation-duration: .72s; }
 
-    .vision-image-wrap { position: relative; overflow: hidden; background: #131722; }
+    .vision-image-wrap { position: relative; overflow: hidden; background: #0B4B41; }
     .vision-image {
       display: block;
       width: 100%;
@@ -478,7 +528,7 @@
       inset: auto 0 0;
       height: 45%;
       pointer-events: none;
-      background: linear-gradient(transparent, rgba(5,5,5,.78));
+      background: linear-gradient(transparent, rgba(3,35,31,.84));
     }
     .card-index {
       position: absolute;
@@ -487,7 +537,7 @@
       padding: 5px 8px;
       border: 1px solid rgba(255,255,255,.17);
       border-radius: 7px;
-      background: rgba(5,5,5,.5);
+      background: rgba(3,35,31,.68);
       color: rgba(255,255,255,.72);
       backdrop-filter: blur(8px);
       font-size: .65rem;
@@ -562,6 +612,8 @@
       .status-text { font-size: .64rem; }
       .organizer-panel { grid-template-columns: 1fr; }
       .organizer-status { grid-column: auto; }
+      .review-panel { grid-column: auto; }
+      .review-item { align-items: flex-start; flex-direction: column; }
       .hero h1 { font-size: clamp(3rem, 17vw, 5.5rem); }
       .vision-form { grid-template-columns: 1fr; }
       .field.full, .submit-actions { grid-column: auto; }
@@ -617,6 +669,16 @@
           </label>
         </div>
         <p class="organizer-status" id="organizer-status" data-en="Competition is live. Settings are saved on this device." data-ar="المسابقة مباشرة. يتم حفظ الإعدادات على هذا الجهاز.">Competition is live. Settings are saved on this device.</p>
+        <div class="review-panel">
+          <div class="review-header">
+            <div>
+              <h3 data-en="Submission review queue" data-ar="قائمة مراجعة المشاركات">Submission review queue</h3>
+              <p data-en="Approve a submission to publish it, or delete it before the audience sees it." data-ar="وافق على المشاركة لعرضها، أو احذفها قبل أن يراها الجمهور.">Approve a submission to publish it, or delete it before the audience sees it.</p>
+            </div>
+            <button class="review-refresh" id="review-refresh" type="button" data-en="Refresh" data-ar="تحديث">Refresh</button>
+          </div>
+          <div class="review-queue" id="review-queue" aria-live="polite"></div>
+        </div>
       </div>
     </details>
 
@@ -714,7 +776,7 @@
         track: "Green Tech",
         prompt: "Regenerative desert farms that harvest water from the air and feed the edge of Riyadh.",
         image: "https://images.unsplash.com/photo-1509391366360-2e959784a276?auto=format&fit=crop&w=1200&q=88",
-        color: "#34a853",
+        color: "#2C7562",
         height: 290,
         votes: 31
       },
@@ -723,7 +785,7 @@
         track: "Smart Mobility",
         prompt: "A silent, autonomous transit ribbon connecting old Najdi towns to tomorrow's city.",
         image: "https://images.unsplash.com/photo-1544620347-c4fd4a3d5957?auto=format&fit=crop&w=1200&q=88",
-        color: "#4285f4",
+        color: "#9B8AC4",
         height: 360,
         votes: 27
       },
@@ -732,7 +794,7 @@
         track: "Water Security",
         prompt: "Living infrastructure turns every public space into a cooling, restorative oasis.",
         image: "https://images.unsplash.com/photo-1518005020951-eccb494ad742?auto=format&fit=crop&w=1200&q=88",
-        color: "#48e0da",
+        color: "#D8D0ED",
         height: 245,
         votes: 24
       },
@@ -741,7 +803,7 @@
         track: "Heritage AI",
         prompt: "Machine intelligence preserves the stories, patterns, and poetry held inside every mud-brick wall.",
         image: "https://images.unsplash.com/photo-1539650116574-75c0c6d73f6e?auto=format&fit=crop&w=1200&q=88",
-        color: "#fbbc05",
+        color: "#9B8AC4",
         height: 325,
         votes: 19
       },
@@ -750,7 +812,7 @@
         track: "Blue Economy",
         prompt: "Ocean-positive coastal cities where coral restoration is part of the everyday commute.",
         image: "https://images.unsplash.com/photo-1544551763-46a013bb70d5?auto=format&fit=crop&w=1200&q=88",
-        color: "#4285f4",
+        color: "#2C7562",
         height: 300,
         votes: 16
       },
@@ -759,7 +821,7 @@
         track: "Human Potential",
         prompt: "An adaptive learning constellation that gives every learner a route to their highest potential.",
         image: "https://images.unsplash.com/photo-1497366754035-f200968a6e72?auto=format&fit=crop&w=1200&q=88",
-        color: "#ea4335",
+        color: "#9B8AC4",
         height: 250,
         votes: 22
       },
@@ -768,7 +830,7 @@
         track: "NEOM",
         prompt: "Architecture that grows, breathes, and shifts with the rhythm of a zero-carbon community.",
         image: "https://images.unsplash.com/photo-1511818966892-d7d671e672a2?auto=format&fit=crop&w=1200&q=88",
-        color: "#ea4335",
+        color: "#D8D0ED",
         height: 380,
         votes: 29
       },
@@ -777,7 +839,7 @@
         track: "Circular Cities",
         prompt: "A circular materials exchange makes construction waste the raw material for beautiful new neighborhoods.",
         image: "https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?auto=format&fit=crop&w=1200&q=88",
-        color: "#fbbc05",
+        color: "#2C7562",
         height: 270,
         votes: 13
       }
@@ -797,6 +859,9 @@
     const organizerStatus = document.getElementById("organizer-status");
     const votingStatus = document.getElementById("voting-status");
     const languageToggle = document.getElementById("language-toggle");
+    const organizerDetails = document.querySelector(".organizer-details");
+    const reviewRefresh = document.getElementById("review-refresh");
+    const reviewQueue = document.getElementById("review-queue");
     const settings = {
       submissionsOpen: localStorage.getItem("imagineSaudiSubmissions") !== "false",
       votingOpen: localStorage.getItem("imagineSaudiVoting") !== "false"
@@ -806,6 +871,7 @@
     localStorage.setItem("imagineSaudiVoterId", voterId);
     let currentLanguage = localStorage.getItem("imagineSaudiLanguage") || "ar";
     let organizerKey = sessionStorage.getItem("imagineSaudiOrganizerKey") || "";
+    let pendingVisions = JSON.parse(localStorage.getItem("imagineSaudiPending") || "[]");
     const copy = {
       en: {
         receiving: "Receiving new visions...",
@@ -828,8 +894,14 @@
         imageDemo: "Image generation simulation — no sign-in required.",
         imageGenerating: "AI is building the visual concept...",
         imageAdded: "Your vision was added to the gallery — share it with the audience.",
+        imageQueued: "Your vision was received and is waiting for organizer approval.",
         submissionClosed: "Submissions are currently closed — the organizer can reopen them above.",
-        voteError: "The vote could not be saved. Please try again."
+        voteError: "The vote could not be saved. Please try again.",
+        reviewEmpty: "No pending submissions.",
+        reviewLoading: "Loading review queue...",
+        approve: "Approve",
+        delete: "Delete",
+        reviewError: "The review queue could not be loaded."
       },
       ar: {
         receiving: "جارٍ استقبال الرؤى...",
@@ -852,8 +924,14 @@
         imageDemo: "محاكاة توليد الصورة — لا تحتاج إلى تسجيل دخول.",
         imageGenerating: "الذكاء الاصطناعي يبني التصور البصري الآن...",
         imageAdded: "تمت إضافة رؤيتكم إلى المعرض — شاركوها مع الحضور.",
+        imageQueued: "تم استلام رؤيتكم وهي بانتظار موافقة المنظم.",
         submissionClosed: "التقديم مغلق حاليًا — يمكن للمنظم فتحه من لوحة التحكم.",
-        voteError: "تعذر حفظ التصويت. حاول مرة أخرى."
+        voteError: "تعذر حفظ التصويت. حاول مرة أخرى.",
+        reviewEmpty: "لا توجد مشاركات بانتظار المراجعة.",
+        reviewLoading: "جارٍ تحميل قائمة المراجعة...",
+        approve: "موافقة",
+        delete: "حذف",
+        reviewError: "تعذر تحميل قائمة المراجعة."
       }
     };
     const generatedImages = [
@@ -865,11 +943,11 @@
     const placeholderImage =
       "data:image/svg+xml;charset=UTF-8," +
       encodeURIComponent(`<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 800">
-        <defs><linearGradient id="g" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#111b39"/><stop offset=".55" stop-color="#172b4b"/><stop offset="1" stop-color="#07100f"/></linearGradient></defs>
+        <defs><linearGradient id="g" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#073B35"/><stop offset=".55" stop-color="#0B4B41"/><stop offset="1" stop-color="#03231F"/></linearGradient></defs>
         <rect width="1200" height="800" fill="url(#g)"/>
-        <path d="M0 610 160 430l125 96 150-220 125 145 180-260 240 260 220-170v519H0Z" fill="#07100f" opacity=".9"/>
-        <path d="M150 650V460h145v190m-75-190v190m280 0V370h175v280m-90-280v280m300 0V490h130v160m-60-160v160" fill="none" stroke="#48e0da" stroke-width="5" opacity=".78"/>
-        <circle cx="930" cy="142" r="65" fill="#fbbc05" opacity=".9"/><text x="60" y="100" fill="#fff" font-family="Arial" font-size="30" letter-spacing="7">FUTURE SAUDI / 2050</text>
+        <path d="M0 610 160 430l125 96 150-220 125 145 180-260 240 260 220-170v519H0Z" fill="#03231F" opacity=".9"/>
+        <path d="M150 650V460h145v190m-75-190v190m280 0V370h175v280m-90-280v280m300 0V490h130v160m-60-160v160" fill="none" stroke="#D8D0ED" stroke-width="5" opacity=".78"/>
+        <circle cx="930" cy="142" r="65" fill="#9B8AC4" opacity=".9"/><text x="60" y="100" fill="#F7F4EC" font-family="Arial" font-size="30" letter-spacing="7">FUTURE SAUDI / 2050</text>
       </svg>`);
 
     function escapeHTML(value) {
@@ -917,7 +995,7 @@
           <div class="vision-content">
             <div class="card-meta">
               <h3 class="team-name">${escapeHTML(vision.team)}</h3>
-              <span class="track-badge" style="color:${escapeHTML(vision.color || "#48e0da")}">${escapeHTML(vision.track)}</span>
+              <span class="track-badge" style="color:${escapeHTML(vision.color || "#D8D0ED")}">${escapeHTML(vision.track)}</span>
             </div>
             <p class="prompt">${escapeHTML(vision.prompt)}</p>
             <div class="vote-row">
@@ -946,16 +1024,23 @@
 
     async function saveRemoteSettings() {
       if (!GOOGLE_APPS_SCRIPT_URL) return;
+      await adminRequest("setSettings", {
+        submissionsOpen: settings.submissionsOpen,
+        votingOpen: settings.votingOpen
+      });
+    }
+
+    function ensureOrganizerKey() {
       if (!organizerKey) {
         organizerKey = prompt(currentLanguage === "ar" ? "أدخل رمز المنظم:" : "Enter the organizer key:");
         if (!organizerKey) throw new Error("Organizer authorization required.");
         sessionStorage.setItem("imagineSaudiOrganizerKey", organizerKey);
       }
-      await googleRequest("setSettings", {
-        adminKey: organizerKey,
-        submissionsOpen: settings.submissionsOpen,
-        votingOpen: settings.votingOpen
-      });
+      return organizerKey;
+    }
+
+    async function adminRequest(action, payload = {}) {
+      return googleRequest(action, { ...payload, adminKey: ensureOrganizerKey() });
     }
 
     // Uses the Google Apps Script backend when configured, otherwise local demo data.
@@ -1024,11 +1109,11 @@
       await new Promise((resolve) => setTimeout(resolve, 1000));
 
       const colors = {
-        "Green Tech": "#34a853",
-        "Smart Mobility": "#4285f4",
-        "Heritage AI": "#fbbc05",
-        "NEOM": "#ea4335",
-        "Human Potential": "#48e0da"
+        "Green Tech": "#2C7562",
+        "Smart Mobility": "#9B8AC4",
+        "Heritage AI": "#D8D0ED",
+        "NEOM": "#9B8AC4",
+        "Human Potential": "#2C7562"
       };
       const newVision = {
         id: `local-${Date.now()}`,
@@ -1036,7 +1121,7 @@
         track,
         prompt,
         image: generatedImages[sourceVisions.length % generatedImages.length],
-        color: colors[track] || "#48e0da",
+        color: colors[track] || "#D8D0ED",
         height: 280 + ((sourceVisions.length * 37) % 100),
         votes: 0
       };
@@ -1050,15 +1135,68 @@
           return;
         }
       } else {
-        sourceVisions.push(newVision);
+        pendingVisions.push(newVision);
+        localStorage.setItem("imagineSaudiPending", JSON.stringify(pendingVisions));
       }
 
       form.reset();
       generateButton.disabled = false;
       generateButton.textContent = currentLanguage === "ar" ? "✦ حوّلوا الفكرة إلى صورة" : "✦ Turn idea into image";
-      formNote.textContent = t("imageAdded");
+      formNote.textContent = t("imageQueued");
+      if (organizerDetails.open) await loadReviewQueue();
       syncGallery();
     });
+
+    async function loadReviewQueue() {
+      reviewQueue.innerHTML = `<p class="review-empty">${t("reviewLoading")}</p>`;
+      try {
+        const pending = GOOGLE_APPS_SCRIPT_URL
+          ? (await adminRequest("pending")).visions || []
+          : pendingVisions;
+        if (!pending.length) {
+          reviewQueue.innerHTML = `<p class="review-empty">${t("reviewEmpty")}</p>`;
+          return;
+        }
+        reviewQueue.innerHTML = pending.map((vision) => `
+          <div class="review-item">
+            <div>
+              <strong>${escapeHTML(vision.team)}</strong>
+              <span>${escapeHTML(vision.prompt)}</span>
+            </div>
+            <div class="review-actions">
+              <button class="review-action approve" type="button" data-review-action="publish" data-review-id="${escapeHTML(vision.id)}">${t("approve")}</button>
+              <button class="review-action delete" type="button" data-review-action="delete" data-review-id="${escapeHTML(vision.id)}">${t("delete")}</button>
+            </div>
+          </div>
+        `).join("");
+        reviewQueue.querySelectorAll("[data-review-action]").forEach((button) => {
+          button.addEventListener("click", () => moderateSubmission(button.dataset.reviewId, button.dataset.reviewAction));
+        });
+      } catch (error) {
+        reviewQueue.innerHTML = `<p class="review-empty">${t("reviewError")}</p>`;
+        console.error("Review queue failed:", error);
+      }
+    }
+
+    async function moderateSubmission(id, action) {
+      if (action === "delete" && !confirm(currentLanguage === "ar" ? "حذف هذه المشاركة نهائيًا؟" : "Delete this submission permanently?")) return;
+      try {
+        if (GOOGLE_APPS_SCRIPT_URL) {
+          await adminRequest(action, { visionId: id });
+        } else {
+          const pendingIndex = pendingVisions.findIndex((vision) => vision.id === id);
+          if (pendingIndex === -1) return;
+          const [vision] = pendingVisions.splice(pendingIndex, 1);
+          if (action === "publish") sourceVisions.push({ ...vision, status: "published" });
+          localStorage.setItem("imagineSaudiPending", JSON.stringify(pendingVisions));
+        }
+        await loadReviewQueue();
+        await syncGallery();
+      } catch (error) {
+        alert(error.message || t("reviewError"));
+        console.error("Moderation action failed:", error);
+      }
+    }
 
     function syncControlInputs() {
       submissionsToggle.checked = settings.submissionsOpen;
@@ -1107,6 +1245,10 @@
       updateCompetitionMode();
     });
 
+    reviewRefresh.addEventListener("click", loadReviewQueue);
+    organizerDetails.addEventListener("toggle", () => {
+      if (organizerDetails.open) loadReviewQueue();
+    });
     languageToggle.addEventListener("click", () => applyLanguage(currentLanguage === "ar" ? "en" : "ar"));
     applyLanguage(currentLanguage);
     setInterval(syncGallery, 8000);
