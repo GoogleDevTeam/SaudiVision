@@ -912,6 +912,27 @@
     .organizer-metric { padding: 12px; border: 1px solid var(--line); border-radius: 11px; background: rgba(155, 138, 196, .06); }
     .organizer-metric span { display: block; color: var(--dim); font-family: "Cairo", sans-serif; font-size: .62rem; line-height: 1.4; text-transform: uppercase; }
     .organizer-metric strong { display: block; margin-top: 5px; color: var(--ink); font-size: 1.2rem; }
+    .organizer-results {
+      margin: 14px 0;
+      padding: 14px;
+      border: 1px solid rgba(216, 208, 237, .18);
+      border-radius: 13px;
+      background: rgba(155, 138, 196, .045);
+    }
+    .organizer-results-header { display: flex; align-items: flex-start; justify-content: space-between; gap: 14px; }
+    .organizer-results-header h3 { margin: 0; font-size: .82rem; }
+    .organizer-results-header p { margin: 4px 0 0; color: var(--dim); font-family: "Cairo", sans-serif; font-size: .66rem; }
+    .organizer-leader { color: var(--light-lavender); font-size: .68rem; text-align: right; }
+    .results-leaderboard { display: grid; gap: 9px; margin-top: 13px; }
+    .leaderboard-item { display: grid; grid-template-columns: 28px minmax(0, 1fr) auto; align-items: center; gap: 9px; }
+    .leaderboard-rank { display: grid; width: 25px; height: 25px; place-items: center; border: 1px solid var(--line); border-radius: 50%; color: var(--light-lavender); font-size: .67rem; }
+    .leaderboard-copy { min-width: 0; }
+    .leaderboard-copy strong { display: block; overflow: hidden; color: var(--ink); font-size: .73rem; text-overflow: ellipsis; white-space: nowrap; }
+    .leaderboard-copy span { display: block; margin-top: 2px; overflow: hidden; color: var(--dim); font-family: "Cairo", sans-serif; font-size: .62rem; text-overflow: ellipsis; white-space: nowrap; }
+    .leaderboard-bar { height: 5px; margin-top: 5px; overflow: hidden; border-radius: 20px; background: rgba(216, 208, 237, .12); }
+    .leaderboard-bar i { display: block; height: 100%; min-width: 2px; border-radius: inherit; background: linear-gradient(90deg, var(--green), var(--lavender)); }
+    .leaderboard-score { color: var(--light-lavender); font-size: .68rem; text-align: right; white-space: nowrap; }
+    .results-empty { margin: 12px 0 0; color: var(--dim); font-family: "Cairo", sans-serif; font-size: .68rem; }
     .organizer-actions, .review-tools { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; }
     .organizer-actions { margin: 4px 0 14px; }
     .organizer-action, .review-tools input, .review-tools select { min-height: 32px; padding: 7px 10px; border: 1px solid var(--line); border-radius: 8px; background: rgba(4, 43, 37, .72); color: var(--ink); font: inherit; font-size: .66rem; }
@@ -993,6 +1014,16 @@
            <button class="organizer-action" id="organizer-refresh" type="button" data-en="↻ Refresh all" data-ar="↻ تحديث الكل">↻ Refresh all</button>
            <button class="organizer-action" id="organizer-export" type="button" data-en="↓ Export CSV" data-ar="↓ تصدير CSV">↓ Export CSV</button>
            <button class="organizer-action danger" id="organizer-lock" type="button" data-en="Lock organizer panel" data-ar="قفل لوحة المنظم">Lock organizer panel</button>
+         </div>
+         <div class="organizer-results" aria-label="Competition results" data-aria-en="Competition results" data-aria-ar="نتائج المسابقة">
+           <div class="organizer-results-header">
+             <div>
+               <h3 data-en="Live results" data-ar="النتائج المباشرة">Live results</h3>
+               <p data-en="A ranked view of published visions and active votes." data-ar="ترتيب الرؤى المنشورة والأصوات النشطة.">A ranked view of published visions and active votes.</p>
+             </div>
+             <span class="organizer-leader" id="organizer-leader">—</span>
+           </div>
+           <div class="results-leaderboard" id="results-leaderboard" aria-live="polite"></div>
          </div>
          <div class="review-tools">
            <input id="review-search" type="search" data-placeholder-en="Search teams or visions" data-placeholder-ar="البحث في المجموعات والرؤى" placeholder="Search teams or visions" />
@@ -1228,6 +1259,8 @@
     const organizerPublishedCount = document.getElementById("organizer-published-count");
     const organizerVoteCount = document.getElementById("organizer-vote-count");
     const organizerLastRefresh = document.getElementById("organizer-last-refresh");
+    const organizerLeader = document.getElementById("organizer-leader");
+    const resultsLeaderboard = document.getElementById("results-leaderboard");
     const organizerRefresh = document.getElementById("organizer-refresh");
     const organizerExport = document.getElementById("organizer-export");
     const organizerLock = document.getElementById("organizer-lock");
@@ -1314,6 +1347,12 @@
          organizerKeyLabel: "Organizer key",
          organizerUnlock: "Unlock",
          organizerCancel: "Cancel",
+         liveResults: "Live results",
+         resultsDescription: "A ranked view of published visions and active votes.",
+         noPublishedResults: "No published visions yet.",
+         leader: "Leader",
+         tied: "Tie",
+         resultsVotes: "{votes} votes · {percent}%",
         allTracks: "All tracks",
          noFilterResults: "No visions match this filter.",
          galleryCount: "Showing {shown} of {total} visions",
@@ -1364,6 +1403,12 @@
          organizerKeyLabel: "رمز المنظم",
          organizerUnlock: "فتح",
          organizerCancel: "إلغاء",
+         liveResults: "النتائج المباشرة",
+         resultsDescription: "ترتيب الرؤى المنشورة والأصوات النشطة.",
+         noPublishedResults: "لا توجد رؤى منشورة بعد.",
+         leader: "المتصدر",
+         tied: "تعادل",
+         resultsVotes: "{votes} تصويت · {percent}٪",
         allTracks: "كل المسارات",
          noFilterResults: "لا توجد رؤى تطابق عامل التصفية.",
          galleryCount: "عرض {shown} من أصل {total} رؤية",
@@ -1813,6 +1858,47 @@
       organizerPublishedCount.textContent = String(publishedOrganizerRecords.length);
       organizerVoteCount.textContent = String(publishedOrganizerRecords.reduce((sum, vision) => sum + (Number(vision.votes) || 0), 0));
       organizerLastRefresh.textContent = new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
+      renderResultsDashboard();
+    }
+
+    function renderResultsDashboard() {
+      const ranked = [...publishedOrganizerRecords]
+        .sort((left, right) => {
+          const voteDifference = (Number(right.votes) || 0) - (Number(left.votes) || 0);
+          if (voteDifference) return voteDifference;
+          const rightDate = Date.parse(right.publishedAt || right.createdAt || "") || 0;
+          const leftDate = Date.parse(left.publishedAt || left.createdAt || "") || 0;
+          return rightDate - leftDate;
+        });
+      if (!ranked.length) {
+        organizerLeader.textContent = "—";
+        resultsLeaderboard.innerHTML = `<p class="results-empty">${t("noPublishedResults")}</p>`;
+        return;
+      }
+
+      const totalVotes = ranked.reduce((sum, vision) => sum + (Number(vision.votes) || 0), 0);
+      const topVotes = Number(ranked[0].votes) || 0;
+      const leaders = ranked.filter((vision) => (Number(vision.votes) || 0) === topVotes);
+      organizerLeader.textContent = leaders.length > 1
+        ? `${t("tied")} · ${topVotes} ${t("votes")}`
+        : `${t("leader")}: ${String(ranked[0].team || "—")}`;
+      resultsLeaderboard.innerHTML = ranked.slice(0, 5).map((vision, index) => {
+        const votes = Number(vision.votes) || 0;
+        const percent = totalVotes ? Math.round((votes / totalVotes) * 100) : 0;
+        const label = t("resultsVotes")
+          .replace("{votes}", votes)
+          .replace("{percent}", percent);
+        return `
+          <div class="leaderboard-item">
+            <span class="leaderboard-rank">${index + 1}</span>
+            <div class="leaderboard-copy">
+              <strong>${escapeHTML(vision.team || "—")}</strong>
+              <span>${escapeHTML(vision.track || "")}</span>
+              <div class="leaderboard-bar" aria-hidden="true"><i style="width:${percent}%"></i></div>
+            </div>
+            <span class="leaderboard-score">${escapeHTML(label)}</span>
+          </div>`;
+      }).join("");
     }
 
     function updateReviewFilters() {
