@@ -779,6 +779,28 @@
     .review-item span { display: block; margin-top: 7px; }
     .review-panel p { margin-block: 8px 0; }
     .organizer-status { line-height: 1.6; }
+
+    /* Arabic hero lockup inspired by the supplied visual */
+    .hero-copy { position: relative; z-index: 1; }
+    .hero h1 { text-wrap: balance; }
+    html[dir="rtl"] .hero-copy { text-align: right; }
+    html[dir="rtl"] .hero h1 {
+      font-family: "Cairo", sans-serif;
+      font-weight: 800;
+      letter-spacing: -.075em;
+      line-height: .9;
+    }
+    html[dir="rtl"] .hero h1 .gradient-word {
+      margin-top: .08em;
+      color: var(--lavender);
+      background: none;
+      -webkit-text-fill-color: currentColor;
+    }
+    html[dir="rtl"] .hero-subtitle { max-width: 640px; margin-inline-start: auto; }
+    @media (max-width: 520px) {
+      html[dir="rtl"] .hero h1 { font-size: clamp(3.1rem, 17vw, 5.7rem); line-height: .95; }
+      html[dir="rtl"] .hero-subtitle { margin-top: 22px; }
+    }
   </style>
 </head>
 <body>
@@ -844,8 +866,8 @@
     </details>
 
     <section class="hero" aria-labelledby="page-title">
-      <div>
-        <h1 id="page-title"><span data-en="The future" data-ar="المستقبل">The future</span><br /><span class="gradient-word" data-en="is imagined." data-ar="نصنعه بالخيال.">is imagined.</span></h1>
+      <div class="hero-copy">
+        <h1 id="page-title" class="hero-lockup"><span data-en="The future" data-ar="المستقبل">The future</span><br /><span class="gradient-word" data-en="is imagined." data-ar="نصنعه بالخيال.">is imagined.</span></h1>
         <p class="hero-subtitle" data-en="Imagine Saudi Arabia in 2050 — write your idea, preview its visual concept, then vote for the best vision." data-ar="تخيّل السعودية في عام 2050 — اكتبوا فكرتكم، شاهدوا تصورها البصري، ثم صوّتوا لأفضل رؤية.">
           تخيّل السعودية في عام 2050 — اكتبوا فكرتكم، شاهدوا تصورها البصري، ثم صوّتوا لأفضل رؤية.
         </p>
