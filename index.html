@@ -864,7 +864,7 @@
       html[dir="rtl"] .hero-subtitle { margin-top: 22px; }
     }
 
-    /* Branded hero background: separated Google Developers, 96, and Saudi layers */
+    /* Branded hero background: repeated Google Developers marks with Saudi and 96 accents */
     .hero-brandscape {
       position: absolute;
       z-index: 0;
@@ -874,25 +874,36 @@
       grid-template-columns: 1fr 1fr;
       grid-template-rows: 1fr 1fr;
       align-items: center;
-      width: 48%;
+      width: 52%;
       height: 100%;
-      padding: 26px 0 16px 28px;
-      gap: 8px;
+      padding: 18px 0 14px 26px;
+      gap: 12px;
       pointer-events: none;
+    }
+    .hero-brandscape-logo-cloud {
+      grid-column: 1 / -1;
+      grid-row: 1;
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      grid-template-rows: repeat(2, minmax(0, 1fr));
+      align-items: center;
+      justify-items: center;
+      width: 100%;
+      height: 100%;
+      padding: 0 7%;
+      gap: 10px 16px;
     }
     .hero-brandscape::before { display: none; }
     .hero-brandscape-logo {
-      grid-column: 1 / -1;
-      grid-row: 1;
-      justify-self: end;
-      align-self: start;
-      width: clamp(170px, 18vw, 260px);
+      display: block;
+      width: min(100%, 118px);
       height: auto;
-      opacity: .12;
+      opacity: .1;
       filter: grayscale(1) brightness(2.1) contrast(.72);
       mix-blend-mode: screen;
-      transform: none;
     }
+    .hero-brandscape-logo:nth-child(2), .hero-brandscape-logo:nth-child(5) { opacity: .14; transform: translateY(4px) rotate(-4deg); }
+    .hero-brandscape-logo:nth-child(3), .hero-brandscape-logo:nth-child(6) { opacity: .075; transform: translateY(-3px) rotate(4deg); }
     .hero-brandscape-number {
       grid-column: 2;
       grid-row: 2;
@@ -900,25 +911,24 @@
       align-self: end;
       color: transparent;
       font-family: "Space Grotesk", sans-serif;
-      font-size: clamp(8rem, 14vw, 14rem);
+      font-size: clamp(7rem, 12vw, 12rem);
       font-weight: 700;
       letter-spacing: -.14em;
       line-height: .72;
-      opacity: .28;
+      opacity: .24;
       -webkit-text-stroke: 1px rgba(216, 208, 237, .32);
       text-shadow: 0 0 42px rgba(155, 138, 196, .16);
     }
     .hero-brandscape-map {
       grid-column: 1;
       grid-row: 2;
-      justify-self: start;
+      justify-self: center;
       align-self: center;
-      width: clamp(125px, 13vw, 190px);
+      width: clamp(120px, 13vw, 190px);
       height: auto;
       overflow: visible;
-      opacity: .46;
+      opacity: .38;
       filter: drop-shadow(0 0 18px rgba(155, 138, 196, .16));
-      transform: none;
     }
     .hero-brandscape-map path {
       fill: rgba(155, 138, 196, .08);
@@ -941,9 +951,8 @@
       margin: 0 12px 18px 0;
       background: rgba(4, 43, 37, .92);
     }
-    html[dir="rtl"] .hero-brandscape { right: auto; left: 0; padding-right: 28px; padding-left: 0; }
-    html[dir="rtl"] .hero-brandscape-logo { justify-self: start; }
-    html[dir="rtl"] .hero-brandscape-map { grid-column: 2; justify-self: end; }
+    html[dir="rtl"] .hero-brandscape { right: auto; left: 0; padding-right: 26px; padding-left: 0; }
+    html[dir="rtl"] .hero-brandscape-map { grid-column: 2; }
     html[dir="rtl"] .hero-brandscape-number { grid-column: 1; justify-self: start; }
     html[dir="rtl"] .hero-brandscape-rule { right: 10%; left: 0; }
     @media (max-width: 1040px) {
@@ -952,15 +961,17 @@
       .counter { margin-right: 0; }
     }
     @media (max-width: 800px) {
-      .hero-brandscape { top: 0; right: -42px; width: 68%; height: 330px; padding: 18px 0 10px 20px; opacity: .8; }
+      .hero-brandscape { top: 0; right: -42px; width: 68%; height: 330px; padding: 14px 0 10px 20px; opacity: .8; }
       html[dir="rtl"] .hero-brandscape { right: auto; left: -42px; padding-right: 20px; padding-left: 0; }
+      .hero-brandscape-logo { width: min(100%, 92px); }
+      .hero-brandscape-logo-cloud { gap: 7px 10px; padding: 0 4%; }
     }
     @media (max-width: 520px) {
-      .hero-brandscape { right: -84px; width: 80%; height: 285px; opacity: .62; }
-      html[dir="rtl"] .hero-brandscape { right: auto; left: -84px; }
-      .hero-brandscape-logo { width: 155px; }
-      .hero-brandscape-map { width: 110px; }
-      .hero-brandscape-number { font-size: 8.5rem; }
+      .hero-brandscape { right: -78px; width: 86%; height: 275px; opacity: .62; }
+      html[dir="rtl"] .hero-brandscape { right: auto; left: -78px; }
+      .hero-brandscape-logo { width: min(100%, 72px); }
+      .hero-brandscape-map { width: 105px; }
+      .hero-brandscape-number { font-size: 7.2rem; }
     }
     .published-review { margin-top: 12px; }
     .organizer-summary { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 8px; margin: 12px 0; }
@@ -1125,11 +1136,18 @@
 
     <section class="hero" aria-labelledby="page-title">
       <div class="hero-brandscape" aria-hidden="true">
-        <img class="hero-brandscape-logo" src="google-developers-logo.png" alt="" />
-        <span class="hero-brandscape-number">96</span>
-        <svg class="hero-brandscape-map" viewBox="0 0 196 178" role="presentation">
-          <path d="M16 18 37 10 57 17 73 12 91 19 111 17 126 29 146 30 159 43 177 48 173 62 184 76 177 91 183 105 174 119 160 124 154 140 139 145 128 162 110 158 96 166 82 153 66 151 57 139 42 138 35 126 21 120 24 105 14 93 20 77 12 63 22 51 18 36Z" />
+        <div class="hero-brandscape-logo-cloud">
+          <img class="hero-brandscape-logo" src="google-developers-logo.png" alt="" />
+          <img class="hero-brandscape-logo" src="google-developers-logo.png" alt="" />
+          <img class="hero-brandscape-logo" src="google-developers-logo.png" alt="" />
+          <img class="hero-brandscape-logo" src="google-developers-logo.png" alt="" />
+          <img class="hero-brandscape-logo" src="google-developers-logo.png" alt="" />
+          <img class="hero-brandscape-logo" src="google-developers-logo.png" alt="" />
+        </div>
+        <svg class="hero-brandscape-map" viewBox="0 0 220 180" role="presentation">
+          <path d="M 87.5 170.0 L 86.2 165.7 L 83.4 162.6 L 82.6 158.6 L 77.7 155.0 L 72.7 146.5 L 70.0 138.2 L 63.4 131.3 L 59.2 129.6 L 52.9 120.0 L 51.8 112.9 L 52.2 106.9 L 46.7 95.7 L 42.2 91.8 L 37.1 89.7 L 34.0 83.9 L 34.5 81.6 L 31.9 76.4 L 29.1 74.1 L 25.4 66.6 L 19.6 58.4 L 14.7 51.5 L 10.0 51.5 L 11.5 46.0 L 11.9 42.4 L 13.1 38.4 L 23.7 40.0 L 27.8 36.9 L 30.0 33.2 L 37.3 31.8 L 38.9 28.4 L 42.0 26.7 L 32.5 16.6 L 51.6 11.5 L 53.4 10.0 L 64.8 12.7 L 79.0 19.8 L 105.8 40.2 L 123.5 41.0 L 132.0 42.0 L 134.3 46.8 L 141.1 46.5 L 144.8 55.2 L 149.5 57.6 L 151.1 61.1 L 157.6 65.4 L 158.1 69.5 L 157.2 72.9 L 158.4 76.3 L 161.1 79.1 L 162.4 82.5 L 163.8 84.9 L 166.7 86.9 L 169.3 86.2 L 171.1 90.1 L 171.5 92.4 L 175.1 102.7 L 203.7 107.8 L 205.6 105.6 L 210.0 112.8 L 203.7 133.0 L 175.1 143.2 L 147.7 147.0 L 138.8 151.6 L 132.0 162.2 L 127.6 163.9 L 125.2 160.5 L 121.6 161.0 L 112.4 160.0 L 110.6 159.0 L 99.7 159.2 L 97.1 160.2 L 93.2 157.5 L 90.7 162.5 L 91.6 166.8 L 87.5 170.0 Z" />
         </svg>
+        <span class="hero-brandscape-number">96</span>
         <span class="hero-brandscape-rule"></span>
       </div>
       <div class="hero-copy">
