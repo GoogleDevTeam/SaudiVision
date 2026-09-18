@@ -274,7 +274,7 @@
       position: relative;
       overflow: hidden;
       display: grid;
-      grid-template-columns: 1fr auto;
+      grid-template-columns: minmax(0, 1fr) minmax(250px, 31%);
       align-items: end;
       gap: 40px;
       padding: clamp(58px, 8vw, 110px) 0 52px;
@@ -354,16 +354,6 @@
     }
     .flow-step:nth-child(2) { animation-delay: -2.2s; }
     .flow-step:nth-child(3) { animation-delay: -4.4s; }
-    .flow-step::after {
-      position: absolute;
-      right: -22px;
-      bottom: -33px;
-      width: 90px;
-      height: 90px;
-      border: 1px solid rgba(255,255,255,.08);
-      border-radius: 50%;
-      content: "";
-    }
     .flow-number {
       display: inline-grid;
       width: 28px;
@@ -678,7 +668,6 @@
     @keyframes card-in { from { opacity: 0; transform: translateY(14px) scale(.98); } to { opacity: 1; transform: translateY(0) scale(1); } }
     @keyframes rise-in { from { opacity: 0; transform: translateY(22px); } to { opacity: 1; transform: translateY(0); } }
     @keyframes float-card { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-5px); } }
-    @keyframes orbit { to { transform: rotate(360deg); } }
     @keyframes count-bump { 50% { color: var(--light-lavender); transform: scale(1.08); } }
     @keyframes review-in { from { opacity: 0; transform: translateX(12px); } to { opacity: 1; transform: translateX(0); } }
     .counter-number.bump { animation: count-bump .45s ease; }
@@ -875,60 +864,61 @@
       html[dir="rtl"] .hero-subtitle { margin-top: 22px; }
     }
 
-    /* Branded hero background: Google Developers, 96, and Saudi silhouette */
+    /* Branded hero background: separated Google Developers, 96, and Saudi layers */
     .hero-brandscape {
       position: absolute;
       z-index: 0;
-      top: -36px;
-      right: -82px;
-      width: min(56vw, 720px);
-      height: clamp(300px, 38vw, 520px);
+      top: 0;
+      right: 0;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      grid-template-rows: 1fr 1fr;
+      align-items: center;
+      width: 48%;
+      height: 100%;
+      padding: 26px 0 16px 28px;
+      gap: 8px;
       pointer-events: none;
-      isolation: isolate;
     }
-    .hero-brandscape::before {
-      position: absolute;
-      inset: 12% 4% 8% 12%;
-      border-radius: 48% 38% 52% 44%;
-      background: linear-gradient(135deg, rgba(44, 117, 98, .22), rgba(155, 138, 196, .14) 56%, transparent 82%);
-      filter: blur(28px);
-      content: "";
-    }
+    .hero-brandscape::before { display: none; }
     .hero-brandscape-logo {
-      position: absolute;
-      top: 9%;
-      right: 18%;
-      width: clamp(190px, 24vw, 340px);
+      grid-column: 1 / -1;
+      grid-row: 1;
+      justify-self: end;
+      align-self: start;
+      width: clamp(170px, 18vw, 260px);
       height: auto;
       opacity: .12;
       filter: grayscale(1) brightness(2.1) contrast(.72);
       mix-blend-mode: screen;
-      transform: rotate(-7deg);
+      transform: none;
     }
     .hero-brandscape-number {
-      position: absolute;
-      right: 1%;
-      bottom: -18%;
+      grid-column: 2;
+      grid-row: 2;
+      justify-self: end;
+      align-self: end;
       color: transparent;
       font-family: "Space Grotesk", sans-serif;
-      font-size: clamp(13rem, 27vw, 26rem);
+      font-size: clamp(8rem, 14vw, 14rem);
       font-weight: 700;
       letter-spacing: -.14em;
       line-height: .72;
-      opacity: .34;
+      opacity: .28;
       -webkit-text-stroke: 1px rgba(216, 208, 237, .32);
       text-shadow: 0 0 42px rgba(155, 138, 196, .16);
     }
     .hero-brandscape-map {
-      position: absolute;
-      top: 24%;
-      right: 10%;
-      width: clamp(150px, 17vw, 255px);
+      grid-column: 1;
+      grid-row: 2;
+      justify-self: start;
+      align-self: center;
+      width: clamp(125px, 13vw, 190px);
       height: auto;
       overflow: visible;
-      opacity: .55;
+      opacity: .46;
       filter: drop-shadow(0 0 18px rgba(155, 138, 196, .16));
-      transform: rotate(-4deg);
+      transform: none;
     }
     .hero-brandscape-map path {
       fill: rgba(155, 138, 196, .08);
@@ -938,29 +928,39 @@
     }
     .hero-brandscape-rule {
       position: absolute;
-      right: 7%;
-      bottom: 18%;
-      width: 30%;
+      top: 52%;
+      right: 0;
+      left: 10%;
       height: 1px;
-      background: linear-gradient(90deg, transparent, rgba(216, 208, 237, .34), transparent);
-      transform: rotate(-18deg);
+      background: linear-gradient(90deg, transparent, rgba(216, 208, 237, .28), transparent);
     }
     .hero-copy, .counter { position: relative; z-index: 1; }
-    html[dir="rtl"] .hero-brandscape { right: auto; left: -82px; }
-    html[dir="rtl"] .hero-brandscape-logo { right: auto; left: 18%; transform: rotate(7deg); }
-    html[dir="rtl"] .hero-brandscape-number { right: auto; left: 1%; }
-    html[dir="rtl"] .hero-brandscape-map { right: auto; left: 10%; transform: rotate(4deg); }
-    html[dir="rtl"] .hero-brandscape-rule { right: auto; left: 7%; transform: rotate(18deg); }
+    .counter {
+      justify-self: end;
+      width: min(100%, 276px);
+      margin: 0 12px 18px 0;
+      background: rgba(4, 43, 37, .92);
+    }
+    html[dir="rtl"] .hero-brandscape { right: auto; left: 0; padding-right: 28px; padding-left: 0; }
+    html[dir="rtl"] .hero-brandscape-logo { justify-self: start; }
+    html[dir="rtl"] .hero-brandscape-map { grid-column: 2; justify-self: end; }
+    html[dir="rtl"] .hero-brandscape-number { grid-column: 1; justify-self: start; }
+    html[dir="rtl"] .hero-brandscape-rule { right: 10%; left: 0; }
+    @media (max-width: 1040px) {
+      .hero-brandscape { width: 58%; height: 380px; padding-right: 0; }
+      html[dir="rtl"] .hero-brandscape { padding-right: 0; padding-left: 0; }
+      .counter { margin-right: 0; }
+    }
     @media (max-width: 800px) {
-      .hero-brandscape { right: -150px; width: 610px; opacity: .82; }
-      html[dir="rtl"] .hero-brandscape { right: auto; left: -150px; }
+      .hero-brandscape { top: 0; right: -42px; width: 68%; height: 330px; padding: 18px 0 10px 20px; opacity: .8; }
+      html[dir="rtl"] .hero-brandscape { right: auto; left: -42px; padding-right: 20px; padding-left: 0; }
     }
     @media (max-width: 520px) {
-      .hero-brandscape { top: 0; right: -190px; width: 520px; height: 340px; opacity: .62; }
-      html[dir="rtl"] .hero-brandscape { right: auto; left: -190px; }
-      .hero-brandscape-logo { top: 8%; width: 220px; }
-      .hero-brandscape-map { top: 24%; width: 160px; }
-      .hero-brandscape-number { bottom: -8%; font-size: 15rem; }
+      .hero-brandscape { right: -84px; width: 80%; height: 285px; opacity: .62; }
+      html[dir="rtl"] .hero-brandscape { right: auto; left: -84px; }
+      .hero-brandscape-logo { width: 155px; }
+      .hero-brandscape-map { width: 110px; }
+      .hero-brandscape-number { font-size: 8.5rem; }
     }
     .published-review { margin-top: 12px; }
     .organizer-summary { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 8px; margin: 12px 0; }
