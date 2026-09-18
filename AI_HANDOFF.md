@@ -235,6 +235,7 @@ Before coding, inspect the latest `main` branch and the live deployment state. T
 - Added the Organizer Overview + Live Results dashboard.
 - Added optional submission/voting deadlines, public countdown state, public results mode, and JSON export.
 - Fixed English hero line spacing and gradient-word margin to match the Arabic lockup rhythm on desktop and mobile.
+- Increased the English hero title gap and subtitle offset again after visual review so the words have unmistakable breathing room.
 
 ### Verification and deployment
 
