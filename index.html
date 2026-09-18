@@ -656,6 +656,20 @@
     }
 
     @media (max-width: 1180px) { .gallery-grid { column-count: 3; } }
+    @media (max-width: 1040px) {
+      .hero {
+        grid-template-columns: 1fr;
+        align-items: start;
+        gap: 30px;
+        padding-bottom: 44px;
+      }
+      .hero h1 {
+        max-width: 900px;
+        font-size: clamp(3.2rem, 8vw, 7.4rem);
+      }
+      .hero-subtitle { max-width: 700px; }
+      .counter { width: min(100%, 320px); }
+    }
     @media (max-width: 800px) {
       .page-shell { --page-gutter: 24px; padding-top: 24px; }
       .topline { align-items: flex-start; }
