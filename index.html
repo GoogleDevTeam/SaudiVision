@@ -902,8 +902,12 @@
       filter: grayscale(1) brightness(2.1) contrast(.72);
       mix-blend-mode: screen;
     }
-    .hero-brandscape-logo:nth-child(2), .hero-brandscape-logo:nth-child(5) { opacity: .14; transform: translateY(4px) rotate(-4deg); }
-    .hero-brandscape-logo:nth-child(3), .hero-brandscape-logo:nth-child(6) { opacity: .075; transform: translateY(-3px) rotate(4deg); }
+    .hero-brandscape-logo:nth-child(1) { opacity: .09; transform: translate(-8px, 5px) rotate(-11deg) scale(.92); }
+    .hero-brandscape-logo:nth-child(2) { opacity: .14; transform: translate(4px, -5px) rotate(7deg) scale(1.04); }
+    .hero-brandscape-logo:nth-child(3) { opacity: .075; transform: translate(9px, 7px) rotate(-3deg) scale(.86); }
+    .hero-brandscape-logo:nth-child(4) { opacity: .12; transform: translate(-6px, -4px) rotate(13deg) scale(.98); }
+    .hero-brandscape-logo:nth-child(5) { opacity: .14; transform: translate(8px, 2px) rotate(-8deg) scale(1.08); }
+    .hero-brandscape-logo:nth-child(6) { opacity: .07; transform: translate(-10px, -6px) rotate(5deg) scale(.9); }
     .hero-brandscape-number {
       grid-column: 2;
       grid-row: 2;
@@ -918,6 +922,7 @@
       opacity: .24;
       -webkit-text-stroke: 1px rgba(216, 208, 237, .32);
       text-shadow: 0 0 42px rgba(155, 138, 196, .16);
+      transform: rotate(5deg) translate(3px, -2px);
     }
     .hero-brandscape-map {
       grid-column: 1;
@@ -929,6 +934,7 @@
       overflow: visible;
       opacity: .38;
       filter: drop-shadow(0 0 18px rgba(155, 138, 196, .16));
+      transform: rotate(-7deg) translate(-3px, 2px);
     }
     .hero-brandscape-map path {
       fill: rgba(155, 138, 196, .08);
