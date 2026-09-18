@@ -230,7 +230,6 @@ function ensureWorkbookPresentation_(spreadsheet) {
   if (!needsSetup) return;
 
   const guideSheet = guide || spreadsheet.insertSheet(GUIDE_SHEET_NAME, 0);
-  guideSheet.setIndex(1);
   buildGuideSheet_(guideSheet);
   Object.keys(SHEETS).forEach(function(key) {
     formatDataSheet_(spreadsheet.getSheetByName(SHEETS[key].name), SHEETS[key]);
