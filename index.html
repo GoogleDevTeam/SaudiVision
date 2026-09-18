@@ -574,4 +574,542 @@
 </head>
 <body>
   <main class="page-shell">
-    <header class="top
+    <header class="topline">
+      <div class="brand-lockup">
+        <div class="brand-mark" aria-hidden="true"></div>
+        <div class="brand-copy">
+          <div>
+            <p class="eyebrow" data-en="Future Vision Competition / 2050" data-ar="مسابقة رؤى المستقبل / 2050">مسابقة رؤى المستقبل / 2050</p>
+            <p class="brand-name"><span>Imagine</span> Saudi 2050</p>
+          </div>
+          <p class="brand-ar" lang="ar" dir="rtl">تخيّل السعودية</p>
+        </div>
+      </div>
+      <div class="status-lockup">
+        <button class="language-toggle" id="language-toggle" type="button" aria-label="Switch language">عربي</button>
+        <span class="live-dot" aria-hidden="true"></span>
+        <span class="status-text" data-en="Live stage feed" data-ar="البث المباشر">Live stage feed</span>
+        <span class="fullscreen-hint" data-en="F11 / FULL SCREEN" data-ar="F11 / ملء الشاشة">F11 / FULL SCREEN</span>
+      </div>
+    </header>
+
+    <details class="organizer-details">
+      <summary data-en="Organizer controls" data-ar="تحكم المنظم">Organizer controls</summary>
+      <div class="organizer-panel" aria-label="Competition controls">
+        <div class="control-card">
+          <div>
+            <strong data-en="Accept submissions" data-ar="استقبال المشاركات">Accept submissions</strong>
+            <small data-en="Allow teams to send their vision." data-ar="السماح للمجموعات بإرسال رؤاها.">Allow teams to send their vision.</small>
+          </div>
+          <label class="toggle" aria-label="Toggle accepting submissions">
+            <input id="submissions-toggle" type="checkbox" checked />
+            <span class="toggle-track"></span>
+          </label>
+        </div>
+        <div class="control-card">
+          <div>
+            <strong data-en="Open voting" data-ar="فتح التصويت">Open voting</strong>
+            <small data-en="Let the audience vote for a winner." data-ar="السماح للحضور بالتصويت للفائز.">Let the audience vote for a winner.</small>
+          </div>
+          <label class="toggle" aria-label="Toggle audience voting">
+            <input id="voting-toggle" type="checkbox" checked />
+            <span class="toggle-track"></span>
+          </label>
+        </div>
+        <p class="organizer-status" id="organizer-status" data-en="Competition is live. Settings are saved on this device." data-ar="المسابقة مباشرة. يتم حفظ الإعدادات على هذا الجهاز.">Competition is live. Settings are saved on this device.</p>
+      </div>
+    </details>
+
+    <section class="hero" aria-labelledby="page-title">
+      <div>
+        <h1 id="page-title"><span data-en="The future" data-ar="المستقبل">The future</span><br /><span class="gradient-word" data-en="is imagined." data-ar="نصنعه بالخيال.">is imagined.</span></h1>
+        <p class="hero-subtitle" data-en="Imagine Saudi Arabia in 2050 — write your idea, let AI turn it into an image, then vote for the best vision." data-ar="تخيّل السعودية في عام 2050 — اكتبوا فكرتكم، دعوا الذكاء الاصطناعي يحوّلها إلى صورة، ثم صوّتوا لأفضل رؤية.">
+          تخيّل السعودية في عام 2050 — اكتبوا فكرتكم، دعوا الذكاء الاصطناعي يحوّلها إلى صورة، ثم صوّتوا لأفضل رؤية.
+        </p>
+      </div>
+      <aside class="counter" aria-live="polite">
+        <span class="counter-label" data-en="Visions ingested" data-ar="الرؤى المستلمة">Visions ingested</span>
+        <strong class="counter-number" id="vision-count">0</strong>
+        <span class="counter-note" id="sync-note" data-en="Awaiting first sync..." data-ar="بانتظار المزامنة الأولى...">Awaiting first sync...</span>
+      </aside>
+    </section>
+
+    <section class="event-flow" aria-label="How the event works">
+      <article class="flow-step">
+        <span class="flow-number">01</span>
+        <h2 data-en="Imagine" data-ar="تخيّلوا">تخيّلوا</h2>
+        <p data-en="Split into groups and write how you imagine Saudi Arabia in 2050." data-ar="قسّموا المشاركين إلى مجموعات، واكتبوا كيف تتخيلون السعودية في 2050.">قسّموا المشاركين إلى مجموعات، واكتبوا كيف تتخيلون السعودية في 2050.</p>
+      </article>
+      <article class="flow-step">
+        <span class="flow-number">02</span>
+        <h2 data-en="Generate" data-ar="حوّلوا الفكرة إلى صورة">حوّلوا الفكرة إلى صورة</h2>
+        <p data-en="AI turns each group’s description into a visual concept for the stage." data-ar="يحوّل الذكاء الاصطناعي وصف كل مجموعة إلى تصميم بصري يعرض على المسرح.">يحوّل الذكاء الاصطناعي وصف كل مجموعة إلى تصميم بصري يعرض على المسرح.</p>
+      </article>
+      <article class="flow-step">
+        <span class="flow-number">03</span>
+        <h2 data-en="Vote" data-ar="صوّتوا">صوّتوا</h2>
+        <p data-en="See every group’s design and vote for the best vision of the Kingdom’s future." data-ar="شاهدوا تصاميم المجموعات وصوّتوا لأفضل تخيل لمستقبل المملكة.">شاهدوا تصاميم المجموعات وصوّتوا لأفضل تخيل لمستقبل المملكة.</p>
+      </article>
+    </section>
+
+    <section class="submit-panel" id="submission-panel" aria-labelledby="submit-heading">
+      <div class="submit-intro">
+        <p class="submit-kicker" data-en="Your future / starts here" data-ar="مستقبلكم / يبدأ هنا">Your future / starts here</p>
+        <h2 id="submit-heading" data-en="Put your imagination on stage." data-ar="خلّوا خيالكم يُعرض على المسرح.">خلّوا خيالكم يُعرض على المسرح.</h2>
+        <p data-en="Write a short description of your idea. This prototype simulates turning it into an AI image and adds it directly to the vision gallery." data-ar="اكتبوا وصفًا قصيرًا لفكرتكم. هذه النسخة تحاكي رحلة تحويل الوصف إلى صورة بالذكاء الاصطناعي، ثم تضيفها مباشرة إلى معرض الرؤى.">اكتبوا وصفًا قصيرًا لفكرتكم. هذه النسخة تحاكي رحلة تحويل الوصف إلى صورة بالذكاء الاصطناعي، ثم تضيفها مباشرة إلى معرض الرؤى.</p>
+        <p class="closed-message" id="closed-message" data-en="Submissions are currently closed — the organizer can reopen them above." data-ar="التقديم مغلق حاليًا — يمكن للمنظم فتحه من لوحة التحكم.">التقديم مغلق حاليًا — يمكن للمنظم فتحه من لوحة التحكم.</p>
+      </div>
+      <form class="vision-form" id="vision-form">
+        <div class="field">
+          <label for="team-input" data-en="Group name" data-ar="اسم المجموعة">اسم المجموعة</label>
+          <input id="team-input" name="team" placeholder="مثال: فريق أُفُق" data-placeholder-en="Example: Horizon team" data-placeholder-ar="مثال: فريق أُفُق" required />
+        </div>
+        <div class="field">
+          <label for="track-input" data-en="Strategic track" data-ar="المسار الاستراتيجي">المسار الاستراتيجي</label>
+          <select id="track-input" name="track">
+            <option value="Green Tech" data-en="Green Tech" data-ar="التقنية الخضراء / Green Tech">التقنية الخضراء / Green Tech</option>
+            <option value="Smart Mobility" data-en="Smart Mobility" data-ar="التنقل الذكي / Smart Mobility">التنقل الذكي / Smart Mobility</option>
+            <option value="Heritage AI" data-en="Heritage AI" data-ar="التراث والذكاء الاصطناعي / Heritage AI">التراث والذكاء الاصطناعي / Heritage AI</option>
+            <option value="NEOM" data-en="NEOM" data-ar="نيوم / NEOM">نيوم / NEOM</option>
+            <option value="Human Potential" data-en="Human Potential" data-ar="الإنسان أولًا / Human Potential">الإنسان أولًا / Human Potential</option>
+          </select>
+        </div>
+        <div class="field full">
+          <label for="prompt-input" data-en="Describe your Saudi 2050 vision" data-ar="وصف رؤيتكم للسعودية 2050">وصف رؤيتكم للسعودية 2050</label>
+          <textarea id="prompt-input" name="prompt" placeholder="مثال: مدن صحراوية خضراء تنتج طاقتها وتجمع مياهها من الهواء..." data-placeholder-en="Example: Green desert cities that produce their own energy and collect water from the air..." data-placeholder-ar="مثال: مدن صحراوية خضراء تنتج طاقتها وتجمع مياهها من الهواء..." required></textarea>
+        </div>
+        <div class="submit-actions">
+          <span class="form-note" id="form-note" data-en="Image generation simulation — no sign-in required." data-ar="محاكاة توليد الصورة — لا تحتاج إلى تسجيل دخول.">محاكاة توليد الصورة — لا تحتاج إلى تسجيل دخول.</span>
+          <button class="generate-button" id="generate-button" type="submit" data-en="✦ Turn idea into image" data-ar="✦ حوّلوا الفكرة إلى صورة">✦ حوّلوا الفكرة إلى صورة</button>
+        </div>
+      </form>
+    </section>
+
+    <section aria-labelledby="gallery-heading">
+      <div class="gallery-toolbar">
+        <h2 class="section-title" id="gallery-heading" data-en="Live vision gallery / stage feed" data-ar="معرض الرؤى المباشر / تصاميم المشاركين">Live vision gallery / stage feed</h2>
+        <div class="sync-state"><span id="voting-status">Voting open</span><span class="sync-icon">↻</span><span id="sync-state">Syncing every 08 seconds</span></div>
+      </div>
+      <div class="gallery-grid" id="gallery-grid" aria-live="polite"></div>
+    </section>
+
+    <footer class="footer">
+      <span data-en="Google Developer Groups on Campus — Shaqra University" data-ar="مجموعات مطوري Google في الجامعة — جامعة شقراء"><strong>Google Developer Groups</strong> on Campus — Shaqra University</span>
+      <div class="color-dashes" aria-label="Google colors"><i></i><i></i><i></i><i></i></div>
+      <span data-en="Saudi Arabia / 2026" data-ar="السعودية / 2026">Saudi Arabia / 2026</span>
+    </footer>
+  </main>
+
+  <script>
+    /*
+      Google Apps Script setup:
+      1. Create a Google Sheet and deploy the companion google-apps-script.gs as a web app.
+      2. Paste the deployment URL below. Keep it empty for standalone demo mode.
+      3. Never put a Gemini/API secret in this file; keep secrets in Apps Script properties.
+    */
+    const GOOGLE_APPS_SCRIPT_URL = "";
+    const sourceVisions = [
+      {
+        team: "Sahab Terra",
+        track: "Green Tech",
+        prompt: "Regenerative desert farms that harvest water from the air and feed the edge of Riyadh.",
+        image: "https://images.unsplash.com/photo-1509391366360-2e959784a276?auto=format&fit=crop&w=1200&q=88",
+        color: "#34a853",
+        height: 290,
+        votes: 31
+      },
+      {
+        team: "Misk Vector",
+        track: "Smart Mobility",
+        prompt: "A silent, autonomous transit ribbon connecting old Najdi towns to tomorrow's city.",
+        image: "https://images.unsplash.com/photo-1544620347-c4fd4a3d5957?auto=format&fit=crop&w=1200&q=88",
+        color: "#4285f4",
+        height: 360,
+        votes: 27
+      },
+      {
+        team: "Oasis OS",
+        track: "Water Security",
+        prompt: "Living infrastructure turns every public space into a cooling, restorative oasis.",
+        image: "https://images.unsplash.com/photo-1518005020951-eccb494ad742?auto=format&fit=crop&w=1200&q=88",
+        color: "#48e0da",
+        height: 245,
+        votes: 24
+      },
+      {
+        team: "Najd Neural",
+        track: "Heritage AI",
+        prompt: "Machine intelligence preserves the stories, patterns, and poetry held inside every mud-brick wall.",
+        image: "https://images.unsplash.com/photo-1539650116574-75c0c6d73f6e?auto=format&fit=crop&w=1200&q=88",
+        color: "#fbbc05",
+        height: 325,
+        votes: 19
+      },
+      {
+        team: "Red Sea Relay",
+        track: "Blue Economy",
+        prompt: "Ocean-positive coastal cities where coral restoration is part of the everyday commute.",
+        image: "https://images.unsplash.com/photo-1544551763-46a013bb70d5?auto=format&fit=crop&w=1200&q=88",
+        color: "#4285f4",
+        height: 300,
+        votes: 16
+      },
+      {
+        team: "Himma Labs",
+        track: "Human Potential",
+        prompt: "An adaptive learning constellation that gives every learner a route to their highest potential.",
+        image: "https://images.unsplash.com/photo-1497366754035-f200968a6e72?auto=format&fit=crop&w=1200&q=88",
+        color: "#ea4335",
+        height: 250,
+        votes: 22
+      },
+      {
+        team: "NEOM Bloom",
+        track: "NEOM",
+        prompt: "Architecture that grows, breathes, and shifts with the rhythm of a zero-carbon community.",
+        image: "https://images.unsplash.com/photo-1511818966892-d7d671e672a2?auto=format&fit=crop&w=1200&q=88",
+        color: "#ea4335",
+        height: 380,
+        votes: 29
+      },
+      {
+        team: "Palm Circuit",
+        track: "Circular Cities",
+        prompt: "A circular materials exchange makes construction waste the raw material for beautiful new neighborhoods.",
+        image: "https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?auto=format&fit=crop&w=1200&q=88",
+        color: "#fbbc05",
+        height: 270,
+        votes: 13
+      }
+    ];
+    let activeVisions = sourceVisions;
+
+    const gallery = document.getElementById("gallery-grid");
+    const count = document.getElementById("vision-count");
+    const note = document.getElementById("sync-note");
+    const syncState = document.getElementById("sync-state");
+    const form = document.getElementById("vision-form");
+    const formNote = document.getElementById("form-note");
+    const generateButton = document.getElementById("generate-button");
+    const submissionPanel = document.getElementById("submission-panel");
+    const submissionsToggle = document.getElementById("submissions-toggle");
+    const votingToggle = document.getElementById("voting-toggle");
+    const organizerStatus = document.getElementById("organizer-status");
+    const votingStatus = document.getElementById("voting-status");
+    const languageToggle = document.getElementById("language-toggle");
+    const settings = {
+      submissionsOpen: localStorage.getItem("imagineSaudiSubmissions") !== "false",
+      votingOpen: localStorage.getItem("imagineSaudiVoting") !== "false"
+    };
+    const voterId = localStorage.getItem("imagineSaudiVoterId") ||
+      (crypto.randomUUID ? crypto.randomUUID() : `voter-${Date.now()}-${Math.random().toString(36).slice(2)}`);
+    localStorage.setItem("imagineSaudiVoterId", voterId);
+    let currentLanguage = localStorage.getItem("imagineSaudiLanguage") || "ar";
+    let organizerKey = sessionStorage.getItem("imagineSaudiOrganizerKey") || "";
+    const copy = {
+      en: {
+        receiving: "Receiving new visions...",
+        connected: "Live feed connected",
+        retrying: "Feed retrying...",
+        unavailable: "Source unavailable — retrying",
+        awaiting: "Awaiting first sync...",
+        lastSync: "Last sync",
+        votingOpen: "Voting open",
+        votingClosed: "Voting closed",
+        vote: "♡ Vote for this vision",
+        unvote: "↶ Unvote",
+        alreadyVoted: "One vote already used",
+        voted: "✓ Voted",
+        votes: "votes",
+        openCompetition: "Competition is live. Settings are saved on this device.",
+        status: "Submissions {submissions} · Voting {voting}.",
+        open: "open",
+        closed: "closed",
+        imageDemo: "Image generation simulation — no sign-in required.",
+        imageGenerating: "AI is building the visual concept...",
+        imageAdded: "Your vision was added to the gallery — share it with the audience.",
+        submissionClosed: "Submissions are currently closed — the organizer can reopen them above.",
+        voteError: "The vote could not be saved. Please try again."
+      },
+      ar: {
+        receiving: "جارٍ استقبال الرؤى...",
+        connected: "البث المباشر متصل",
+        retrying: "جارٍ إعادة المحاولة...",
+        unavailable: "المصدر غير متاح — جارٍ إعادة المحاولة",
+        awaiting: "بانتظار المزامنة الأولى...",
+        lastSync: "آخر مزامنة",
+        votingOpen: "التصويت مفتوح",
+        votingClosed: "التصويت مغلق",
+        vote: "♡ صوّت لهذه الرؤية",
+        unvote: "↶ إلغاء التصويت",
+        alreadyVoted: "لديك تصويت واحد مستخدم",
+        voted: "✓ تم التصويت",
+        votes: "تصويت",
+        openCompetition: "المسابقة مباشرة. يتم حفظ الإعدادات على هذا الجهاز.",
+        status: "المشاركات {submissions} · التصويت {voting}.",
+        open: "مفتوحة",
+        closed: "مغلقة",
+        imageDemo: "محاكاة توليد الصورة — لا تحتاج إلى تسجيل دخول.",
+        imageGenerating: "الذكاء الاصطناعي يبني التصور البصري الآن...",
+        imageAdded: "تمت إضافة رؤيتكم إلى المعرض — شاركوها مع الحضور.",
+        submissionClosed: "التقديم مغلق حاليًا — يمكن للمنظم فتحه من لوحة التحكم.",
+        voteError: "تعذر حفظ التصويت. حاول مرة أخرى."
+      }
+    };
+    const generatedImages = [
+      "https://images.unsplash.com/photo-1534274988757-a28bf1a57c17?auto=format&fit=crop&w=1200&q=88",
+      "https://images.unsplash.com/photo-1500534623283-312aade485b7?auto=format&fit=crop&w=1200&q=88",
+      "https://images.unsplash.com/photo-1539650116574-75c0c6d73f6e?auto=format&fit=crop&w=1200&q=88",
+      "https://images.unsplash.com/photo-1470770841072-f978cf4d019e?auto=format&fit=crop&w=1200&q=88"
+    ];
+    const placeholderImage =
+      "data:image/svg+xml;charset=UTF-8," +
+      encodeURIComponent(`<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 800">
+        <defs><linearGradient id="g" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#111b39"/><stop offset=".55" stop-color="#172b4b"/><stop offset="1" stop-color="#07100f"/></linearGradient></defs>
+        <rect width="1200" height="800" fill="url(#g)"/>
+        <path d="M0 610 160 430l125 96 150-220 125 145 180-260 240 260 220-170v519H0Z" fill="#07100f" opacity=".9"/>
+        <path d="M150 650V460h145v190m-75-190v190m280 0V370h175v280m-90-280v280m300 0V490h130v160m-60-160v160" fill="none" stroke="#48e0da" stroke-width="5" opacity=".78"/>
+        <circle cx="930" cy="142" r="65" fill="#fbbc05" opacity=".9"/><text x="60" y="100" fill="#fff" font-family="Arial" font-size="30" letter-spacing="7">FUTURE SAUDI / 2050</text>
+      </svg>`);
+
+    function escapeHTML(value) {
+      return String(value).replace(/[&<>"']/g, (character) => ({
+        "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#039;"
+      }[character]));
+    }
+
+    function t(key) {
+      return copy[currentLanguage][key] || copy.en[key] || key;
+    }
+
+    function applyLanguage(language) {
+      currentLanguage = language === "en" ? "en" : "ar";
+      localStorage.setItem("imagineSaudiLanguage", currentLanguage);
+      document.documentElement.lang = currentLanguage;
+      document.documentElement.dir = currentLanguage === "ar" ? "rtl" : "ltr";
+      document.querySelectorAll("[data-en][data-ar]").forEach((element) => {
+        element.textContent = element.dataset[currentLanguage];
+      });
+      document.querySelectorAll("[data-placeholder-en][data-placeholder-ar]").forEach((element) => {
+        element.placeholder = element.dataset[`placeholder${currentLanguage === "ar" ? "Ar" : "En"}`];
+      });
+      languageToggle.textContent = currentLanguage === "ar" ? "English" : "عربي";
+      languageToggle.setAttribute("aria-label", currentLanguage === "ar" ? "Switch to English" : "التبديل إلى العربية");
+      updateCompetitionMode(false);
+      syncGallery();
+    }
+
+    function visionCard(vision, index) {
+      const safeImage = escapeHTML(vision.image || placeholderImage);
+      const selectedVision = localStorage.getItem("imagineSaudiVote");
+      const isVoted = selectedVision === vision.team;
+      const anotherVisionVoted = Boolean(selectedVision && selectedVision !== vision.team);
+      const votingClosed = !settings.votingOpen;
+      const voteDisabled = votingClosed || anotherVisionVoted;
+      return `
+        <article class="vision-card" style="animation-delay:${Math.min(index * 55, 500)}ms">
+          <div class="vision-image-wrap">
+            <img class="vision-image" style="height:${vision.height || 280}px" src="${safeImage}" alt="${escapeHTML(vision.team)} concept art" loading="lazy"
+              onerror="this.onerror=null;this.src='${placeholderImage}'" />
+            <div class="image-glow"></div>
+            <span class="card-index">VISION / ${String(index + 1).padStart(2, "0")}</span>
+          </div>
+          <div class="vision-content">
+            <div class="card-meta">
+              <h3 class="team-name">${escapeHTML(vision.team)}</h3>
+              <span class="track-badge" style="color:${escapeHTML(vision.color || "#48e0da")}">${escapeHTML(vision.track)}</span>
+            </div>
+            <p class="prompt">${escapeHTML(vision.prompt)}</p>
+            <div class="vote-row">
+              <span class="vote-count" id="vote-count-${index}">${vision.votes || 0} ${t("votes")}</span>
+              <button class="vote-button${isVoted ? " voted" : ""}" id="vote-${index}" type="button" onclick="voteForVision(${index})" ${voteDisabled ? "disabled" : ""}>
+                ${votingClosed ? t("votingClosed") : isVoted ? t("unvote") : anotherVisionVoted ? t("alreadyVoted") : t("vote")}
+              </button>
+            </div>
+          </div>
+        </article>`;
+    }
+
+    async function googleRequest(action, payload = {}) {
+      if (!GOOGLE_APPS_SCRIPT_URL) return null;
+      const url = `${GOOGLE_APPS_SCRIPT_URL}${action ? `?action=${encodeURIComponent(action)}` : ""}`;
+      const response = await fetch(url, {
+        method: "POST",
+        headers: { "Content-Type": "text/plain;charset=utf-8" },
+        body: JSON.stringify({ action, ...payload })
+      });
+      if (!response.ok) throw new Error(`Google backend returned ${response.status}`);
+      const result = await response.json();
+      if (result.ok === false) throw new Error(result.error || "Google backend error");
+      return result;
+    }
+
+    async function saveRemoteSettings() {
+      if (!GOOGLE_APPS_SCRIPT_URL) return;
+      if (!organizerKey) {
+        organizerKey = prompt(currentLanguage === "ar" ? "أدخل رمز المنظم:" : "Enter the organizer key:");
+        if (!organizerKey) throw new Error("Organizer authorization required.");
+        sessionStorage.setItem("imagineSaudiOrganizerKey", organizerKey);
+      }
+      await googleRequest("setSettings", {
+        adminKey: organizerKey,
+        submissionsOpen: settings.submissionsOpen,
+        votingOpen: settings.votingOpen
+      });
+    }
+
+    // Uses the Google Apps Script backend when configured, otherwise local demo data.
+    async function fetchVisionBatch() {
+      if (GOOGLE_APPS_SCRIPT_URL) {
+        const result = await googleRequest("visions");
+        if (result.settings) {
+          settings.submissionsOpen = Boolean(result.settings.submissionsOpen);
+          settings.votingOpen = Boolean(result.settings.votingOpen);
+          syncControlInputs();
+          updateCompetitionMode(false);
+        }
+        return result.visions || [];
+      }
+      await new Promise((resolve) => setTimeout(resolve, 420));
+      return sourceVisions;
+    }
+
+    async function syncGallery() {
+      syncState.textContent = t("receiving");
+      try {
+        const visions = await fetchVisionBatch();
+        activeVisions = visions;
+        gallery.innerHTML = visions.map(visionCard).join("");
+        count.textContent = visions.length;
+        note.textContent = `${t("lastSync")} · ${new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}`;
+        syncState.textContent = t("connected");
+      } catch (error) {
+        syncState.textContent = t("retrying");
+        note.textContent = t("unavailable");
+        console.error("Gallery sync failed:", error);
+      }
+    }
+
+    async function voteForVision(index) {
+      const vision = activeVisions[index];
+      const selectedVision = localStorage.getItem("imagineSaudiVote");
+      if (!settings.votingOpen || !vision || (selectedVision && selectedVision !== vision.team)) return;
+      const action = selectedVision === vision.team ? "unvote" : "vote";
+      try {
+        if (GOOGLE_APPS_SCRIPT_URL) {
+          await googleRequest(action, { visionId: vision.id || vision.team, voterId });
+        }
+        vision.votes = Math.max(0, (vision.votes || 0) + (action === "vote" ? 1 : -1));
+        if (action === "vote") localStorage.setItem("imagineSaudiVote", vision.team);
+        else localStorage.removeItem("imagineSaudiVote");
+        await syncGallery();
+      } catch (error) {
+        alert(t("voteError"));
+        console.error("Vote request failed:", error);
+      }
+    }
+
+    form.addEventListener("submit", async (event) => {
+      event.preventDefault();
+      if (!settings.submissionsOpen) return;
+      const data = new FormData(form);
+      const team = String(data.get("team")).trim();
+      const track = String(data.get("track"));
+      const prompt = String(data.get("prompt")).trim();
+      if (!team || !prompt) return;
+
+      generateButton.disabled = true;
+      generateButton.textContent = "⟳ جاري تحويل الفكرة...";
+      formNote.textContent = t("imageGenerating");
+      await new Promise((resolve) => setTimeout(resolve, 1000));
+
+      const colors = {
+        "Green Tech": "#34a853",
+        "Smart Mobility": "#4285f4",
+        "Heritage AI": "#fbbc05",
+        "NEOM": "#ea4335",
+        "Human Potential": "#48e0da"
+      };
+      const newVision = {
+        id: `local-${Date.now()}`,
+        team,
+        track,
+        prompt,
+        image: generatedImages[sourceVisions.length % generatedImages.length],
+        color: colors[track] || "#48e0da",
+        height: 280 + ((sourceVisions.length * 37) % 100),
+        votes: 0
+      };
+      if (GOOGLE_APPS_SCRIPT_URL) {
+        try {
+          await googleRequest("submit", newVision);
+        } catch (error) {
+          generateButton.disabled = false;
+          formNote.textContent = t("voteError");
+          console.error("Submission request failed:", error);
+          return;
+        }
+      } else {
+        sourceVisions.push(newVision);
+      }
+
+      form.reset();
+      generateButton.disabled = false;
+      generateButton.textContent = currentLanguage === "ar" ? "✦ حوّلوا الفكرة إلى صورة" : "✦ Turn idea into image";
+      formNote.textContent = t("imageAdded");
+      syncGallery();
+    });
+
+    function syncControlInputs() {
+      submissionsToggle.checked = settings.submissionsOpen;
+      votingToggle.checked = settings.votingOpen;
+    }
+
+    function updateCompetitionMode(shouldSync = true) {
+      syncControlInputs();
+      submissionPanel.classList.toggle("is-closed", !settings.submissionsOpen);
+      form.querySelectorAll("input, select, textarea, button").forEach((element) => {
+        element.disabled = !settings.submissionsOpen;
+      });
+      formNote.textContent = settings.submissionsOpen ? t("imageDemo") : t("submissionClosed");
+      votingStatus.textContent = settings.votingOpen ? t("votingOpen") : t("votingClosed");
+      organizerStatus.textContent = settings.submissionsOpen && settings.votingOpen
+        ? t("openCompetition")
+        : t("status").replace("{submissions}", settings.submissionsOpen ? t("open") : t("closed")).replace("{voting}", settings.votingOpen ? t("open") : t("closed"));
+      if (shouldSync) syncGallery();
+    }
+
+    submissionsToggle.addEventListener("change", async () => {
+      const previous = settings.submissionsOpen;
+      settings.submissionsOpen = submissionsToggle.checked;
+      localStorage.setItem("imagineSaudiSubmissions", String(settings.submissionsOpen));
+      try {
+        await saveRemoteSettings();
+      } catch (error) {
+        settings.submissionsOpen = previous;
+        localStorage.setItem("imagineSaudiSubmissions", String(previous));
+        alert(error.message || t("voteError"));
+      }
+      updateCompetitionMode();
+    });
+
+    votingToggle.addEventListener("change", async () => {
+      const previous = settings.votingOpen;
+      settings.votingOpen = votingToggle.checked;
+      localStorage.setItem("imagineSaudiVoting", String(settings.votingOpen));
+      try {
+        await saveRemoteSettings();
+      } catch (error) {
+        settings.votingOpen = previous;
+        localStorage.setItem("imagineSaudiVoting", String(previous));
+        alert(error.message || t("voteError"));
+      }
+      updateCompetitionMode();
+    });
+
+    languageToggle.addEventListener("click", () => applyLanguage(currentLanguage === "ar" ? "en" : "ar"));
+    applyLanguage(currentLanguage);
+    setInterval(syncGallery, 8000);
+  </script>
+</body>
+</html>
