@@ -233,6 +233,9 @@
       font-family: "Cairo", sans-serif;
       font-size: .68rem;
     }
+    .organizer-status.is-error {
+      color: #F0B7C8;
+    }
     .review-panel {
       grid-column: 1 / -1;
       padding: 14px;
@@ -1001,6 +1004,7 @@
         submissionClosed: "Submissions are currently closed — the organizer can reopen them above.",
          submitError: "The submission could not be saved. Please try again.",
          settingsError: "Competition settings could not be saved. Please try again.",
+         backendUnavailable: "The backend is unavailable. Settings were not changed. Redeploy the Apps Script web app.",
          organizerRequired: "Organizer authorization is required.",
          confirmDelete: "Delete this submission permanently? It will not be shown publicly.",
          demoBadge: "DEMO PREVIEW",
@@ -1038,6 +1042,7 @@
         submissionClosed: "التقديم مغلق حاليًا — يمكن للمنظم فتحه من لوحة التحكم.",
          submitError: "تعذر حفظ المشاركة. حاول مرة أخرى.",
          settingsError: "تعذر حفظ إعدادات المسابقة. حاول مرة أخرى.",
+         backendUnavailable: "الخادم غير متاح. لم يتم تغيير الإعدادات. أعد نشر تطبيق Apps Script.",
          organizerRequired: "يلزم إدخال رمز صلاحية المنظم.",
          confirmDelete: "حذف هذه المشاركة نهائيًا؟ لن تظهر للجمهور.",
          demoBadge: "تصور تجريبي",
@@ -1177,7 +1182,10 @@
         headers: { "Content-Type": "text/plain;charset=utf-8" },
         body: JSON.stringify({ action, ...payload })
       });
-      if (!response.ok) throw new Error(`Google backend returned ${response.status}`);
+      if (!response.ok) {
+        if ([404, 502, 503, 504].includes(response.status)) throw new Error("Backend unavailable.");
+        throw new Error("Google backend returned " + response.status);
+      }
       const result = await response.json();
       if (result.ok === false) throw new Error(result.error || "Google backend error");
       return result;
@@ -1189,6 +1197,14 @@
         submissionsOpen: settings.submissionsOpen,
         votingOpen: settings.votingOpen
       });
+    }
+
+    function showOrganizerError(error) {
+      const message = /backend unavailable|404|502|503|504/i.test(error?.message || "")
+        ? t("backendUnavailable")
+        : t("settingsError");
+      organizerStatus.textContent = message;
+      organizerStatus.classList.add("is-error");
     }
 
     function ensureOrganizerKey() {
@@ -1398,6 +1414,7 @@
 
     function updateCompetitionMode(shouldSync = true) {
       syncControlInputs();
+      organizerStatus.classList.remove("is-error");
       submissionPanel.classList.toggle("is-closed", !settings.submissionsOpen);
       form.querySelectorAll("input, select, textarea, button").forEach((element) => {
         element.disabled = !settings.submissionsOpen;
@@ -1419,7 +1436,9 @@
       } catch (error) {
         settings.submissionsOpen = previous;
         localStorage.setItem("imagineSaudiSubmissions", String(previous));
-        alert(t("settingsError"));
+        updateCompetitionMode(false);
+        showOrganizerError(error);
+        return;
       }
       updateCompetitionMode();
     });
@@ -1433,7 +1452,9 @@
       } catch (error) {
         settings.votingOpen = previous;
         localStorage.setItem("imagineSaudiVoting", String(previous));
-        alert(t("settingsError"));
+        updateCompetitionMode(false);
+        showOrganizerError(error);
+        return;
       }
       updateCompetitionMode();
     });
