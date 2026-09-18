@@ -61,20 +61,7 @@
       mask-image: linear-gradient(to bottom, #000, transparent 80%);
     }
 
-    body::after {
-      position: fixed;
-      z-index: -1;
-      top: 18%;
-      left: -90px;
-      width: 180px;
-      height: 180px;
-      border: 1px solid rgba(216, 208, 237, .1);
-      border-radius: 38% 62% 56% 44%;
-      content: "";
-      transform: rotate(24deg);
-      animation: drift-shape 16s ease-in-out infinite alternate;
-      pointer-events: none;
-    }
+    body::after { display: none; }
 
     .page-shell {
       width: min(calc(100% - (var(--page-gutter) * 2)), 1720px);
@@ -285,6 +272,7 @@
 
     .hero {
       position: relative;
+      overflow: hidden;
       display: grid;
       grid-template-columns: 1fr auto;
       align-items: end;
@@ -292,19 +280,7 @@
       padding: clamp(58px, 8vw, 110px) 0 52px;
       animation: rise-in .9s both;
     }
-    .hero::after {
-      position: absolute;
-      z-index: -1;
-      top: 8%;
-      right: 12%;
-      width: 180px;
-      height: 180px;
-      border: 1px solid rgba(155, 138, 196, .2);
-      border-radius: 50%;
-      box-shadow: 0 0 0 22px rgba(155, 138, 196, .05), 0 0 0 44px rgba(155, 138, 196, .035);
-      content: "";
-      animation: orbit 14s linear infinite;
-    }
+    .hero::after { display: none; }
 
     .hero h1 {
       max-width: 900px;
@@ -344,17 +320,7 @@
       box-shadow: inset 0 0 30px rgba(216, 208, 237, .06), 0 0 32px rgba(155, 138, 196, .11);
     }
 
-    .counter::before {
-      position: absolute;
-      width: 90px;
-      height: 90px;
-      top: -52px;
-      right: -35px;
-      border: 1px solid rgba(255,255,255,.18);
-      border-radius: 50%;
-      box-shadow: 0 0 0 10px rgba(255,255,255,.025), 0 0 0 20px rgba(255,255,255,.025);
-      content: "";
-    }
+    .counter::before { display: none; }
 
     .counter-label { display: block; color: var(--muted); font-size: .7rem; letter-spacing: .12em; text-transform: uppercase; }
     .counter-number {
@@ -909,32 +875,92 @@
       html[dir="rtl"] .hero-subtitle { margin-top: 22px; }
     }
 
-    /* Keep the decorative accent outside both title lockups */
-    .hero::after { display: none; }
-    .hero-accent {
+    /* Branded hero background: Google Developers, 96, and Saudi silhouette */
+    .hero-brandscape {
       position: absolute;
       z-index: 0;
-      top: 10%;
-      right: -72px;
-      width: 190px;
-      height: 190px;
-      border: 1px solid rgba(155, 138, 196, .2);
-      border-radius: 50%;
-      box-shadow: 0 0 0 22px rgba(155, 138, 196, .05), 0 0 0 44px rgba(155, 138, 196, .035);
+      top: -36px;
+      right: -82px;
+      width: min(56vw, 720px);
+      height: clamp(300px, 38vw, 520px);
       pointer-events: none;
-      animation: orbit 14s linear infinite;
+      isolation: isolate;
     }
-    html[dir="rtl"] .hero-accent { right: auto; left: -72px; }
-    .hero-accent::after {
+    .hero-brandscape::before {
       position: absolute;
-      right: 18px;
-      bottom: -12px;
-      width: 12px;
-      height: 12px;
-      border-radius: 50%;
-      background: var(--lavender);
+      inset: 12% 4% 8% 12%;
+      border-radius: 48% 38% 52% 44%;
+      background: linear-gradient(135deg, rgba(44, 117, 98, .22), rgba(155, 138, 196, .14) 56%, transparent 82%);
+      filter: blur(28px);
       content: "";
-      box-shadow: 0 0 0 8px rgba(155, 138, 196, .12);
+    }
+    .hero-brandscape-logo {
+      position: absolute;
+      top: 9%;
+      right: 18%;
+      width: clamp(190px, 24vw, 340px);
+      height: auto;
+      opacity: .12;
+      filter: grayscale(1) brightness(2.1) contrast(.72);
+      mix-blend-mode: screen;
+      transform: rotate(-7deg);
+    }
+    .hero-brandscape-number {
+      position: absolute;
+      right: 1%;
+      bottom: -18%;
+      color: transparent;
+      font-family: "Space Grotesk", sans-serif;
+      font-size: clamp(13rem, 27vw, 26rem);
+      font-weight: 700;
+      letter-spacing: -.14em;
+      line-height: .72;
+      opacity: .34;
+      -webkit-text-stroke: 1px rgba(216, 208, 237, .32);
+      text-shadow: 0 0 42px rgba(155, 138, 196, .16);
+    }
+    .hero-brandscape-map {
+      position: absolute;
+      top: 24%;
+      right: 10%;
+      width: clamp(150px, 17vw, 255px);
+      height: auto;
+      overflow: visible;
+      opacity: .55;
+      filter: drop-shadow(0 0 18px rgba(155, 138, 196, .16));
+      transform: rotate(-4deg);
+    }
+    .hero-brandscape-map path {
+      fill: rgba(155, 138, 196, .08);
+      stroke: rgba(216, 208, 237, .5);
+      stroke-width: 1.25;
+      vector-effect: non-scaling-stroke;
+    }
+    .hero-brandscape-rule {
+      position: absolute;
+      right: 7%;
+      bottom: 18%;
+      width: 30%;
+      height: 1px;
+      background: linear-gradient(90deg, transparent, rgba(216, 208, 237, .34), transparent);
+      transform: rotate(-18deg);
+    }
+    .hero-copy, .counter { position: relative; z-index: 1; }
+    html[dir="rtl"] .hero-brandscape { right: auto; left: -82px; }
+    html[dir="rtl"] .hero-brandscape-logo { right: auto; left: 18%; transform: rotate(7deg); }
+    html[dir="rtl"] .hero-brandscape-number { right: auto; left: 1%; }
+    html[dir="rtl"] .hero-brandscape-map { right: auto; left: 10%; transform: rotate(4deg); }
+    html[dir="rtl"] .hero-brandscape-rule { right: auto; left: 7%; transform: rotate(18deg); }
+    @media (max-width: 800px) {
+      .hero-brandscape { right: -150px; width: 610px; opacity: .82; }
+      html[dir="rtl"] .hero-brandscape { right: auto; left: -150px; }
+    }
+    @media (max-width: 520px) {
+      .hero-brandscape { top: 0; right: -190px; width: 520px; height: 340px; opacity: .62; }
+      html[dir="rtl"] .hero-brandscape { right: auto; left: -190px; }
+      .hero-brandscape-logo { top: 8%; width: 220px; }
+      .hero-brandscape-map { top: 24%; width: 160px; }
+      .hero-brandscape-number { bottom: -8%; font-size: 15rem; }
     }
     .published-review { margin-top: 12px; }
     @media (max-width: 800px) {
@@ -1103,7 +1129,14 @@
     </details>
 
     <section class="hero" aria-labelledby="page-title">
-      <span class="hero-accent" aria-hidden="true"></span>
+      <div class="hero-brandscape" aria-hidden="true">
+        <img class="hero-brandscape-logo" src="google-developers-logo.png" alt="" />
+        <span class="hero-brandscape-number">96</span>
+        <svg class="hero-brandscape-map" viewBox="0 0 196 178" role="presentation">
+          <path d="M16 18 37 10 57 17 73 12 91 19 111 17 126 29 146 30 159 43 177 48 173 62 184 76 177 91 183 105 174 119 160 124 154 140 139 145 128 162 110 158 96 166 82 153 66 151 57 139 42 138 35 126 21 120 24 105 14 93 20 77 12 63 22 51 18 36Z" />
+        </svg>
+        <span class="hero-brandscape-rule"></span>
+      </div>
       <div class="hero-copy">
         <h1 id="page-title" class="hero-lockup"><span data-en="The future" data-ar="المستقبل">The future</span><br /><span class="gradient-word" data-en="is imagined." data-ar="نصنعه بالخيال.">is imagined.</span></h1>
         <p class="hero-subtitle" data-en="Imagine Saudi Arabia in 2050 — write your idea, preview its visual concept, then vote for the best vision." data-ar="تخيّل السعودية في عام 2050 — اكتبوا فكرتكم، شاهدوا تصورها البصري، ثم صوّتوا لأفضل رؤية.">
