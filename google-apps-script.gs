@@ -75,7 +75,7 @@ const SHEETS = {
 };
 
 const GUIDE_SHEET_NAME = "START HERE";
-const WORKBOOK_FORMAT_VERSION = "2026-09-18-v4";
+const WORKBOOK_FORMAT_VERSION = "2026-09-19-v5";
 const THEME = {
   darkGreen: "#073B35",
   green: "#2C7562",
@@ -105,7 +105,7 @@ const FIELD_NOTES = {
   height: "Gallery image height in pixels, constrained by the backend.",
   votes: "Current active vote count for a published vision.",
   submittedBy: "Optional participant or identity reference.",
-  key: "Settings key. Supported keys are submissionsOpen and votingOpen.",
+  key: "Settings key. Supported keys are submissionsOpen, votingOpen, submissionDeadline, and votingDeadline.",
   value: "Setting value. Boolean settings are stored as true or false.",
   votedAt: "When the active vote was created.",
   active: "Whether this vote is currently active.",
@@ -114,7 +114,9 @@ const FIELD_NOTES = {
 
 const DEFAULT_SETTINGS = {
   submissionsOpen: true,
-  votingOpen: true
+  votingOpen: true,
+  submissionDeadline: "",
+  votingDeadline: ""
 };
 
 function doGet(event) {
@@ -251,6 +253,8 @@ function buildGuideSheet_(sheet) {
     ["Metric", "Current value", "What it means", "How to change it"],
     ["Submissions", '=IFERROR(VLOOKUP("submissionsOpen",Settings!A:B,2,FALSE),"true")', "Whether public participants can send new visions.", "Use the organizer controls in the website."],
     ["Voting", '=IFERROR(VLOOKUP("votingOpen",Settings!A:B,2,FALSE),"true")', "Whether the audience can vote.", "Use the organizer controls in the website."],
+    ["Submission deadline", '=IFERROR(VLOOKUP("submissionDeadline",Settings!A:B,2,FALSE),"")', "Optional ISO deadline shown as a public countdown.", "Set it from the organizer controls."],
+    ["Voting deadline", '=IFERROR(VLOOKUP("votingDeadline",Settings!A:B,2,FALSE),"")', "Optional ISO deadline shown as a public countdown.", "Set it from the organizer controls."],
     ["Published visions", '=COUNTIF(Visions!D:D,"published")', "Approved concepts currently visible in the public gallery.", "Approve a pending submission from the review queue."],
     ["Pending submissions", '=COUNTIF(Submissions!D:D,"pending")', "Submissions waiting for organizer review.", "Open Organizer controls and refresh the review queue."],
     ["", "", "", ""],
@@ -271,13 +275,15 @@ function buildGuideSheet_(sheet) {
     ["GOOGLE_APPS_SCRIPT_URL", "Frontend index.html", "HTTPS address used by the browser.", "Use only the deployed /exec URL."],
     ["submissionsOpen", "Settings tab", "true accepts new submissions; false closes the form.", "Prefer the secured organizer controls."],
     ["votingOpen", "Settings tab", "true allows vote/unvote; false closes voting.", "Close voting before announcing results."],
+    ["submissionDeadline", "Settings tab", "Optional ISO timestamp for the public submission countdown.", "Leave blank to hide the countdown."],
+    ["votingDeadline", "Settings tab", "Optional ISO timestamp for the public voting countdown.", "Leave blank to hide the countdown."],
     ["imageSource", "Visions / Submissions", "demo-preview, generated, uploaded, or curated.", "Keep demo previews labeled until real AI is connected."],
     ["", "", "", ""],
     ["SHEET MAP", "", "", ""],
     ["Sheet", "What it stores", "Important fields", "Organizer guidance"],
     ["Visions", "Published gallery concepts and live vote counts.", "status, team, prompt, image, votes", "Public data source. Do not manually publish pending records here."],
     ["Submissions", "All participant submissions and moderation history.", "status, team, prompt, imageSource", "Primary review queue. New records are always pending."],
-    ["Settings", "Competition switches and update timestamps.", "submissionsOpen, votingOpen", "Keep one row per supported setting."],
+    ["Settings", "Competition switches, optional deadlines, and update timestamps.", "submissionsOpen, votingOpen, submissionDeadline, votingDeadline", "Keep one row per supported setting."],
     ["Votes", "Vote history with current active state.", "voterId, visionId, active", "LockService protects race-sensitive updates."],
     ["Unvotes", "Audit trail for removed votes.", "voterId, visionId, unvotedAt", "Keep this history during the competition."],
     ["", "", "", ""],
@@ -564,11 +570,21 @@ function parseBoolean_(value, fallback) {
   return fallback;
 }
 
+function parseDeadline_(value, fallback) {
+  if (value === undefined || value === null) return fallback;
+  const text = String(value).trim();
+  if (!text) return "";
+  const timestamp = new Date(text).getTime();
+  return Number.isFinite(timestamp) ? new Date(timestamp).toISOString() : fallback;
+}
+
 function getSettings_() {
   const settings = Object.assign({}, DEFAULT_SETTINGS);
   objectRows_(SHEETS.settings).forEach(function(record) {
     if (record.key === "submissionsOpen") settings.submissionsOpen = parseBoolean_(record.value, settings.submissionsOpen);
     if (record.key === "votingOpen") settings.votingOpen = parseBoolean_(record.value, settings.votingOpen);
+    if (record.key === "submissionDeadline") settings.submissionDeadline = parseDeadline_(record.value, settings.submissionDeadline);
+    if (record.key === "votingDeadline") settings.votingDeadline = parseDeadline_(record.value, settings.votingDeadline);
   });
   return settings;
 }
@@ -578,10 +594,12 @@ function saveSettings_(payload) {
     const settings = getSettings_();
     settings.submissionsOpen = parseBoolean_(payload.submissionsOpen, settings.submissionsOpen);
     settings.votingOpen = parseBoolean_(payload.votingOpen, settings.votingOpen);
+    settings.submissionDeadline = parseDeadline_(payload.submissionDeadline, settings.submissionDeadline);
+    settings.votingDeadline = parseDeadline_(payload.votingDeadline, settings.votingDeadline);
     const timestamp = now_();
     const definition = SHEETS.settings;
 
-    ["submissionsOpen", "votingOpen"].forEach(function(key) {
+    ["submissionsOpen", "votingOpen", "submissionDeadline", "votingDeadline"].forEach(function(key) {
       const record = findRecord_(definition, "key", key);
       if (record) {
         updateRecord_(record, { value: String(settings[key]), updatedAt: timestamp });

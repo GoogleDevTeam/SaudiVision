@@ -510,6 +510,39 @@
     .is-closed .closed-message { display: block; }
     .is-closed .vision-form { opacity: .52; }
 
+    .public-status {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 20px;
+      margin: 0 0 18px;
+      padding: 15px 17px;
+      border: 1px solid rgba(216, 208, 237, .22);
+      border-radius: 14px;
+      background: linear-gradient(115deg, rgba(44, 117, 98, .18), rgba(155, 138, 196, .11));
+    }
+    .public-status-kicker { color: var(--cyan); font-size: .62rem; letter-spacing: .12em; text-transform: uppercase; }
+    .public-status h3 { margin: 4px 0 0; font-size: .98rem; }
+    .public-status p { margin: 4px 0 0; color: var(--dim); font-family: "Cairo", sans-serif; font-size: .68rem; }
+    .public-countdown { min-width: 145px; text-align: right; }
+    .public-countdown span { display: block; color: var(--dim); font-family: "Cairo", sans-serif; font-size: .65rem; }
+    .public-countdown strong { display: block; margin-top: 3px; color: var(--light-lavender); font-size: 1.18rem; letter-spacing: .08em; }
+    .public-results { margin: 0 0 26px; padding: 17px; border: 1px solid rgba(216, 208, 237, .2); border-radius: 14px; background: rgba(4, 43, 37, .56); }
+    .public-results[hidden] { display: none; }
+    .public-results-header { display: flex; align-items: baseline; justify-content: space-between; gap: 14px; }
+    .public-results h3 { margin: 0; font-size: .9rem; }
+    .public-results p { margin: 4px 0 0; color: var(--dim); font-family: "Cairo", sans-serif; font-size: .68rem; }
+    .public-results-list { display: grid; gap: 8px; margin-top: 13px; }
+    .public-result-item { display: grid; grid-template-columns: 28px 1fr auto; align-items: center; gap: 10px; padding: 9px 0; border-top: 1px solid rgba(255,255,255,.08); }
+    .public-result-rank { color: var(--cyan); font-size: .8rem; font-weight: 700; }
+    .public-result-copy strong, .public-result-copy span { display: block; }
+    .public-result-copy strong { font-size: .74rem; }
+    .public-result-copy span { margin-top: 2px; color: var(--muted); font-family: "Cairo", sans-serif; font-size: .65rem; }
+    .public-result-score { color: var(--light-lavender); font-size: .7rem; white-space: nowrap; }
+    .deadline-control { align-items: flex-start; }
+    .deadline-input { width: 170px; min-height: 32px; padding: 6px 8px; border: 1px solid var(--line); border-radius: 8px; outline: none; background: rgba(4, 43, 37, .72); color: var(--ink); font: inherit; font-size: .65rem; }
+    .deadline-input:focus { border-color: var(--cyan); box-shadow: 0 0 0 3px rgba(155, 138, 196, .14); }
+
     .gallery-toolbar {
       display: flex;
       align-items: center;
@@ -1003,6 +1036,20 @@
             <span class="toggle-track"></span>
           </label>
         </div>
+        <div class="control-card deadline-control">
+          <div>
+            <strong data-en="Submission deadline" data-ar="موعد إغلاق التقديم">Submission deadline</strong>
+            <small data-en="Optional public countdown for submissions." data-ar="عدّ تنازلي اختياري للتقديم العام.">Optional public countdown for submissions.</small>
+          </div>
+          <input class="deadline-input" id="submission-deadline" type="datetime-local" aria-label="Submission deadline" data-aria-en="Submission deadline" data-aria-ar="موعد إغلاق التقديم" />
+        </div>
+        <div class="control-card deadline-control">
+          <div>
+            <strong data-en="Voting deadline" data-ar="موعد إغلاق التصويت">Voting deadline</strong>
+            <small data-en="Optional public countdown for voting." data-ar="عدّ تنازلي اختياري للتصويت العام.">Optional public countdown for voting.</small>
+          </div>
+          <input class="deadline-input" id="voting-deadline" type="datetime-local" aria-label="Voting deadline" data-aria-en="Voting deadline" data-aria-ar="موعد إغلاق التصويت" />
+        </div>
         <p class="organizer-status" id="organizer-status" data-en="Competition is live. Settings are saved on this device." data-ar="المسابقة مباشرة. يتم حفظ الإعدادات على هذا الجهاز.">Competition is live. Settings are saved on this device.</p>
          <div class="organizer-summary" aria-label="Organizer summary" data-aria-en="Organizer summary" data-aria-ar="ملخص المنظم">
            <div class="organizer-metric"><span data-en="Pending" data-ar="قيد المراجعة">Pending</span><strong id="organizer-pending-count">—</strong></div>
@@ -1013,6 +1060,7 @@
          <div class="organizer-actions">
            <button class="organizer-action" id="organizer-refresh" type="button" data-en="↻ Refresh all" data-ar="↻ تحديث الكل">↻ Refresh all</button>
            <button class="organizer-action" id="organizer-export" type="button" data-en="↓ Export CSV" data-ar="↓ تصدير CSV">↓ Export CSV</button>
+           <button class="organizer-action" id="organizer-export-json" type="button" data-en="{ } Export JSON" data-ar="{ } تصدير JSON">{ } Export JSON</button>
            <button class="organizer-action danger" id="organizer-lock" type="button" data-en="Lock organizer panel" data-ar="قفل لوحة المنظم">Lock organizer panel</button>
          </div>
          <div class="organizer-results" aria-label="Competition results" data-aria-en="Competition results" data-aria-ar="نتائج المسابقة">
@@ -1126,6 +1174,26 @@
       <div class="gallery-toolbar">
         <h2 class="section-title" id="gallery-heading" data-en="Live vision gallery / stage feed" data-ar="معرض الرؤى المباشر / تصاميم المشاركين">Live vision gallery / stage feed</h2>
         <div class="sync-state"><span id="voting-status" data-en="Voting open" data-ar="التصويت مفتوح">Voting open</span><span class="sync-icon">↻</span><span id="sync-state" data-en="Syncing every 08 seconds" data-ar="تتم المزامنة كل 08 ثوانٍ">Syncing every 08 seconds</span></div>
+      </div>
+      <div class="public-status" id="public-status" aria-live="polite">
+        <div>
+          <span class="public-status-kicker" data-en="Competition status" data-ar="حالة المسابقة">Competition status</span>
+          <h3 id="public-phase">Submissions are open</h3>
+          <p id="public-phase-detail">Share your vision with the audience.</p>
+        </div>
+        <div class="public-countdown">
+          <span id="public-countdown-label">Countdown</span>
+          <strong id="public-countdown">—</strong>
+        </div>
+      </div>
+      <div class="public-results" id="public-results" hidden>
+        <div class="public-results-header">
+          <div>
+            <h3 data-en="Public results" data-ar="النتائج العامة">Public results</h3>
+            <p data-en="Voting is closed. Published visions are ranked below." data-ar="أُغلق التصويت. تظهر الرؤى المنشورة مرتبة أدناه.">Voting is closed. Published visions are ranked below.</p>
+          </div>
+        </div>
+        <div class="public-results-list" id="public-results-list" aria-live="polite"></div>
       </div>
       <div class="gallery-controls">
         <input class="gallery-control gallery-search" id="gallery-search" type="search" data-placeholder-en="Search visions, teams, or tracks" data-placeholder-ar="البحث في الرؤى أو المجموعات أو المسارات" placeholder="Search visions, teams, or tracks" />
@@ -1263,10 +1331,19 @@
     const resultsLeaderboard = document.getElementById("results-leaderboard");
     const organizerRefresh = document.getElementById("organizer-refresh");
     const organizerExport = document.getElementById("organizer-export");
+    const organizerExportJson = document.getElementById("organizer-export-json");
     const organizerLock = document.getElementById("organizer-lock");
     const reviewSearch = document.getElementById("review-search");
     const reviewTrackFilter = document.getElementById("review-track-filter");
     const votingStatus = document.getElementById("voting-status");
+    const submissionDeadlineInput = document.getElementById("submission-deadline");
+    const votingDeadlineInput = document.getElementById("voting-deadline");
+    const publicPhase = document.getElementById("public-phase");
+    const publicPhaseDetail = document.getElementById("public-phase-detail");
+    const publicCountdownLabel = document.getElementById("public-countdown-label");
+    const publicCountdown = document.getElementById("public-countdown");
+    const publicResults = document.getElementById("public-results");
+    const publicResultsList = document.getElementById("public-results-list");
     const languageToggle = document.getElementById("language-toggle");
     const organizerDetails = document.querySelector(".organizer-details");
     const organizerAccess = document.getElementById("organizer-access");
@@ -1278,7 +1355,9 @@
     const publishedQueue = document.getElementById("published-queue");
     const settings = {
       submissionsOpen: localStorage.getItem("imagineSaudiSubmissions") !== "false",
-      votingOpen: localStorage.getItem("imagineSaudiVoting") !== "false"
+      votingOpen: localStorage.getItem("imagineSaudiVoting") !== "false",
+      submissionDeadline: localStorage.getItem("imagineSaudiSubmissionDeadline") || "",
+      votingDeadline: localStorage.getItem("imagineSaudiVotingDeadline") || ""
     };
     const voterId = localStorage.getItem("imagineSaudiVoterId") ||
       (window.crypto && typeof window.crypto.randomUUID === "function"
@@ -1315,6 +1394,18 @@
         lastSync: "Last sync",
         votingOpen: "Voting open",
         votingClosed: "Voting closed",
+        phaseSubmissions: "Submissions are open",
+        phaseVoting: "Voting is open",
+        phaseResults: "Results are live",
+        phaseSubmissionsDetail: "Share your vision before the submission deadline.",
+        phaseVotingDetail: "Vote for the published vision that should lead the future.",
+        phaseResultsDetail: "Voting is closed. The published visions are ranked below.",
+        countdownLabel: "Countdown",
+        countdownNone: "No deadline set",
+        countdownFinished: "Deadline reached",
+        publicResults: "Public results",
+        resultsEmpty: "No published visions yet.",
+        resultsVoteLabel: "{votes} votes",
         vote: "♡ Vote for this vision",
         unvote: "↶ Unvote",
         alreadyVoted: "One vote already used",
@@ -1371,6 +1462,18 @@
         lastSync: "آخر مزامنة",
         votingOpen: "التصويت مفتوح",
         votingClosed: "التصويت مغلق",
+        phaseSubmissions: "التقديم مفتوح",
+        phaseVoting: "التصويت مفتوح",
+        phaseResults: "النتائج متاحة",
+        phaseSubmissionsDetail: "شاركوا رؤيتكم قبل موعد إغلاق التقديم.",
+        phaseVotingDetail: "صوّتوا للرؤية المنشورة التي تقود المستقبل.",
+        phaseResultsDetail: "أُغلق التصويت. تظهر الرؤى المنشورة مرتبة أدناه.",
+        countdownLabel: "العدّ التنازلي",
+        countdownNone: "لم يُحدد موعد",
+        countdownFinished: "انتهى الموعد",
+        publicResults: "النتائج العامة",
+        resultsEmpty: "لا توجد رؤى منشورة بعد.",
+        resultsVoteLabel: "{votes} تصويت",
         vote: "♡ صوّت لهذه الرؤية",
         unvote: "↶ إلغاء التصويت",
         alreadyVoted: "لديك تصويت واحد مستخدم",
@@ -1502,6 +1605,69 @@
       return /^#[0-9a-f]{6}$/i.test(String(value || "")) ? value : "#D8D0ED";
     }
 
+    function isoToDateTimeInput(value) {
+      if (!value) return "";
+      const date = new Date(value);
+      if (!Number.isFinite(date.getTime())) return "";
+      const pad = (part) => String(part).padStart(2, "0");
+      return [date.getFullYear(), pad(date.getMonth() + 1), pad(date.getDate())].join("-") +
+        "T" + [pad(date.getHours()), pad(date.getMinutes())].join(":");
+    }
+
+    function deadlineInputToIso(value) {
+      if (!value) return "";
+      const timestamp = new Date(value).getTime();
+      return Number.isFinite(timestamp) ? new Date(timestamp).toISOString() : "";
+    }
+
+    function syncDeadlineInputs() {
+      submissionDeadlineInput.value = isoToDateTimeInput(settings.submissionDeadline);
+      votingDeadlineInput.value = isoToDateTimeInput(settings.votingDeadline);
+    }
+
+    function formatCountdown(milliseconds) {
+      const totalSeconds = Math.max(0, Math.floor(milliseconds / 1000));
+      const days = Math.floor(totalSeconds / 86400);
+      const hours = Math.floor((totalSeconds % 86400) / 3600);
+      const minutes = Math.floor((totalSeconds % 3600) / 60);
+      const seconds = totalSeconds % 60;
+      return days + "d " + String(hours).padStart(2, "0") + "h " + String(minutes).padStart(2, "0") + "m " + String(seconds).padStart(2, "0") + "s";
+    }
+
+    function renderPublicResults() {
+      const ranked = [...activeVisions].sort((left, right) => {
+        const voteDifference = (Number(right.votes) || 0) - (Number(left.votes) || 0);
+        if (voteDifference) return voteDifference;
+        return (Date.parse(right.publishedAt || right.createdAt || "") || 0) - (Date.parse(left.publishedAt || left.createdAt || "") || 0);
+      });
+      publicResultsList.innerHTML = ranked.length
+        ? ranked.slice(0, 5).map((vision, index) =>
+          '<div class="public-result-item"><span class="public-result-rank">' + (index + 1) + '</span><div class="public-result-copy"><strong>' + escapeHTML(vision.team || "—") + '</strong><span>' + escapeHTML(vision.track || "") + '</span></div><span class="public-result-score">' + t("resultsVoteLabel").replace("{votes}", Number(vision.votes) || 0) + '</span></div>'
+        ).join("")
+        : '<p class="gallery-empty">' + t("resultsEmpty") + '</p>';
+    }
+
+    function updatePublicCompetitionState() {
+      const phase = !settings.votingOpen ? "results" : !settings.submissionsOpen ? "voting" : "submissions";
+      const phaseCopy = {
+        submissions: ["phaseSubmissions", "phaseSubmissionsDetail"],
+        voting: ["phaseVoting", "phaseVotingDetail"],
+        results: ["phaseResults", "phaseResultsDetail"]
+      }[phase];
+      publicPhase.textContent = t(phaseCopy[0]);
+      publicPhaseDetail.textContent = t(phaseCopy[1]);
+      publicResults.hidden = phase !== "results";
+      if (phase === "results") renderPublicResults();
+      const deadline = phase === "submissions" ? settings.submissionDeadline : phase === "voting" ? settings.votingDeadline : "";
+      publicCountdownLabel.textContent = t("countdownLabel");
+      if (!deadline) {
+        publicCountdown.textContent = t("countdownNone");
+      } else {
+        const remaining = Date.parse(deadline) - Date.now();
+        publicCountdown.textContent = remaining > 0 ? formatCountdown(remaining) : t("countdownFinished");
+      }
+    }
+
     function persistLocalCollections() {
       localStorage.setItem("imagineSaudiPending", JSON.stringify(pendingVisions));
       localStorage.setItem("imagineSaudiPublished", JSON.stringify(localPublishedVisions));
@@ -1597,7 +1763,9 @@
       if (!GOOGLE_APPS_SCRIPT_URL) return;
       await adminRequest("setSettings", {
         submissionsOpen: settings.submissionsOpen,
-        votingOpen: settings.votingOpen
+        votingOpen: settings.votingOpen,
+        submissionDeadline: settings.submissionDeadline,
+        votingDeadline: settings.votingDeadline
       });
     }
 
@@ -1698,6 +1866,9 @@
         if (result.settings) {
           settings.submissionsOpen = Boolean(result.settings.submissionsOpen);
           settings.votingOpen = Boolean(result.settings.votingOpen);
+          settings.submissionDeadline = result.settings.submissionDeadline || "";
+          settings.votingDeadline = result.settings.votingDeadline || "";
+          syncDeadlineInputs();
           syncControlInputs();
           updateCompetitionMode(false);
         }
@@ -1729,6 +1900,7 @@
       try {
         const visions = await fetchVisionBatch();
         activeVisions = visions;
+        updatePublicCompetitionState();
         const selectedVision = localStorage.getItem("imagineSaudiVote");
         if (selectedVision && !visions.some((vision) => visionKey(vision) === selectedVision || vision.team === selectedVision)) {
           localStorage.removeItem("imagineSaudiVote");
@@ -2012,6 +2184,29 @@
       URL.revokeObjectURL(link.href);
     }
 
+    function downloadOrganizerJson() {
+      const records = [
+        ...pendingOrganizerRecords.map((vision) => ({ ...vision, exportStatus: "pending" })),
+        ...publishedOrganizerRecords.map((vision) => ({ ...vision, exportStatus: "published" }))
+      ];
+      if (!records.length) return;
+      const rankedResults = [...publishedOrganizerRecords].sort((left, right) => (Number(right.votes) || 0) - (Number(left.votes) || 0));
+      const payload = {
+        exportedAt: new Date().toISOString(),
+        competition: "Imagine Saudi 2050",
+        settings: { ...settings },
+        records: records,
+        publishedResults: rankedResults
+      };
+      const link = document.createElement("a");
+      link.href = URL.createObjectURL(new Blob([JSON.stringify(payload, null, 2)], { type: "application/json;charset=utf-8" }));
+      link.download = "imagine-saudi-2050-" + new Date().toISOString().slice(0, 10) + ".json";
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+      URL.revokeObjectURL(link.href);
+    }
+
     function lockOrganizerPanel() {
       organizerKey = "";
       organizerUnlocked = false;
@@ -2026,6 +2221,7 @@
     function syncControlInputs() {
       submissionsToggle.checked = settings.submissionsOpen;
       votingToggle.checked = settings.votingOpen;
+      syncDeadlineInputs();
     }
 
     function updateCompetitionMode(shouldSync = true) {
@@ -2037,10 +2233,27 @@
       });
       formNote.textContent = settings.submissionsOpen ? t("imageDemo") : t("submissionClosed");
       votingStatus.textContent = settings.votingOpen ? t("votingOpen") : t("votingClosed");
+      updatePublicCompetitionState();
       organizerStatus.textContent = settings.submissionsOpen && settings.votingOpen
         ? t("openCompetition")
         : t("status").replace("{submissions}", settings.submissionsOpen ? t("open") : t("closed")).replace("{voting}", settings.votingOpen ? t("open") : t("closed"));
       if (shouldSync) syncGallery();
+    }
+
+    async function saveDeadlineSetting(key, input, storageKey) {
+      const previous = settings[key];
+      settings[key] = deadlineInputToIso(input.value);
+      localStorage.setItem(storageKey, settings[key]);
+      try {
+        await saveRemoteSettings();
+      } catch (error) {
+        settings[key] = previous;
+        localStorage.setItem(storageKey, previous);
+        syncDeadlineInputs();
+        showOrganizerError(error);
+        return;
+      }
+      updateCompetitionMode(false);
     }
 
     submissionsToggle.addEventListener("change", async () => {
@@ -2077,6 +2290,9 @@
       updateCompetitionMode();
     });
 
+    submissionDeadlineInput.addEventListener("change", () => saveDeadlineSetting("submissionDeadline", submissionDeadlineInput, "imagineSaudiSubmissionDeadline"));
+    votingDeadlineInput.addEventListener("change", () => saveDeadlineSetting("votingDeadline", votingDeadlineInput, "imagineSaudiVotingDeadline"));
+
     organizerAccess.addEventListener("click", unlockOrganizerControls);
     organizerLogin.addEventListener("submit", (event) => {
       event.preventDefault();
@@ -2092,6 +2308,7 @@
     organizerLoginCancel.addEventListener("click", hideOrganizerLogin);
     organizerRefresh.addEventListener("click", loadReviewQueue);
     organizerExport.addEventListener("click", downloadOrganizerCsv);
+    organizerExportJson.addEventListener("click", downloadOrganizerJson);
     organizerLock.addEventListener("click", lockOrganizerPanel);
     reviewRefresh.addEventListener("click", loadReviewQueue);
     reviewSearch.addEventListener("input", rerenderReviewQueues);
@@ -2106,6 +2323,7 @@
     applyLanguage(currentLanguage);
     restoreOrganizerSession();
     setInterval(syncGallery, 8000);
+    setInterval(updatePublicCompetitionState, 1000);
   </script>
 </body>
 </html>

@@ -220,6 +220,8 @@ Before coding, inspect the latest `main` branch and the live deployment state. T
 - Moderation and vote-cleanup safeguards are implemented in the backend.
 - `AI_HANDOFF.md` now contains the continuation protocol and feature roadmap.
 - The organizer panel now includes a live results board with ranked published visions, vote percentages, leader status, and tie detection.
+- Organizer exports now include both CSV and JSON, with ranked published results and competition settings metadata.
+- Public visitors now see the current competition phase, an optional deadline countdown, and a public ranked-results view after voting closes.
 
 ### Completed recently
 
@@ -231,18 +233,20 @@ Before coding, inspect the latest `main` branch and the live deployment state. T
 - Deactivated active votes when a published vision is deleted.
 - Added this living handoff and progress protocol.
 - Added the Organizer Overview + Live Results dashboard.
+- Added optional submission/voting deadlines, public countdown state, public results mode, and JSON export.
 
 ### Verification and deployment
 
 - Frontend JavaScript syntax has been checked with Node.
 - Apps Script syntax has been checked with Node-compatible parsing.
-- The organizer dashboard markup and inline JavaScript passed syntax and static wiring checks.
+- The organizer dashboard markup and inline JavaScript passed static wiring checks for the new export, deadline, countdown, and results controls.
+- The environment used for this change did not include Node, so runtime syntax verification remains a follow-up check before deployment.
 - Apps Script health endpoint has returned `{ ok: true, status: "ready" }`.
 - GitHub Pages deployment is separate from Apps Script deployment.
 - Apps Script changes require copying the backend into Apps Script and deploying a new version.
 
 ### Next recommended step
 
-Add JSON export and a public countdown/results state. Keep the existing CSV export, data model, and organizer authorization unchanged.
+Copy the updated backend into Apps Script, deploy a new web-app version, and verify the public countdown/results response through the live /exec endpoint. Then confirm GitHub Pages serves the new frontend.
 
 ---
