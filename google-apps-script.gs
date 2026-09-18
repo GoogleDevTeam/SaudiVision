@@ -419,7 +419,7 @@ function formatDataSheet_(sheet, definition) {
     .setFontFamily("Arial")
     .setFontColor(THEME.ink)
     .setVerticalAlignment("top");
-  if (lastRow > 1) bodyRange.applyRowBanding(SpreadsheetApp.BandingTheme.LIGHT_GREY);
+  if (lastRow > 1 && sheet.getBandings().length === 0) bodyRange.applyRowBanding(SpreadsheetApp.BandingTheme.LIGHT_GREY);
   if (!sheet.getFilter()) sheet.getRange(1, 1, Math.max(lastRow, sheet.getMaxRows()), lastColumn).createFilter();
 
   definition.headers.forEach(function(header, index) {
