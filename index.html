@@ -834,6 +834,21 @@
       .hero-accent { right: -112px; }
       html[dir="rtl"] .hero-accent { right: auto; left: -112px; }
     }
+
+    .organizer-summary { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 8px; margin: 12px 0; }
+    .organizer-metric { padding: 12px; border: 1px solid var(--line); border-radius: 11px; background: rgba(155, 138, 196, .06); }
+    .organizer-metric span { display: block; color: var(--dim); font-family: "Cairo", sans-serif; font-size: .62rem; line-height: 1.4; text-transform: uppercase; }
+    .organizer-metric strong { display: block; margin-top: 5px; color: var(--ink); font-size: 1.2rem; }
+    .organizer-actions, .review-tools { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; }
+    .organizer-actions { margin: 4px 0 14px; }
+    .organizer-action, .review-tools input, .review-tools select { min-height: 32px; padding: 7px 10px; border: 1px solid var(--line); border-radius: 8px; background: rgba(4, 43, 37, .72); color: var(--ink); font: inherit; font-size: .66rem; }
+    .organizer-action { cursor: pointer; }
+    .organizer-action:hover { border-color: rgba(216, 208, 237, .55); transform: translateY(-1px); }
+    .organizer-action.danger { color: #E6B6D2; }
+    .review-tools { margin: 2px 0 12px; }
+    .review-tools input { flex: 1 1 220px; min-width: 180px; }
+    .review-tools select { flex: 0 1 180px; }
+    @media (max-width: 700px) { .organizer-summary { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
   </style>
 </head>
 <body>
@@ -885,6 +900,23 @@
           </label>
         </div>
         <p class="organizer-status" id="organizer-status" data-en="Competition is live. Settings are saved on this device." data-ar="المسابقة مباشرة. يتم حفظ الإعدادات على هذا الجهاز.">Competition is live. Settings are saved on this device.</p>
+         <div class="organizer-summary" aria-label="Organizer summary" data-aria-en="Organizer summary" data-aria-ar="ملخص المنظم">
+           <div class="organizer-metric"><span data-en="Pending" data-ar="قيد المراجعة">Pending</span><strong id="organizer-pending-count">—</strong></div>
+           <div class="organizer-metric"><span data-en="Published" data-ar="منشورة">Published</span><strong id="organizer-published-count">—</strong></div>
+           <div class="organizer-metric"><span data-en="Total votes" data-ar="إجمالي الأصوات">Total votes</span><strong id="organizer-vote-count">—</strong></div>
+           <div class="organizer-metric"><span data-en="Last refresh" data-ar="آخر تحديث">Last refresh</span><strong id="organizer-last-refresh">—</strong></div>
+         </div>
+         <div class="organizer-actions">
+           <button class="organizer-action" id="organizer-refresh" type="button" data-en="↻ Refresh all" data-ar="↻ تحديث الكل">↻ Refresh all</button>
+           <button class="organizer-action" id="organizer-export" type="button" data-en="↓ Export CSV" data-ar="↓ تصدير CSV">↓ Export CSV</button>
+           <button class="organizer-action danger" id="organizer-lock" type="button" data-en="Lock organizer panel" data-ar="قفل لوحة المنظم">Lock organizer panel</button>
+         </div>
+         <div class="review-tools">
+           <input id="review-search" type="search" data-placeholder-en="Search teams or visions" data-placeholder-ar="البحث في المجموعات والرؤى" placeholder="Search teams or visions" />
+           <select id="review-track-filter" aria-label="Filter by track" data-aria-en="Filter by track" data-aria-ar="تصفية حسب المسار">
+             <option value="" data-en="All tracks" data-ar="كل المسارات">All tracks</option>
+           </select>
+         </div>
         <div class="review-panel">
           <div class="review-header">
             <div>
@@ -1090,6 +1122,15 @@
     const submissionsToggle = document.getElementById("submissions-toggle");
     const votingToggle = document.getElementById("voting-toggle");
     const organizerStatus = document.getElementById("organizer-status");
+    const organizerPendingCount = document.getElementById("organizer-pending-count");
+    const organizerPublishedCount = document.getElementById("organizer-published-count");
+    const organizerVoteCount = document.getElementById("organizer-vote-count");
+    const organizerLastRefresh = document.getElementById("organizer-last-refresh");
+    const organizerRefresh = document.getElementById("organizer-refresh");
+    const organizerExport = document.getElementById("organizer-export");
+    const organizerLock = document.getElementById("organizer-lock");
+    const reviewSearch = document.getElementById("review-search");
+    const reviewTrackFilter = document.getElementById("review-track-filter");
     const votingStatus = document.getElementById("voting-status");
     const languageToggle = document.getElementById("language-toggle");
     const organizerDetails = document.querySelector(".organizer-details");
@@ -1109,6 +1150,8 @@
     let currentLanguage = localStorage.getItem("imagineSaudiLanguage") || "ar";
     let organizerKey = sessionStorage.getItem("imagineSaudiOrganizerKey") || "";
     let organizerUnlocked = false;
+    let pendingOrganizerRecords = [];
+    let publishedOrganizerRecords = [];
     function readLocalArray(key) {
       try {
         const value = JSON.parse(localStorage.getItem(key) || "[]");
@@ -1161,7 +1204,10 @@
         reviewLoading: "Loading review queue...",
         approve: "Approve",
         delete: "Delete",
-        reviewError: "The review queue could not be loaded."
+        reviewError: "The review queue could not be loaded.",
+        organizerLocked: "Organizer panel locked for this browser session.",
+        allTracks: "All tracks",
+        noFilterResults: "No visions match this filter."
       },
       ar: {
         receiving: "جارٍ استقبال الرؤى...",
@@ -1199,7 +1245,10 @@
         reviewLoading: "جارٍ تحميل قائمة المراجعة...",
         approve: "موافقة",
         delete: "حذف",
-        reviewError: "تعذر تحميل قائمة المراجعة."
+        reviewError: "تعذر تحميل قائمة المراجعة.",
+        organizerLocked: "تم قفل لوحة المنظم لهذه الجلسة.",
+        allTracks: "كل المسارات",
+        noFilterResults: "لا توجد رؤى تطابق عامل التصفية."
       }
     };
     const generatedImages = [
@@ -1561,12 +1610,39 @@
       });
     }
 
+    function filteredReviewRecords(records) {
+      const query = reviewSearch.value.trim().toLowerCase();
+      const track = reviewTrackFilter.value;
+      return records.filter((vision) => {
+        const text = [vision.team, vision.track, vision.prompt].map((value) => String(value || "").toLowerCase()).join(" ");
+        return (!query || text.includes(query)) && (!track || String(vision.track || "") === track);
+      });
+    }
+
+    function updateOrganizerSummary() {
+      organizerPendingCount.textContent = String(pendingOrganizerRecords.length);
+      organizerPublishedCount.textContent = String(publishedOrganizerRecords.length);
+      organizerVoteCount.textContent = String(publishedOrganizerRecords.reduce((sum, vision) => sum + (Number(vision.votes) || 0), 0));
+      organizerLastRefresh.textContent = new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
+    }
+
+    function updateReviewFilters() {
+      const current = reviewTrackFilter.value;
+      const tracks = [...new Set([...pendingOrganizerRecords, ...publishedOrganizerRecords].map((vision) => String(vision.track || "").trim()).filter(Boolean))].sort();
+      reviewTrackFilter.innerHTML = [
+        `<option value="">${t("allTracks")}</option>`,
+        ...tracks.map((track) => `<option value="${escapeHTML(track)}">${escapeHTML(track)}</option>`)
+      ].join("");
+      reviewTrackFilter.value = tracks.includes(current) ? current : "";
+    }
+
     function renderReviewItems(container, visions, action, emptyMessage) {
-      if (!visions.length) {
-        container.innerHTML = `<p class="review-empty">${emptyMessage}</p>`;
+      const filtered = filteredReviewRecords(visions);
+      if (!filtered.length) {
+        container.innerHTML = `<p class="review-empty">${visions.length ? t("noFilterResults") : emptyMessage}</p>`;
         return;
       }
-      container.innerHTML = visions.map((vision) => `
+      container.innerHTML = filtered.map((vision) => `
         <div class="review-item">
           <div>
             <strong>${escapeHTML(vision.team)}</strong>
@@ -1581,13 +1657,21 @@
       bindReviewActions(container);
     }
 
+    function rerenderReviewQueues() {
+      renderReviewItems(reviewQueue, pendingOrganizerRecords, "publish", t("reviewEmpty"));
+      renderReviewItems(publishedQueue, publishedOrganizerRecords, "deletePublished", t("reviewEmpty"));
+    }
+
     async function loadPublishedQueue() {
       publishedQueue.innerHTML = `<p class="review-empty">${t("reviewLoading")}</p>`;
       try {
         const published = GOOGLE_APPS_SCRIPT_URL
           ? (await googleRequest("visions")).visions || []
           : [...sourceVisions, ...localPublishedVisions];
-        renderReviewItems(publishedQueue, published, "deletePublished", t("reviewEmpty"));
+        publishedOrganizerRecords = published;
+        updateReviewFilters();
+        updateOrganizerSummary();
+        rerenderReviewQueues();
       } catch (error) {
         publishedQueue.innerHTML = `<p class="review-empty">${t("reviewError")}</p>`;
         console.error("Published queue failed:", error);
@@ -1600,7 +1684,8 @@
         const pending = GOOGLE_APPS_SCRIPT_URL
           ? (await adminRequest("pending")).visions || []
           : pendingVisions;
-        renderReviewItems(reviewQueue, pending, "publish", t("reviewEmpty"));
+        pendingOrganizerRecords = pending;
+        updateReviewFilters();
         await loadPublishedQueue();
       } catch (error) {
         reviewQueue.innerHTML = `<p class="review-empty">${t("reviewError")}</p>`;
@@ -1631,6 +1716,36 @@
         alert(t("reviewError"));
         console.error("Moderation action failed:", error);
       }
+    }
+
+
+    function downloadOrganizerCsv() {
+      const records = [
+        ...pendingOrganizerRecords.map((vision) => ({ ...vision, exportStatus: "pending" })),
+        ...publishedOrganizerRecords.map((vision) => ({ ...vision, exportStatus: "published" }))
+      ];
+      if (!records.length) return;
+      const headers = ["status", "team", "track", "prompt", "votes", "createdAt", "publishedAt", "imageSource"];
+      const quote = (value) => "\"" + String(value ?? "").replace(/\"/g, "\"\"") + "\"";
+      const csv = [headers, ...records.map((vision) => headers.map((header) => quote(vision[header])))].map((row) => row.join(",")).join("\n");
+      const link = document.createElement("a");
+      link.href = URL.createObjectURL(new Blob(["\ufeff" + csv], { type: "text/csv;charset=utf-8" }));
+      link.download = "imagine-saudi-2050-" + new Date().toISOString().slice(0, 10) + ".csv";
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+      URL.revokeObjectURL(link.href);
+    }
+
+    function lockOrganizerPanel() {
+      organizerKey = "";
+      organizerUnlocked = false;
+      sessionStorage.removeItem("imagineSaudiOrganizerKey");
+      organizerDetails.open = false;
+      organizerDetails.hidden = true;
+      organizerAccess.hidden = false;
+      organizerStatus.textContent = t("organizerLocked");
+      animateInteraction(organizerAccess, "is-confirmed");
     }
 
     function syncControlInputs() {
@@ -1688,7 +1803,12 @@
     });
 
     organizerAccess.addEventListener("click", unlockOrganizerControls);
+    organizerRefresh.addEventListener("click", loadReviewQueue);
+    organizerExport.addEventListener("click", downloadOrganizerCsv);
+    organizerLock.addEventListener("click", lockOrganizerPanel);
     reviewRefresh.addEventListener("click", loadReviewQueue);
+    reviewSearch.addEventListener("input", rerenderReviewQueues);
+    reviewTrackFilter.addEventListener("change", rerenderReviewQueues);
     organizerDetails.addEventListener("toggle", () => {
       if (organizerDetails.open) loadReviewQueue();
     });
