@@ -702,6 +702,68 @@
       .gallery-toolbar { align-items: flex-start; flex-direction: column; gap: 10px; }
       .footer { align-items: flex-start; flex-direction: column; }
     }
+
+    /* Interaction motion layer */
+    .organizer-access {
+      margin: 24px 0 2px;
+      padding: 8px 12px;
+      border: 1px solid rgba(216, 208, 237, .22);
+      border-radius: 9px;
+      cursor: pointer;
+      background: rgba(155, 138, 196, .08);
+      color: var(--dim);
+      font-size: .68rem;
+      letter-spacing: .06em;
+      text-transform: uppercase;
+    }
+    .organizer-access:hover { border-color: rgba(216, 208, 237, .5); color: var(--ink); }
+    button, input, select, textarea, .vision-card, .review-item, .control-card, .toggle-track {
+      transition: transform .2s ease, opacity .2s ease, box-shadow .2s ease, border-color .2s ease, background-color .2s ease;
+    }
+    button:not(:disabled):active { transform: translateY(1px) scale(.98); }
+    input:focus, select:focus, textarea:focus { transform: translateY(-1px); box-shadow: 0 0 0 3px rgba(155, 138, 196, .18); }
+    .vision-card:hover { transform: translateY(-4px); }
+    .interaction-pop { animation: interaction-pop .45s ease; }
+    .is-processing { animation: button-shimmer 1s ease-in-out infinite; pointer-events: none; }
+    .is-confirmed { animation: success-pop .55s ease; }
+    .is-rejected { animation: error-shake .45s ease; }
+    .is-changing { animation: control-flash .45s ease; }
+    .is-submitting { animation: submit-pulse 1.2s ease-in-out infinite; }
+    @keyframes interaction-pop {
+      0% { transform: scale(1); }
+      45% { transform: scale(.96); }
+      100% { transform: scale(1); }
+    }
+    @keyframes button-shimmer {
+      0%, 100% { box-shadow: 0 0 0 rgba(216, 208, 237, 0); }
+      50% { box-shadow: 0 0 0 5px rgba(216, 208, 237, .12); }
+    }
+    @keyframes success-pop {
+      0% { transform: scale(1); }
+      45% { transform: scale(1.025); box-shadow: 0 0 0 7px rgba(44, 117, 98, .16); }
+      100% { transform: scale(1); }
+    }
+    @keyframes error-shake {
+      0%, 100% { transform: translateX(0); }
+      25% { transform: translateX(-4px); }
+      75% { transform: translateX(4px); }
+    }
+    @keyframes control-flash {
+      0%, 100% { border-color: var(--line); }
+      50% { border-color: rgba(216, 208, 237, .72); box-shadow: 0 0 0 5px rgba(155, 138, 196, .1); }
+    }
+    @keyframes submit-pulse {
+      0%, 100% { box-shadow: 0 0 0 rgba(155, 138, 196, 0); }
+      50% { box-shadow: 0 0 0 8px rgba(155, 138, 196, .08); }
+    }
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after {
+        animation-duration: .001ms !important;
+        animation-iteration-count: 1 !important;
+        scroll-behavior: auto !important;
+        transition-duration: .001ms !important;
+      }
+    }
   </style>
 </head>
 <body>
@@ -727,7 +789,9 @@
       </div>
     </header>
 
-    <details class="organizer-details">
+    <button class="organizer-access" id="organizer-access" type="button" data-en="🔒 Organizer access" data-ar="🔒 دخول المنظم">🔒 Organizer access</button>
+
+    <details class="organizer-details" id="organizer-details" hidden>
       <summary data-en="Organizer controls" data-ar="تحكم المنظم">Organizer controls</summary>
        <div class="organizer-panel" aria-label="Competition controls" data-aria-en="Competition controls" data-aria-ar="تحكم المسابقة">
         <div class="control-card">
@@ -949,6 +1013,7 @@
     const votingStatus = document.getElementById("voting-status");
     const languageToggle = document.getElementById("language-toggle");
     const organizerDetails = document.querySelector(".organizer-details");
+    const organizerAccess = document.getElementById("organizer-access");
     const reviewRefresh = document.getElementById("review-refresh");
     const reviewQueue = document.getElementById("review-queue");
     const settings = {
@@ -962,6 +1027,7 @@
     localStorage.setItem("imagineSaudiVoterId", voterId);
     let currentLanguage = localStorage.getItem("imagineSaudiLanguage") || "ar";
     let organizerKey = sessionStorage.getItem("imagineSaudiOrganizerKey") || "";
+    let organizerUnlocked = false;
     function readLocalArray(key) {
       try {
         const value = JSON.parse(localStorage.getItem(key) || "[]");
@@ -1207,6 +1273,20 @@
       organizerStatus.classList.add("is-error");
     }
 
+
+    function animateInteraction(element, className = "interaction-pop") {
+      if (!element) return;
+      element.classList.remove(className);
+      void element.offsetWidth;
+      element.classList.add(className);
+      window.setTimeout(() => element.classList.remove(className), 700);
+    }
+
+    document.addEventListener("pointerdown", (event) => {
+      const target = event.target.closest("button, .toggle-track");
+      if (target && !target.disabled) animateInteraction(target);
+    });
+
     function ensureOrganizerKey() {
       if (!organizerKey) {
         organizerKey = prompt(currentLanguage === "ar" ? "أدخل رمز المنظم:" : "Enter the organizer key:");
@@ -1225,6 +1305,40 @@
           sessionStorage.removeItem("imagineSaudiOrganizerKey");
         }
         throw error;
+      }
+    }
+
+    async function unlockOrganizerControls() {
+      organizerAccess.disabled = true;
+      organizerAccess.classList.add("is-processing");
+      try {
+        await adminRequest("pending");
+        organizerUnlocked = true;
+        organizerDetails.hidden = false;
+        organizerAccess.hidden = true;
+        await loadReviewQueue();
+      } catch (error) {
+        organizerAccess.classList.add("is-rejected");
+        showOrganizerError(error);
+        console.error("Organizer unlock failed:", error);
+      } finally {
+        organizerAccess.disabled = false;
+        organizerAccess.classList.remove("is-processing");
+      }
+    }
+
+    async function restoreOrganizerSession() {
+      if (!organizerKey) return;
+      try {
+        await adminRequest("pending");
+        organizerUnlocked = true;
+        organizerDetails.hidden = false;
+        organizerAccess.hidden = true;
+        await loadReviewQueue();
+      } catch (error) {
+        organizerUnlocked = false;
+        organizerDetails.hidden = true;
+        organizerAccess.hidden = false;
       }
     }
 
@@ -1274,12 +1388,14 @@
 
     async function voteForVision(index) {
       const vision = activeVisions[index];
+      const voteButton = document.getElementById(`vote-${index}`);
       const selectedVision = localStorage.getItem("imagineSaudiVote");
       const selectedVisionKey = vision ? visionKey(vision) : "";
       const isSelected = Boolean(vision) && (selectedVision === selectedVisionKey || selectedVision === vision.team);
       if (voteInFlight || !settings.votingOpen || !vision || (selectedVision && !isSelected)) return;
       const action = isSelected ? "unvote" : "vote";
       voteInFlight = true;
+      voteButton?.classList.add("is-processing");
       try {
         if (GOOGLE_APPS_SCRIPT_URL) {
           await googleRequest(action, { visionId: vision.id || vision.team, voterId });
@@ -1289,9 +1405,11 @@
         else localStorage.removeItem("imagineSaudiVote");
         await syncGallery();
       } catch (error) {
+        voteButton?.classList.add("is-rejected");
         alert(t("voteError"));
         console.error("Vote request failed:", error);
       } finally {
+        voteButton?.classList.remove("is-processing");
         voteInFlight = false;
       }
     }
@@ -1305,6 +1423,8 @@
       const prompt = String(data.get("prompt")).trim();
       if (!team || !prompt) return;
 
+      form.classList.add("is-submitting");
+      submissionPanel.classList.add("is-submitting");
       generateButton.disabled = true;
        generateButton.classList.add("is-generating");
        generateButton.textContent = t("imageGeneratingButton");
@@ -1429,6 +1549,7 @@
 
     submissionsToggle.addEventListener("change", async () => {
       const previous = settings.submissionsOpen;
+      animateInteraction(submissionsToggle.closest(".control-card"), "is-changing");
       settings.submissionsOpen = submissionsToggle.checked;
       localStorage.setItem("imagineSaudiSubmissions", String(settings.submissionsOpen));
       try {
@@ -1445,6 +1566,7 @@
 
     votingToggle.addEventListener("change", async () => {
       const previous = settings.votingOpen;
+      animateInteraction(votingToggle.closest(".control-card"), "is-changing");
       settings.votingOpen = votingToggle.checked;
       localStorage.setItem("imagineSaudiVoting", String(settings.votingOpen));
       try {
@@ -1459,12 +1581,14 @@
       updateCompetitionMode();
     });
 
+    organizerAccess.addEventListener("click", unlockOrganizerControls);
     reviewRefresh.addEventListener("click", loadReviewQueue);
     organizerDetails.addEventListener("toggle", () => {
       if (organizerDetails.open) loadReviewQueue();
     });
     languageToggle.addEventListener("click", () => applyLanguage(currentLanguage === "ar" ? "en" : "ar"));
     applyLanguage(currentLanguage);
+    restoreOrganizerSession();
     setInterval(syncGallery, 8000);
   </script>
 </body>
