@@ -801,6 +801,39 @@
       html[dir="rtl"] .hero h1 { font-size: clamp(3.1rem, 17vw, 5.7rem); line-height: .95; }
       html[dir="rtl"] .hero-subtitle { margin-top: 22px; }
     }
+
+    /* Keep the decorative accent outside both title lockups */
+    .hero::after { display: none; }
+    .hero-accent {
+      position: absolute;
+      z-index: 0;
+      top: 10%;
+      right: -72px;
+      width: 190px;
+      height: 190px;
+      border: 1px solid rgba(155, 138, 196, .2);
+      border-radius: 50%;
+      box-shadow: 0 0 0 22px rgba(155, 138, 196, .05), 0 0 0 44px rgba(155, 138, 196, .035);
+      pointer-events: none;
+      animation: orbit 14s linear infinite;
+    }
+    html[dir="rtl"] .hero-accent { right: auto; left: -72px; }
+    .hero-accent::after {
+      position: absolute;
+      right: 18px;
+      bottom: -12px;
+      width: 12px;
+      height: 12px;
+      border-radius: 50%;
+      background: var(--lavender);
+      content: "";
+      box-shadow: 0 0 0 8px rgba(155, 138, 196, .12);
+    }
+    .published-review { margin-top: 12px; }
+    @media (max-width: 800px) {
+      .hero-accent { right: -112px; }
+      html[dir="rtl"] .hero-accent { right: auto; left: -112px; }
+    }
   </style>
 </head>
 <body>
@@ -862,10 +895,20 @@
           </div>
           <div class="review-queue" id="review-queue" aria-live="polite"></div>
         </div>
+        <div class="review-panel published-review">
+          <div class="review-header">
+            <div>
+              <h3 data-en="Published visions" data-ar="الرؤى المنشورة">Published visions</h3>
+              <p data-en="Remove a published vision from the public gallery when needed." data-ar="إزالة رؤية منشورة من المعرض العام عند الحاجة.">Remove a published vision from the public gallery when needed.</p>
+            </div>
+          </div>
+          <div class="review-queue" id="published-queue" aria-live="polite"></div>
+        </div>
       </div>
     </details>
 
     <section class="hero" aria-labelledby="page-title">
+      <span class="hero-accent" aria-hidden="true"></span>
       <div class="hero-copy">
         <h1 id="page-title" class="hero-lockup"><span data-en="The future" data-ar="المستقبل">The future</span><br /><span class="gradient-word" data-en="is imagined." data-ar="نصنعه بالخيال.">is imagined.</span></h1>
         <p class="hero-subtitle" data-en="Imagine Saudi Arabia in 2050 — write your idea, preview its visual concept, then vote for the best vision." data-ar="تخيّل السعودية في عام 2050 — اكتبوا فكرتكم، شاهدوا تصورها البصري، ثم صوّتوا لأفضل رؤية.">
@@ -1053,6 +1096,7 @@
     const organizerAccess = document.getElementById("organizer-access");
     const reviewRefresh = document.getElementById("review-refresh");
     const reviewQueue = document.getElementById("review-queue");
+    const publishedQueue = document.getElementById("published-queue");
     const settings = {
       submissionsOpen: localStorage.getItem("imagineSaudiSubmissions") !== "false",
       votingOpen: localStorage.getItem("imagineSaudiVoting") !== "false"
@@ -1511,50 +1555,75 @@
       syncGallery();
     });
 
+    function bindReviewActions(container) {
+      container.querySelectorAll("[data-review-action]").forEach((button) => {
+        button.addEventListener("click", () => moderateSubmission(button.dataset.reviewId, button.dataset.reviewAction));
+      });
+    }
+
+    function renderReviewItems(container, visions, action, emptyMessage) {
+      if (!visions.length) {
+        container.innerHTML = `<p class="review-empty">${emptyMessage}</p>`;
+        return;
+      }
+      container.innerHTML = visions.map((vision) => `
+        <div class="review-item">
+          <div>
+            <strong>${escapeHTML(vision.team)}</strong>
+            <span>${escapeHTML(vision.prompt)}</span>
+          </div>
+          <div class="review-actions">
+            ${action === "publish" ? `<button class="review-action approve" type="button" data-review-action="publish" data-review-id="${escapeHTML(vision.id)}">${t("approve")}</button>` : ""}
+            <button class="review-action delete" type="button" data-review-action="${action}" data-review-id="${escapeHTML(vision.id)}">${t("delete")}</button>
+          </div>
+        </div>`
+      ).join("");
+      bindReviewActions(container);
+    }
+
+    async function loadPublishedQueue() {
+      publishedQueue.innerHTML = `<p class="review-empty">${t("reviewLoading")}</p>`;
+      try {
+        const published = GOOGLE_APPS_SCRIPT_URL
+          ? (await googleRequest("visions")).visions || []
+          : [...sourceVisions, ...localPublishedVisions];
+        renderReviewItems(publishedQueue, published, "deletePublished", t("reviewEmpty"));
+      } catch (error) {
+        publishedQueue.innerHTML = `<p class="review-empty">${t("reviewError")}</p>`;
+        console.error("Published queue failed:", error);
+      }
+    }
+
     async function loadReviewQueue() {
       reviewQueue.innerHTML = `<p class="review-empty">${t("reviewLoading")}</p>`;
       try {
         const pending = GOOGLE_APPS_SCRIPT_URL
           ? (await adminRequest("pending")).visions || []
           : pendingVisions;
-        if (!pending.length) {
-          reviewQueue.innerHTML = `<p class="review-empty">${t("reviewEmpty")}</p>`;
-          return;
-        }
-        reviewQueue.innerHTML = pending.map((vision) => `
-          <div class="review-item">
-            <div>
-              <strong>${escapeHTML(vision.team)}</strong>
-              <span>${escapeHTML(vision.prompt)}</span>
-            </div>
-            <div class="review-actions">
-              <button class="review-action approve" type="button" data-review-action="publish" data-review-id="${escapeHTML(vision.id)}">${t("approve")}</button>
-              <button class="review-action delete" type="button" data-review-action="delete" data-review-id="${escapeHTML(vision.id)}">${t("delete")}</button>
-            </div>
-          </div>
-        `).join("");
-        reviewQueue.querySelectorAll("[data-review-action]").forEach((button) => {
-          button.addEventListener("click", () => moderateSubmission(button.dataset.reviewId, button.dataset.reviewAction));
-        });
+        renderReviewItems(reviewQueue, pending, "publish", t("reviewEmpty"));
+        await loadPublishedQueue();
       } catch (error) {
         reviewQueue.innerHTML = `<p class="review-empty">${t("reviewError")}</p>`;
+        publishedQueue.innerHTML = `<p class="review-empty">${t("reviewError")}</p>`;
         console.error("Review queue failed:", error);
       }
     }
 
     async function moderateSubmission(id, action) {
-       if (action === "delete" && !confirm(t("confirmDelete"))) return;
+      if (["delete", "deletePublished"].includes(action) && !confirm(t("confirmDelete"))) return;
       try {
         if (GOOGLE_APPS_SCRIPT_URL) {
           await adminRequest(action, { visionId: id });
+        } else if (action === "deletePublished") {
+          const publishedIndex = localPublishedVisions.findIndex((vision) => vision.id === id);
+          if (publishedIndex !== -1) localPublishedVisions.splice(publishedIndex, 1);
+          persistLocalCollections();
         } else {
           const pendingIndex = pendingVisions.findIndex((vision) => vision.id === id);
           if (pendingIndex === -1) return;
           const [vision] = pendingVisions.splice(pendingIndex, 1);
-           if (action === "publish") {
-             localPublishedVisions.push({ ...vision, status: "published" });
-           }
-           persistLocalCollections();
+          if (action === "publish") localPublishedVisions.push({ ...vision, status: "published" });
+          persistLocalCollections();
         }
         await loadReviewQueue();
         await syncGallery();
