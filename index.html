@@ -1050,6 +1050,24 @@
         <circle cx="930" cy="142" r="65" fill="#9B8AC4" opacity=".9"/><text x="60" y="100" fill="#F7F4EC" font-family="Arial" font-size="30" letter-spacing="7">FUTURE SAUDI / 2050</text>
       </svg>`);
 
+    function createDemoPreviewImage(seedText) {
+      const text = String(seedText || "Imagine Saudi 2050");
+      const seed = [...text].reduce((total, character) => total + character.charCodeAt(0), 0);
+      const accent = ["#2C7562", "#9B8AC4", "#D8D0ED"][seed % 3];
+      const horizon = 470 + (seed % 90);
+      const sunX = 180 + (seed % 780);
+      const svg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 800">
+        <rect width="1200" height="800" fill="#073B35"/>
+        <circle cx="${sunX}" cy="176" r="92" fill="${accent}" opacity=".82"/>
+        <circle cx="${sunX}" cy="176" r="132" fill="none" stroke="#D8D0ED" stroke-opacity=".2" stroke-width="3"/>
+        <path d="M0 ${horizon} Q220 ${horizon - 105} 430 ${horizon} T860 ${horizon - 24} T1200 ${horizon - 82} V800H0Z" fill="#03231F"/>
+        <path d="M0 ${horizon + 42} Q220 ${horizon - 60} 430 ${horizon + 42} T860 ${horizon + 16} T1200 ${horizon - 42} V800H0Z" fill="${accent}" opacity=".2"/>
+        <path d="M120 ${horizon + 60}V${horizon - 75}h110v135m-55-135v135m285 0V${horizon - 154}h150v154m-75-154v154m270 0V${horizon - 105}h100v105m-45-105v105" fill="none" stroke="#F7F4EC" stroke-opacity=".76" stroke-width="8"/>
+        <path d="M70 690h1060M160 735h880" stroke="#9B8AC4" stroke-opacity=".55" stroke-width="3"/>
+      </svg>`;
+      return "data:image/svg+xml;charset=UTF-8," + encodeURIComponent(svg);
+    }
+
     function escapeHTML(value) {
       return String(value).replace(/[&<>"']/g, (character) => ({
         "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#039;"
@@ -1273,7 +1291,7 @@
         team,
         track,
         prompt,
-         image: generatedImages[(sourceVisions.length + localPublishedVisions.length) % generatedImages.length],
+         image: createDemoPreviewImage(`${team}|${track}|${prompt}`),
         color: colors[track] || "#D8D0ED",
          height: 280 + (((sourceVisions.length + localPublishedVisions.length) * 37) % 100),
          votes: 0,
