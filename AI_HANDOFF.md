@@ -8,6 +8,32 @@ Copy the prompt below into the next AI session when continuing this project.
 
 Continue the existing **Imagine Saudi 2050** project. Do not recreate it from scratch, replace the architecture, remove existing functionality, or change the visual theme without a strong reason.
 
+### Continuity and progress protocol
+
+Do not make the user repeat project context. At the beginning of every session:
+
+1. Read `AI_HANDOFF.md`.
+2. Inspect the latest `main` branch and recent commits.
+3. Check the current deployment state before assuming a change is live.
+4. Compare the current code with the progress log below.
+5. Continue from the next unfinished item instead of restarting discovery.
+
+After every meaningful implementation, bug fix, deployment, or verification:
+
+1. Update this file's **Progress log** with what changed.
+2. Record the files and commit that changed.
+3. Record tests run and whether GitHub Pages or Apps Script still needs deployment.
+4. Update **Next recommended step**.
+5. Commit the progress update together with the code whenever possible.
+
+In every user-facing response, briefly state:
+
+- Completed
+- In progress or blocked
+- Next recommended step
+
+Only ask the user for information that cannot be discovered from the repository, deployment, or connected services. Never ask them to paste the organizer key or other secrets.
+
 ### Product
 
 This is an interactive future-vision competition for Google Developer Groups on Campus — Shaqra University.
@@ -183,5 +209,37 @@ Implement in this order:
 - The final response clearly states which files changed, what was tested, and whether GitHub Pages or Apps Script still needs deployment.
 
 Before coding, inspect the latest `main` branch and the live deployment state. Then make the smallest complete improvement rather than rebuilding the project.
+
+## Progress log
+
+### Current state
+
+- The repository contains the working vanilla HTML frontend and Google Apps Script backend.
+- The organizer access flow uses a visible in-page key panel rather than a native browser prompt.
+- The public gallery supports search, track filtering, and sorting by featured order, votes, or newest.
+- Moderation and vote-cleanup safeguards are implemented in the backend.
+- `AI_HANDOFF.md` now contains the continuation protocol and feature roadmap.
+
+### Completed recently
+
+- Fixed the organizer menu appearing unresponsive when native `prompt()` was blocked or invisible.
+- Added organizer-key input, Unlock, and Cancel controls.
+- Preserved session-only organizer-key storage.
+- Added public gallery search/filter/sort controls.
+- Added duplicate-publish protection.
+- Deactivated active votes when a published vision is deleted.
+- Added this living handoff and progress protocol.
+
+### Verification and deployment
+
+- Frontend JavaScript syntax has been checked with Node.
+- Apps Script syntax has been checked with Node-compatible parsing.
+- Apps Script health endpoint has returned `{ ok: true, status: "ready" }`.
+- GitHub Pages deployment is separate from Apps Script deployment.
+- Apps Script changes require copying the backend into Apps Script and deploying a new version.
+
+### Next recommended step
+
+Build the Organizer Overview + Results dashboard inside the existing organizer menu. Use the existing Sheets data and preserve the current architecture.
 
 ---
