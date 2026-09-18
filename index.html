@@ -134,15 +134,6 @@
       transition: background .2s ease, transform .2s ease;
     }
     .language-toggle:hover { background: rgba(155, 138, 196, .24); transform: translateY(-2px); }
-    .live-dot {
-      width: 8px;
-      height: 8px;
-      border-radius: 50%;
-      background: var(--green);
-      box-shadow: 0 0 0 5px rgba(44, 117, 98, .25), 0 0 16px var(--green);
-      animation: pulse 2s infinite;
-    }
-    .status-text { color: var(--muted); font-size: .75rem; letter-spacing: .06em; text-transform: uppercase; }
     .fullscreen-hint {
       padding: 7px 10px;
       border: 1px solid var(--line);
@@ -885,7 +876,7 @@
       top: 0;
       right: 0;
       left: 0;
-      height: 54%;
+      inset: 0;
       pointer-events: none;
     }
     .hero-brandscape::before { display: none; }
@@ -898,12 +889,12 @@
       filter: grayscale(1) brightness(2.1) contrast(.72);
       mix-blend-mode: screen;
     }
-    .hero-brandscape-logo:nth-child(1) { top: 4%; right: 6%; opacity: .09; transform: rotate(-11deg) scale(.92); }
-    .hero-brandscape-logo:nth-child(2) { top: 29%; right: 34%; opacity: .14; transform: rotate(7deg) scale(1.04); }
-    .hero-brandscape-logo:nth-child(3) { top: 8%; right: 68%; opacity: .075; transform: rotate(-3deg) scale(.86); }
-    .hero-brandscape-logo:nth-child(4) { top: 57%; right: 16%; opacity: .12; transform: rotate(13deg) scale(.98); }
-    .hero-brandscape-logo:nth-child(5) { top: 68%; right: 53%; opacity: .14; transform: rotate(-8deg) scale(1.08); }
-    .hero-brandscape-logo:nth-child(6) { top: 43%; right: 78%; opacity: .07; transform: rotate(5deg) scale(.9); }
+    .hero-brandscape-logo:nth-child(1) { top: 5%; right: 4%; opacity: .09; transform: rotate(-14deg) translate(8px, -2px) scale(.9); }
+    .hero-brandscape-logo:nth-child(2) { top: 21%; right: 39%; opacity: .13; transform: rotate(8deg) translate(-4px, 7px) scale(1.03); }
+    .hero-brandscape-logo:nth-child(3) { top: 42%; right: 72%; opacity: .075; transform: rotate(-5deg) translate(3px, 2px) scale(.82); }
+    .hero-brandscape-logo:nth-child(4) { top: 55%; right: 9%; opacity: .12; transform: rotate(16deg) translate(-6px, 4px) scale(.96); }
+    .hero-brandscape-logo:nth-child(5) { top: 73%; right: 44%; opacity: .14; transform: rotate(-10deg) translate(5px, -3px) scale(1.08); }
+    .hero-brandscape-logo:nth-child(6) { top: 82%; right: 78%; opacity: .07; transform: rotate(6deg) translate(-2px, 5px) scale(.88); }
     .hero-brandscape-number {
       grid-column: 2;
       grid-row: 2;
@@ -1030,8 +1021,6 @@
       </div>
       <div class="status-lockup">
         <button class="language-toggle" id="language-toggle" type="button" aria-label="Switch language">عربي</button>
-        <span class="live-dot" aria-hidden="true"></span>
-        <span class="status-text" data-en="Live stage feed" data-ar="البث المباشر">Live stage feed</span>
         <span class="fullscreen-hint" data-en="F11 / FULL SCREEN" data-ar="F11 / ملء الشاشة">F11 / FULL SCREEN</span>
       </div>
     </header>
@@ -1221,7 +1210,7 @@
 
     <section aria-labelledby="gallery-heading">
       <div class="gallery-toolbar">
-        <h2 class="section-title" id="gallery-heading" data-en="Live vision gallery / stage feed" data-ar="معرض الرؤى المباشر / تصاميم المشاركين">Live vision gallery / stage feed</h2>
+        <h2 class="section-title" id="gallery-heading" data-en="Vision gallery" data-ar="معرض الرؤى">Vision gallery</h2>
         <div class="sync-state"><span id="voting-status" data-en="Voting open" data-ar="التصويت مفتوح">Voting open</span><span class="sync-icon">↻</span><span id="sync-state" data-en="Syncing every 08 seconds" data-ar="تتم المزامنة كل 08 ثوانٍ">Syncing every 08 seconds</span></div>
       </div>
       <div class="public-status" id="public-status" aria-live="polite">
@@ -1436,8 +1425,8 @@
     const copy = {
       en: {
         receiving: "Receiving new visions...",
-        connected: "Live feed connected",
-        retrying: "Feed retrying...",
+        connected: "Sync complete",
+        retrying: "Syncing again...",
         unavailable: "Source unavailable — retrying",
         awaiting: "Awaiting first sync...",
         lastSync: "Last sync",
@@ -1505,8 +1494,8 @@
       },
       ar: {
         receiving: "جارٍ استقبال الرؤى...",
-        connected: "البث المباشر متصل",
-        retrying: "جارٍ إعادة المحاولة...",
+        connected: "اكتملت المزامنة",
+        retrying: "جارٍ تحديث المزامنة...",
         unavailable: "المصدر غير متاح — جارٍ إعادة المحاولة",
         awaiting: "بانتظار المزامنة الأولى...",
         lastSync: "آخر مزامنة",
