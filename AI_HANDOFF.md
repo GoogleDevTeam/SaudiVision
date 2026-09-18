@@ -279,7 +279,7 @@ Before coding, inspect the latest `main` branch and the live deployment state. T
 
 - Preserved the deep-green/lavender theme, hero readability, mobile layout, and Arabic RTL mirroring.
 
-- Frontend commits: `0e0c1eb8f5611d2bc68ab6391af50c32aa0d5646` and `57e31ddbfc83d2c7f14018138ac5c8013dff07d1`.
+- Separated the brand layers into a two-row composition, removed the remaining flow-card rings, and removed the unused orbit animation. Final frontend commit: `64d40580c77036d87d2d53aadd70d343f8471641`.
 
 ### Next recommended step
 
