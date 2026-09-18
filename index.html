@@ -515,12 +515,44 @@
       align-items: center;
       justify-content: space-between;
       gap: 24px;
-      margin-bottom: 28px;
+      margin-bottom: 14px;
     }
     .section-title { margin: 0; font-size: 1rem; font-weight: 600; }
     .section-title span { color: var(--dim); font-weight: 400; }
     .sync-state { display: flex; align-items: center; gap: 8px; color: var(--dim); font-size: .72rem; }
     .sync-icon { color: var(--cyan); animation: spin 3s linear infinite; }
+    .gallery-controls {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+      margin-bottom: 28px;
+    }
+    .gallery-control {
+      min-height: 34px;
+      padding: 7px 10px;
+      border: 1px solid var(--line);
+      border-radius: 9px;
+      outline: none;
+      background: rgba(4, 43, 37, .72);
+      color: var(--ink);
+      font: inherit;
+      font-size: .68rem;
+    }
+    .gallery-control:focus { border-color: var(--cyan); box-shadow: 0 0 0 3px rgba(155, 138, 196, .14); }
+    .gallery-search { flex: 1 1 230px; min-width: 180px; }
+    .gallery-control option { background: var(--dark-green); }
+    .gallery-results { margin: 0; color: var(--dim); font-family: "Cairo", sans-serif; font-size: .68rem; }
+    .gallery-empty {
+      grid-column: 1 / -1;
+      padding: 32px 16px;
+      border: 1px dashed var(--line);
+      border-radius: var(--radius);
+      color: var(--dim);
+      font-family: "Cairo", sans-serif;
+      text-align: center;
+    }
 
     .gallery-grid {
       column-count: 4;
@@ -992,6 +1024,9 @@
             <option value="Heritage AI" data-en="Heritage AI" data-ar="التراث والذكاء الاصطناعي / Heritage AI">التراث والذكاء الاصطناعي / Heritage AI</option>
             <option value="NEOM" data-en="NEOM" data-ar="نيوم / NEOM">نيوم / NEOM</option>
             <option value="Human Potential" data-en="Human Potential" data-ar="الإنسان أولًا / Human Potential">الإنسان أولًا / Human Potential</option>
+            <option value="Water Security" data-en="Water Security" data-ar="أمن المياه / Water Security">أمن المياه / Water Security</option>
+            <option value="Blue Economy" data-en="Blue Economy" data-ar="الاقتصاد الأزرق / Blue Economy">الاقتصاد الأزرق / Blue Economy</option>
+            <option value="Circular Cities" data-en="Circular Cities" data-ar="المدن الدائرية / Circular Cities">المدن الدائرية / Circular Cities</option>
           </select>
         </div>
         <div class="field full">
@@ -1009,6 +1044,18 @@
       <div class="gallery-toolbar">
         <h2 class="section-title" id="gallery-heading" data-en="Live vision gallery / stage feed" data-ar="معرض الرؤى المباشر / تصاميم المشاركين">Live vision gallery / stage feed</h2>
         <div class="sync-state"><span id="voting-status" data-en="Voting open" data-ar="التصويت مفتوح">Voting open</span><span class="sync-icon">↻</span><span id="sync-state" data-en="Syncing every 08 seconds" data-ar="تتم المزامنة كل 08 ثوانٍ">Syncing every 08 seconds</span></div>
+      </div>
+      <div class="gallery-controls">
+        <input class="gallery-control gallery-search" id="gallery-search" type="search" data-placeholder-en="Search visions, teams, or tracks" data-placeholder-ar="البحث في الرؤى أو المجموعات أو المسارات" placeholder="Search visions, teams, or tracks" />
+        <select class="gallery-control" id="gallery-track-filter" aria-label="Filter gallery by track" data-aria-en="Filter gallery by track" data-aria-ar="تصفية المعرض حسب المسار">
+          <option value="" data-en="All tracks" data-ar="كل المسارات">All tracks</option>
+        </select>
+        <select class="gallery-control" id="gallery-sort" aria-label="Sort gallery" data-aria-en="Sort gallery" data-aria-ar="ترتيب المعرض">
+          <option value="featured" data-en="Featured order" data-ar="الترتيب المميز">Featured order</option>
+          <option value="votes" data-en="Most votes" data-ar="الأكثر تصويتًا">Most votes</option>
+          <option value="newest" data-en="Newest first" data-ar="الأحدث أولًا">Newest first</option>
+        </select>
+        <p class="gallery-results" id="gallery-results" aria-live="polite"></p>
       </div>
       <div class="gallery-grid" id="gallery-grid" aria-live="polite"></div>
     </section>
@@ -1119,6 +1166,10 @@
     const formNote = document.getElementById("form-note");
     const generateButton = document.getElementById("generate-button");
     const submissionPanel = document.getElementById("submission-panel");
+    const gallerySearch = document.getElementById("gallery-search");
+    const galleryTrackFilter = document.getElementById("gallery-track-filter");
+    const gallerySort = document.getElementById("gallery-sort");
+    const galleryResults = document.getElementById("gallery-results");
     const submissionsToggle = document.getElementById("submissions-toggle");
     const votingToggle = document.getElementById("voting-toggle");
     const organizerStatus = document.getElementById("organizer-status");
@@ -1207,7 +1258,13 @@
         reviewError: "The review queue could not be loaded.",
         organizerLocked: "Organizer panel locked for this browser session.",
         allTracks: "All tracks",
-        noFilterResults: "No visions match this filter."
+         noFilterResults: "No visions match this filter.",
+         galleryCount: "Showing {shown} of {total} visions",
+         searchVisions: "Search visions, teams, or tracks",
+         sortFeatured: "Featured order",
+         sortVotes: "Most votes",
+         sortNewest: "Newest first",
+         galleryEmpty: "No published visions match your search."
       },
       ar: {
         receiving: "جارٍ استقبال الرؤى...",
@@ -1248,7 +1305,13 @@
         reviewError: "تعذر تحميل قائمة المراجعة.",
         organizerLocked: "تم قفل لوحة المنظم لهذه الجلسة.",
         allTracks: "كل المسارات",
-        noFilterResults: "لا توجد رؤى تطابق عامل التصفية."
+         noFilterResults: "لا توجد رؤى تطابق عامل التصفية.",
+         galleryCount: "عرض {shown} من أصل {total} رؤية",
+         searchVisions: "البحث في الرؤى أو المجموعات أو المسارات",
+         sortFeatured: "الترتيب المميز",
+         sortVotes: "الأكثر تصويتًا",
+         sortNewest: "الأحدث أولًا",
+         galleryEmpty: "لا توجد رؤى منشورة تطابق بحثكم."
       }
     };
     const generatedImages = [
@@ -1309,12 +1372,14 @@
       document.querySelectorAll("[data-placeholder-en][data-placeholder-ar]").forEach((element) => {
         element.placeholder = element.dataset[`placeholder${currentLanguage === "ar" ? "Ar" : "En"}`];
       });
+      gallerySearch.placeholder = t("searchVisions");
       languageToggle.textContent = currentLanguage === "ar" ? "English" : "عربي";
       languageToggle.setAttribute("aria-label", currentLanguage === "ar" ? "Switch to English" : "التبديل إلى العربية");
       document.querySelectorAll("[data-aria-en][data-aria-ar]").forEach((element) => {
         element.setAttribute("aria-label", element.dataset[currentLanguage === "ar" ? "ariaAr" : "ariaEn"]);
       });
       updateCompetitionMode(false);
+      updateGalleryFilters();
       syncGallery();
       if (organizerDetails.open) loadReviewQueue();
     }
@@ -1368,6 +1433,42 @@
             </div>
           </div>
         </article>`;
+    }
+
+    function filteredGalleryVisions(visions) {
+      const query = gallerySearch.value.trim().toLowerCase();
+      const track = galleryTrackFilter.value;
+      const filtered = visions
+        .map((vision, index) => ({ vision, index }))
+        .filter(({ vision }) => {
+          const text = [vision.team, vision.track, vision.prompt]
+            .map((value) => String(value || "").toLowerCase())
+            .join(" ");
+          return (!query || text.includes(query)) && (!track || String(vision.track || "") === track);
+        });
+      if (gallerySort.value === "votes") {
+        filtered.sort((left, right) => (Number(right.vision.votes) || 0) - (Number(left.vision.votes) || 0));
+      } else if (gallerySort.value === "newest") {
+        filtered.sort((left, right) => {
+          const rightDate = Date.parse(right.vision.publishedAt || right.vision.createdAt || "") || 0;
+          const leftDate = Date.parse(left.vision.publishedAt || left.vision.createdAt || "") || 0;
+          return rightDate - leftDate;
+        });
+      }
+      return filtered;
+    }
+
+    function updateGalleryFilters() {
+      const current = galleryTrackFilter.value;
+      const tracks = [...new Set(activeVisions.map((vision) => String(vision.track || "").trim()).filter(Boolean))].sort();
+      galleryTrackFilter.innerHTML = [
+        `<option value="">${t("allTracks")}</option>`,
+        ...tracks.map((track) => `<option value="${escapeHTML(track)}">${escapeHTML(track)}</option>`)
+      ].join("");
+      galleryTrackFilter.value = tracks.includes(current) ? current : "";
+      [...gallerySort.options].forEach((option) => {
+        option.textContent = t(option.value === "votes" ? "sortVotes" : option.value === "newest" ? "sortNewest" : "sortFeatured");
+      });
     }
 
     async function googleRequest(action, payload = {}) {
@@ -1495,12 +1596,27 @@
       ];
     }
 
+    function renderGallery() {
+      const visibleVisions = filteredGalleryVisions(activeVisions);
+      gallery.innerHTML = visibleVisions.length
+        ? visibleVisions.map(({ vision, index }) => visionCard(vision, index)).join("")
+        : `<p class="gallery-empty">${t("galleryEmpty")}</p>`;
+      galleryResults.textContent = t("galleryCount")
+        .replace("{shown}", visibleVisions.length)
+        .replace("{total}", activeVisions.length);
+    }
+
     async function syncGallery() {
       syncState.textContent = t("receiving");
       try {
         const visions = await fetchVisionBatch();
         activeVisions = visions;
-        gallery.innerHTML = visions.map(visionCard).join("");
+        const selectedVision = localStorage.getItem("imagineSaudiVote");
+        if (selectedVision && !visions.some((vision) => visionKey(vision) === selectedVision || vision.team === selectedVision)) {
+          localStorage.removeItem("imagineSaudiVote");
+        }
+        updateGalleryFilters();
+        renderGallery();
         const countChanged = count.textContent !== String(visions.length);
         count.textContent = visions.length;
         if (countChanged) {
@@ -1809,6 +1925,9 @@
     reviewRefresh.addEventListener("click", loadReviewQueue);
     reviewSearch.addEventListener("input", rerenderReviewQueues);
     reviewTrackFilter.addEventListener("change", rerenderReviewQueues);
+    gallerySearch.addEventListener("input", renderGallery);
+    galleryTrackFilter.addEventListener("change", renderGallery);
+    gallerySort.addEventListener("change", renderGallery);
     organizerDetails.addEventListener("toggle", () => {
       if (organizerDetails.open) loadReviewQueue();
     });
