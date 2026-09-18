@@ -165,6 +165,9 @@ function route_(action, payload) {
     case "delete":
       requireAdmin_(payload);
       return moderateSubmission_(payload.visionId, "deleted");
+    case "deletePublished":
+      requireAdmin_(payload);
+      return deletePublishedVision_(payload.visionId);
     case "setSettings":
       requireAdmin_(payload);
       return saveSettings_(payload);
@@ -682,6 +685,24 @@ function moderateSubmission_(submissionId, nextStatus) {
       });
     }
     return { ok: true, status: nextStatus, submissionId: String(submission.id) };
+  });
+}
+
+function deletePublishedVision_(visionId) {
+  return withLock_(function() {
+    const vision = findRecord_(SHEETS.visions, "id", visionId);
+    if (!vision) throw new Error("Published vision not found.");
+    if (String(vision.status).toLowerCase() !== "published") {
+      throw new Error("Only published visions can be deleted here.");
+    }
+
+    const timestamp = now_();
+    updateRecord_(vision, { status: "deleted" });
+    const submission = findRecord_(SHEETS.submissions, "id", visionId);
+    if (submission && String(submission.status).toLowerCase() === "published") {
+      updateRecord_(submission, { status: "deleted", updatedAt: timestamp });
+    }
+    return { ok: true, status: "deleted", visionId: String(visionId) };
   });
 }
 
