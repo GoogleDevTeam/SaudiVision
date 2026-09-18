@@ -271,6 +271,16 @@ Before coding, inspect the latest `main` branch and the live deployment state. T
 
 - Frontend auth feedback was clarified without placing the internal configuration name in the DOM. Frontend commit: `f3f657f68e8168efc89e16ece702c341e999076c`.
 
+### Visual update — 2026-09-19
+
+- Replaced the hero’s circular accent, floating blob, and counter ring with a low-contrast branded background system.
+
+- Added the existing Google Developers logo asset, an oversized `96` motif, and a Saudi Arabia silhouette as layered hero decoration.
+
+- Preserved the deep-green/lavender theme, hero readability, mobile layout, and Arabic RTL mirroring.
+
+- Frontend commits: `0e0c1eb8f5611d2bc68ab6391af50c32aa0d5646` and `57e31ddbfc83d2c7f14018138ac5c8013dff07d1`.
+
 ### Next recommended step
 
 Wait for the latest GitHub Pages workflow to finish, then open the live site and enter the exact organizer key configured in Apps Script. If it is rejected, reset the Script Properties value rather than changing the frontend.
