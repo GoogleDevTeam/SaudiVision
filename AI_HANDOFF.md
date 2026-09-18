@@ -275,11 +275,11 @@ Before coding, inspect the latest `main` branch and the live deployment state. T
 
 - Replaced the hero’s circular accent, floating blob, and counter ring with a low-contrast branded background system.
 
-- Added the existing Google Developers logo asset, an oversized `96` motif, and a Saudi Arabia silhouette as layered hero decoration.
+- Added six repeated Google Developers logo marks, repeated as a controlled 3×2 background pattern, plus an oversized `96` motif and an accurate simplified Saudi Arabia boundary.
 
 - Preserved the deep-green/lavender theme, hero readability, mobile layout, and Arabic RTL mirroring.
 
-- Separated the brand layers into a two-row composition, removed the remaining flow-card rings, and removed the unused orbit animation. Final frontend commit: `64d40580c77036d87d2d53aadd70d343f8471641`.
+- Replaced the rough gear-like map placeholder with a real simplified boundary path, separated the logo/map/96 areas, removed the remaining flow-card rings, and removed the unused orbit animation. Final frontend commit: `faa228e6fb9e0932b1f5716c42ad5472dd5beca1`.
 
 ### Next recommended step
 
