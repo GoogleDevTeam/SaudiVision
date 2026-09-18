@@ -724,6 +724,9 @@ function voteForVision_(payload) {
 
 function unvoteVision_(payload) {
   return withLock_(function() {
+    const settings = getSettings_();
+    if (!settings.votingOpen) throw new Error("Voting is currently closed.");
+
     const voterId = validVoterId_(payload.voterId);
     const visionId = cleanText_(payload.visionId, 200, "Vision ID");
     const activeVote = objectRows_(SHEETS.votes).find(function(record) {
