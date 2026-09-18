@@ -91,13 +91,13 @@
       animation: decorative-drift var(--drift-duration) ease-in-out var(--drift-delay) infinite alternate;
     }
     .decorative-logo {
-      width: clamp(52px, 6vw, 104px);
+      width: clamp(30px, 3.4vw, 62px);
       height: auto;
       filter: grayscale(1) brightness(2.1) contrast(.72);
       mix-blend-mode: screen;
     }
     .decorative-silhouette {
-      width: clamp(180px, 23vw, 390px);
+      width: clamp(88px, 12vw, 210px);
       height: auto;
       overflow: visible;
       filter: drop-shadow(0 0 24px rgba(155, 138, 196, .2));
@@ -111,7 +111,7 @@
     .decorative-number {
       color: transparent;
       font-family: "Space Grotesk", sans-serif;
-      font-size: clamp(5rem, 10vw, 10rem);
+      font-size: clamp(3rem, 5.8vw, 6.5rem);
       font-weight: 700;
       letter-spacing: -.14em;
       line-height: .72;
@@ -1190,6 +1190,11 @@
   </main>
 
   <script>
+    if ("scrollRestoration" in history) history.scrollRestoration = "manual";
+    window.scrollTo(0, 0);
+    window.addEventListener("load", () => window.scrollTo(0, 0), { once: true });
+    window.addEventListener("pageshow", () => window.scrollTo(0, 0));
+
     /*
       Google Apps Script setup:
       1. Create a Google Sheet and deploy the companion google-apps-script.gs as a web app.
@@ -1237,7 +1242,7 @@
       const spawnCount = 20;
       for (let index = 0; index < spawnCount; index += 1) {
         const roll = Math.random();
-        const kind = roll < .65 ? "logo" : roll < .85 ? "silhouette" : "number";
+        const kind = roll < .50 ? "logo" : roll < .80 ? "silhouette" : "number";
         decorativeLayer.appendChild(createDecorativeMark(kind));
       }
     }
