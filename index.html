@@ -201,6 +201,118 @@
     }
     .counter-note { display: block; margin-top: 12px; color: var(--green); font-size: .72rem; }
 
+    .event-flow {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 12px;
+      margin: 0 0 34px;
+    }
+    .flow-step {
+      position: relative;
+      min-height: 138px;
+      padding: 20px;
+      overflow: hidden;
+      border: 1px solid var(--line);
+      border-radius: 18px;
+      background: rgba(16, 18, 27, .58);
+    }
+    .flow-step::after {
+      position: absolute;
+      right: -22px;
+      bottom: -33px;
+      width: 90px;
+      height: 90px;
+      border: 1px solid rgba(255,255,255,.08);
+      border-radius: 50%;
+      content: "";
+    }
+    .flow-number {
+      display: inline-grid;
+      width: 28px;
+      height: 28px;
+      margin-bottom: 15px;
+      place-items: center;
+      border-radius: 9px;
+      background: rgba(66, 133, 244, .18);
+      color: var(--blue);
+      font-size: .75rem;
+      font-weight: 700;
+    }
+    .flow-step:nth-child(2) .flow-number { background: rgba(251, 188, 5, .16); color: var(--yellow); }
+    .flow-step:nth-child(3) .flow-number { background: rgba(52, 168, 83, .16); color: var(--green); }
+    .flow-step h2 { margin: 0 0 7px; font-size: .98rem; }
+    .flow-step p {
+      max-width: 280px;
+      margin: 0;
+      color: var(--muted);
+      font-family: "Cairo", sans-serif;
+      font-size: .76rem;
+      line-height: 1.65;
+    }
+
+    .submit-panel {
+      display: grid;
+      grid-template-columns: .78fr 1.22fr;
+      gap: 24px;
+      align-items: stretch;
+      margin-bottom: 48px;
+      padding: 26px;
+      border: 1px solid rgba(72, 224, 218, .24);
+      border-radius: var(--radius);
+      background:
+        radial-gradient(circle at 90% 0%, rgba(72, 224, 218, .12), transparent 22rem),
+        var(--panel);
+    }
+    .submit-intro { display: flex; flex-direction: column; justify-content: center; }
+    .submit-kicker { margin: 0 0 9px; color: var(--cyan); font-size: .68rem; font-weight: 700; letter-spacing: .15em; text-transform: uppercase; }
+    .submit-intro h2 { max-width: 400px; margin: 0; font-size: clamp(1.5rem, 3vw, 2.5rem); letter-spacing: -.05em; line-height: 1; }
+    .submit-intro p { max-width: 430px; margin: 15px 0 0; color: var(--muted); font-family: "Cairo", sans-serif; font-size: .87rem; line-height: 1.8; }
+    .vision-form { display: grid; grid-template-columns: 1fr 1fr; gap: 13px; }
+    .field { display: flex; flex-direction: column; gap: 7px; }
+    .field.full { grid-column: 1 / -1; }
+    .field label { color: var(--muted); font-family: "Cairo", sans-serif; font-size: .73rem; }
+    .field input, .field select, .field textarea {
+      width: 100%;
+      border: 1px solid rgba(255,255,255,.13);
+      border-radius: 11px;
+      outline: none;
+      background: rgba(4, 5, 10, .64);
+      color: var(--ink);
+      font: inherit;
+      font-size: .8rem;
+      transition: border-color .2s ease, box-shadow .2s ease;
+    }
+    .field input, .field select { height: 42px; padding: 0 12px; }
+    .field textarea { min-height: 92px; padding: 11px 12px; resize: vertical; }
+    .field input:focus, .field select:focus, .field textarea:focus {
+      border-color: var(--cyan);
+      box-shadow: 0 0 0 3px rgba(72, 224, 218, .1);
+    }
+    .field select option { background: #11131b; }
+    .submit-actions { display: flex; align-items: center; justify-content: space-between; gap: 12px; grid-column: 1 / -1; }
+    .form-note { color: var(--dim); font-family: "Cairo", sans-serif; font-size: .68rem; }
+    .generate-button, .vote-button {
+      border: 0;
+      border-radius: 10px;
+      cursor: pointer;
+      font: inherit;
+      font-weight: 700;
+      transition: transform .2s ease, box-shadow .2s ease, opacity .2s ease;
+    }
+    .generate-button {
+      padding: 12px 17px;
+      background: linear-gradient(100deg, var(--blue), var(--cyan));
+      color: #041012;
+      font-size: .76rem;
+    }
+    .generate-button:hover, .vote-button:hover:not(:disabled) { box-shadow: 0 7px 20px rgba(72, 224, 218, .2); transform: translateY(-2px); }
+    .generate-button:disabled { cursor: wait; opacity: .65; }
+    .vote-row { display: flex; align-items: center; justify-content: flex-end; gap: 9px; margin-top: 17px; }
+    .vote-button { padding: 8px 11px; background: rgba(66, 133, 244, .13); color: #9ac0ff; font-size: .7rem; }
+    .vote-button.voted { background: rgba(52, 168, 83, .16); color: #7ee19a; }
+    .vote-button:disabled { cursor: default; }
+    .vote-count { color: var(--dim); font-size: .69rem; }
+
     .gallery-toolbar {
       display: flex;
       align-items: center;
@@ -319,6 +431,8 @@
       .fullscreen-hint { display: none; }
       .hero { display: block; padding: 64px 0 34px; }
       .counter { min-width: 0; margin-top: 28px; }
+      .event-flow { grid-template-columns: 1fr; }
+      .submit-panel { grid-template-columns: 1fr; padding: 21px; }
       .gallery-grid { column-count: 2; }
     }
     @media (max-width: 520px) {
@@ -327,6 +441,9 @@
       .brand-name { font-size: .82rem; }
       .status-text { font-size: .64rem; }
       .hero h1 { font-size: clamp(3rem, 17vw, 5.5rem); }
+      .vision-form { grid-template-columns: 1fr; }
+      .field.full, .submit-actions { grid-column: auto; }
+      .submit-actions { align-items: flex-start; flex-direction: column; }
       .gallery-grid { column-count: 1; }
       .gallery-toolbar { align-items: flex-start; flex-direction: column; gap: 10px; }
       .footer { align-items: flex-start; flex-direction: column; }
@@ -357,7 +474,7 @@
       <div>
         <h1 id="page-title">The future<br /><span class="gradient-word">is imagined.</span></h1>
         <p class="hero-subtitle" lang="ar" dir="rtl">
-          أفكار اليوم، مستقبل المملكة غدًا — شاهد رؤى الفرق وهي تُبنى بالذكاء الاصطناعي على المسرح.
+          تخيّل السعودية في عام 2050 — اكتبوا فكرتكم، دعوا الذكاء الاصطناعي يحوّلها إلى صورة، ثم صوّتوا لأفضل رؤية.
         </p>
       </div>
       <aside class="counter" aria-live="polite">
@@ -367,9 +484,59 @@
       </aside>
     </section>
 
+    <section class="event-flow" aria-label="How the event works">
+      <article class="flow-step" lang="ar" dir="rtl">
+        <span class="flow-number">01</span>
+        <h2>تخيّلوا</h2>
+        <p>قسّموا المشاركين إلى مجموعات، واكتبوا كيف تتخيلون السعودية في 2050.</p>
+      </article>
+      <article class="flow-step" lang="ar" dir="rtl">
+        <span class="flow-number">02</span>
+        <h2>حوّلوا الفكرة إلى صورة</h2>
+        <p>يحوّل الذكاء الاصطناعي وصف كل مجموعة إلى تصميم بصري يعرض على المسرح.</p>
+      </article>
+      <article class="flow-step" lang="ar" dir="rtl">
+        <span class="flow-number">03</span>
+        <h2>صوّتوا</h2>
+        <p>شاهدوا تصاميم المجموعات وصوّتوا لأفضل تخيل لمستقبل المملكة.</p>
+      </article>
+    </section>
+
+    <section class="submit-panel" aria-labelledby="submit-heading">
+      <div class="submit-intro" lang="ar" dir="rtl">
+        <p class="submit-kicker">Your future / starts here</p>
+        <h2 id="submit-heading">خلّوا خيالكم يُعرض على المسرح.</h2>
+        <p>اكتبوا وصفًا قصيرًا لفكرتكم. هذه النسخة تحاكي رحلة تحويل الوصف إلى صورة بالذكاء الاصطناعي، ثم تضيفها مباشرة إلى معرض الرؤى.</p>
+      </div>
+      <form class="vision-form" id="vision-form" lang="ar" dir="rtl">
+        <div class="field">
+          <label for="team-input">اسم المجموعة</label>
+          <input id="team-input" name="team" placeholder="مثال: فريق أُفُق" required />
+        </div>
+        <div class="field">
+          <label for="track-input">المسار الاستراتيجي</label>
+          <select id="track-input" name="track">
+            <option value="Green Tech">التقنية الخضراء / Green Tech</option>
+            <option value="Smart Mobility">التنقل الذكي / Smart Mobility</option>
+            <option value="Heritage AI">التراث والذكاء الاصطناعي / Heritage AI</option>
+            <option value="NEOM">نيوم / NEOM</option>
+            <option value="Human Potential">الإنسان أولًا / Human Potential</option>
+          </select>
+        </div>
+        <div class="field full">
+          <label for="prompt-input">وصف رؤيتكم للسعودية 2050</label>
+          <textarea id="prompt-input" name="prompt" placeholder="مثال: مدن صحراوية خضراء تنتج طاقتها وتجمع مياهها من الهواء..." required></textarea>
+        </div>
+        <div class="submit-actions">
+          <span class="form-note" id="form-note">محاكاة توليد الصورة — لا تحتاج إلى تسجيل دخول.</span>
+          <button class="generate-button" id="generate-button" type="submit">✦ حوّلوا الفكرة إلى صورة</button>
+        </div>
+      </form>
+    </section>
+
     <section aria-labelledby="gallery-heading">
       <div class="gallery-toolbar">
-        <h2 class="section-title" id="gallery-heading">Live vision gallery <span>/ stage feed</span></h2>
+        <h2 class="section-title" id="gallery-heading">Live vision gallery <span>/ تصاميم المشاركين</span></h2>
         <div class="sync-state"><span class="sync-icon">↻</span><span id="sync-state">Syncing every 08 seconds</span></div>
       </div>
       <div class="gallery-grid" id="gallery-grid" aria-live="polite"></div>
@@ -395,7 +562,8 @@
         prompt: "Regenerative desert farms that harvest water from the air and feed the edge of Riyadh.",
         image: "https://images.unsplash.com/photo-1509391366360-2e959784a276?auto=format&fit=crop&w=1200&q=88",
         color: "#34a853",
-        height: 290
+        height: 290,
+        votes: 31
       },
       {
         team: "Misk Vector",
@@ -403,7 +571,8 @@
         prompt: "A silent, autonomous transit ribbon connecting old Najdi towns to tomorrow's city.",
         image: "https://images.unsplash.com/photo-1544620347-c4fd4a3d5957?auto=format&fit=crop&w=1200&q=88",
         color: "#4285f4",
-        height: 360
+        height: 360,
+        votes: 27
       },
       {
         team: "Oasis OS",
@@ -411,7 +580,8 @@
         prompt: "Living infrastructure turns every public space into a cooling, restorative oasis.",
         image: "https://images.unsplash.com/photo-1518005020951-eccb494ad742?auto=format&fit=crop&w=1200&q=88",
         color: "#48e0da",
-        height: 245
+        height: 245,
+        votes: 24
       },
       {
         team: "Najd Neural",
@@ -419,7 +589,8 @@
         prompt: "Machine intelligence preserves the stories, patterns, and poetry held inside every mud-brick wall.",
         image: "https://images.unsplash.com/photo-1539650116574-75c0c6d73f6e?auto=format&fit=crop&w=1200&q=88",
         color: "#fbbc05",
-        height: 325
+        height: 325,
+        votes: 19
       },
       {
         team: "Red Sea Relay",
@@ -427,7 +598,8 @@
         prompt: "Ocean-positive coastal cities where coral restoration is part of the everyday commute.",
         image: "https://images.unsplash.com/photo-1544551763-46a013bb70d5?auto=format&fit=crop&w=1200&q=88",
         color: "#4285f4",
-        height: 300
+        height: 300,
+        votes: 16
       },
       {
         team: "Himma Labs",
@@ -435,7 +607,8 @@
         prompt: "An adaptive learning constellation that gives every learner a route to their highest potential.",
         image: "https://images.unsplash.com/photo-1497366754035-f200968a6e72?auto=format&fit=crop&w=1200&q=88",
         color: "#ea4335",
-        height: 250
+        height: 250,
+        votes: 22
       },
       {
         team: "NEOM Bloom",
@@ -443,7 +616,8 @@
         prompt: "Architecture that grows, breathes, and shifts with the rhythm of a zero-carbon community.",
         image: "https://images.unsplash.com/photo-1511818966892-d7d671e672a2?auto=format&fit=crop&w=1200&q=88",
         color: "#ea4335",
-        height: 380
+        height: 380,
+        votes: 29
       },
       {
         team: "Palm Circuit",
@@ -451,7 +625,8 @@
         prompt: "A circular materials exchange makes construction waste the raw material for beautiful new neighborhoods.",
         image: "https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?auto=format&fit=crop&w=1200&q=88",
         color: "#fbbc05",
-        height: 270
+        height: 270,
+        votes: 13
       }
     ];
 
@@ -459,6 +634,15 @@
     const count = document.getElementById("vision-count");
     const note = document.getElementById("sync-note");
     const syncState = document.getElementById("sync-state");
+    const form = document.getElementById("vision-form");
+    const formNote = document.getElementById("form-note");
+    const generateButton = document.getElementById("generate-button");
+    const generatedImages = [
+      "https://images.unsplash.com/photo-1534274988757-a28bf1a57c17?auto=format&fit=crop&w=1200&q=88",
+      "https://images.unsplash.com/photo-1500534623283-312aade485b7?auto=format&fit=crop&w=1200&q=88",
+      "https://images.unsplash.com/photo-1539650116574-75c0c6d73f6e?auto=format&fit=crop&w=1200&q=88",
+      "https://images.unsplash.com/photo-1470770841072-f978cf4d019e?auto=format&fit=crop&w=1200&q=88"
+    ];
     const placeholderImage =
       "data:image/svg+xml;charset=UTF-8," +
       encodeURIComponent(`<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 800">
@@ -477,6 +661,7 @@
 
     function visionCard(vision, index) {
       const safeImage = escapeHTML(vision.image || placeholderImage);
+      const isVoted = localStorage.getItem("imagineSaudiVote") === vision.team;
       return `
         <article class="vision-card" style="animation-delay:${Math.min(index * 55, 500)}ms">
           <div class="vision-image-wrap">
@@ -491,6 +676,12 @@
               <span class="track-badge" style="color:${escapeHTML(vision.color || "#48e0da")}">${escapeHTML(vision.track)}</span>
             </div>
             <p class="prompt">${escapeHTML(vision.prompt)}</p>
+            <div class="vote-row">
+              <span class="vote-count" id="vote-count-${index}">${vision.votes || 0} votes</span>
+              <button class="vote-button${isVoted ? " voted" : ""}" id="vote-${index}" type="button" onclick="voteForVision(${index})" ${isVoted ? "disabled" : ""}>
+                ${isVoted ? "✓ Voted" : "♡ Vote for this vision"}
+              </button>
+            </div>
           </div>
         </article>`;
     }
@@ -515,6 +706,51 @@
         console.error("Gallery sync failed:", error);
       }
     }
+
+    function voteForVision(index) {
+      const vision = sourceVisions[index];
+      if (!vision || localStorage.getItem("imagineSaudiVote")) return;
+      vision.votes = (vision.votes || 0) + 1;
+      localStorage.setItem("imagineSaudiVote", vision.team);
+      syncGallery();
+    }
+
+    form.addEventListener("submit", async (event) => {
+      event.preventDefault();
+      const data = new FormData(form);
+      const team = String(data.get("team")).trim();
+      const track = String(data.get("track"));
+      const prompt = String(data.get("prompt")).trim();
+      if (!team || !prompt) return;
+
+      generateButton.disabled = true;
+      generateButton.textContent = "⟳ جاري تحويل الفكرة...";
+      formNote.textContent = "الذكاء الاصطناعي يبني التصور البصري الآن...";
+      await new Promise((resolve) => setTimeout(resolve, 1000));
+
+      const colors = {
+        "Green Tech": "#34a853",
+        "Smart Mobility": "#4285f4",
+        "Heritage AI": "#fbbc05",
+        "NEOM": "#ea4335",
+        "Human Potential": "#48e0da"
+      };
+      sourceVisions.push({
+        team,
+        track,
+        prompt,
+        image: generatedImages[sourceVisions.length % generatedImages.length],
+        color: colors[track] || "#48e0da",
+        height: 280 + ((sourceVisions.length * 37) % 100),
+        votes: 0
+      });
+
+      form.reset();
+      generateButton.disabled = false;
+      generateButton.textContent = "✦ حوّلوا الفكرة إلى صورة";
+      formNote.textContent = "تمت إضافة رؤيتكم إلى المعرض — شاركوها مع الحضور.";
+      syncGallery();
+    });
 
     syncGallery();
     setInterval(syncGallery, 8000);
