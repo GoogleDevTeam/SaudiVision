@@ -255,8 +255,18 @@ Before coding, inspect the latest `main` branch and the live deployment state. T
 
 - The live `/exec?action=visions` response currently includes only `submissionsOpen` and `votingOpen`; it does not include the new deadline fields from the current backend source. The Apps Script deployment is therefore behind GitHub and still needs the latest backend copied and deployed.
 
+### Follow-up fix — 2026-09-19
+
+- A cache-busting live request reached the updated Apps Script code but exposed a repeat-initialization error: `You cannot add alternating background colors to a range that already has alternating background colors.`
+
+- Patched `google-apps-script.gs` so row banding is applied only when the sheet has no existing banding.
+
+- Backend fix commit: `471370d067cfbaee2221506f9cc821af2b05862b`.
+
+- Apps Script source syntax parse passed after the patch.
+
 ### Next recommended step
 
-Copy the current `google-apps-script.gs` from `main` into Apps Script, deploy a new web-app version while preserving the existing `/exec` URL, then verify both `/exec?action=health` and `/exec?action=visions`. The visions response should expose `submissionDeadline` and `votingDeadline` in `settings` (empty values are acceptable). After that, recheck GitHub Pages and test the organizer deadline/countdown controls.
+Copy the patched `google-apps-script.gs` from `main` into Apps Script, deploy a new web-app version while preserving the existing `/exec` URL, then verify `/exec?action=health` and a cache-busting `/exec?action=visions`. The visions response should expose `submissionDeadline` and `votingDeadline` in `settings` (empty values are acceptable).
 
 ---
