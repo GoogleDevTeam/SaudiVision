@@ -265,8 +265,14 @@ Before coding, inspect the latest `main` branch and the live deployment state. T
 
 - Apps Script source syntax parse passed after the patch.
 
+- Deployed verification now passes: health is ready, `/visions` includes both deadline fields, and repeated initialization no longer returns the banding error.
+
+- Organizer auth diagnostics reject an intentionally invalid key as expected; no secret was exposed or tested.
+
+- Frontend auth feedback was clarified without placing the internal configuration name in the DOM. Frontend commit: `f3f657f68e8168efc89e16ece702c341e999076c`.
+
 ### Next recommended step
 
-Copy the patched `google-apps-script.gs` from `main` into Apps Script, deploy a new web-app version while preserving the existing `/exec` URL, then verify `/exec?action=health` and a cache-busting `/exec?action=visions`. The visions response should expose `submissionDeadline` and `votingDeadline` in `settings` (empty values are acceptable).
+Wait for the latest GitHub Pages workflow to finish, then open the live site and enter the exact organizer key configured in Apps Script. If it is rejected, reset the Script Properties value rather than changing the frontend.
 
 ---
