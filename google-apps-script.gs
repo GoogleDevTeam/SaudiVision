@@ -556,6 +556,11 @@ function withLock_(callback) {
 function parseBoolean_(value, fallback) {
   if (value === true || value === "true") return true;
   if (value === false || value === "false") return false;
+  if (typeof value === "string") {
+    const normalized = value.trim().toLowerCase();
+    if (normalized === "true") return true;
+    if (normalized === "false") return false;
+  }
   return fallback;
 }
 
@@ -660,12 +665,21 @@ function getPendingSubmissions_() {
 
 function moderateSubmission_(submissionId, nextStatus) {
   return withLock_(function() {
+    if (["published", "deleted"].indexOf(nextStatus) === -1) {
+      throw new Error("Invalid moderation status.");
+    }
     const submission = findRecord_(SHEETS.submissions, "id", submissionId);
     if (!submission) throw new Error("Submission not found.");
     if (String(submission.status).toLowerCase() !== "pending") {
       throw new Error("Only pending submissions can be moderated.");
     }
 
+    if (nextStatus === "published") {
+      const existingVision = findRecord_(SHEETS.visions, "id", submission.id);
+      if (existingVision) {
+        throw new Error("This submission already has a vision record.");
+      }
+    }
     const timestamp = now_();
     updateRecord_(submission, { status: nextStatus, updatedAt: timestamp });
     if (nextStatus === "published") {
@@ -698,6 +712,18 @@ function deletePublishedVision_(visionId) {
 
     const timestamp = now_();
     updateRecord_(vision, { status: "deleted" });
+    objectRows_(SHEETS.votes)
+      .filter(function(record) {
+        return String(record.visionId) === String(visionId) && parseBoolean_(record.active, false);
+      })
+      .forEach(function(record) {
+        updateRecord_(record, { active: false });
+        appendRecord_(SHEETS.unvotes, {
+          voterId: record.voterId,
+          visionId: visionId,
+          unvotedAt: timestamp
+        });
+      });
     const submission = findRecord_(SHEETS.submissions, "id", visionId);
     if (submission && String(submission.status).toLowerCase() === "published") {
       updateRecord_(submission, { status: "deleted", updatedAt: timestamp });
