@@ -749,6 +749,47 @@
       text-transform: uppercase;
     }
     .organizer-access:hover { border-color: rgba(216, 208, 237, .5); color: var(--ink); }
+    .organizer-login {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: end;
+      gap: 8px;
+      max-width: 560px;
+      margin: 12px 0 2px;
+      padding: 12px;
+      border: 1px solid rgba(216, 208, 237, .22);
+      border-radius: 12px;
+      background: rgba(4, 43, 37, .82);
+    }
+    .organizer-login[hidden] { display: none; }
+    .organizer-login-field { display: flex; flex: 1 1 220px; flex-direction: column; gap: 5px; }
+    .organizer-login-field label { color: var(--muted); font-family: "Cairo", sans-serif; font-size: .68rem; }
+    .organizer-login-field input {
+      min-height: 36px;
+      padding: 7px 10px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      outline: none;
+      background: rgba(3, 35, 31, .8);
+      color: var(--ink);
+      font: inherit;
+      font-size: .75rem;
+    }
+    .organizer-login-field input:focus { border-color: var(--cyan); box-shadow: 0 0 0 3px rgba(155, 138, 196, .14); }
+    .organizer-login-actions { display: flex; gap: 6px; }
+    .organizer-login-actions button {
+      min-height: 36px;
+      padding: 7px 11px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      cursor: pointer;
+      background: rgba(155, 138, 196, .14);
+      color: var(--ink);
+      font: inherit;
+      font-size: .68rem;
+    }
+    .organizer-login-actions button[type="submit"] { background: var(--lavender); color: var(--dark-green); font-weight: 700; }
+    .organizer-login-actions button:hover { border-color: rgba(216, 208, 237, .55); }
     button, input, select, textarea, .vision-card, .review-item, .control-card, .toggle-track {
       transition: transform .2s ease, opacity .2s ease, box-shadow .2s ease, border-color .2s ease, background-color .2s ease;
     }
@@ -907,6 +948,16 @@
     </header>
 
     <button class="organizer-access" id="organizer-access" type="button" data-en="🔒 Organizer access" data-ar="🔒 دخول المنظم">🔒 Organizer access</button>
+    <form class="organizer-login" id="organizer-login" hidden>
+      <div class="organizer-login-field">
+        <label for="organizer-key-input" data-en="Organizer key" data-ar="رمز المنظم">Organizer key</label>
+        <input id="organizer-key-input" type="password" autocomplete="current-password" data-placeholder-en="Enter the organizer key" data-placeholder-ar="أدخل رمز المنظم" placeholder="Enter the organizer key" />
+      </div>
+      <div class="organizer-login-actions">
+        <button type="submit" data-en="Unlock" data-ar="فتح">Unlock</button>
+        <button id="organizer-login-cancel" type="button" data-en="Cancel" data-ar="إلغاء">Cancel</button>
+      </div>
+    </form>
 
     <details class="organizer-details" id="organizer-details" hidden>
       <summary data-en="Organizer controls" data-ar="تحكم المنظم">Organizer controls</summary>
@@ -1186,6 +1237,9 @@
     const languageToggle = document.getElementById("language-toggle");
     const organizerDetails = document.querySelector(".organizer-details");
     const organizerAccess = document.getElementById("organizer-access");
+    const organizerLogin = document.getElementById("organizer-login");
+    const organizerKeyInput = document.getElementById("organizer-key-input");
+    const organizerLoginCancel = document.getElementById("organizer-login-cancel");
     const reviewRefresh = document.getElementById("review-refresh");
     const reviewQueue = document.getElementById("review-queue");
     const publishedQueue = document.getElementById("published-queue");
@@ -1257,6 +1311,9 @@
         delete: "Delete",
         reviewError: "The review queue could not be loaded.",
         organizerLocked: "Organizer panel locked for this browser session.",
+         organizerKeyLabel: "Organizer key",
+         organizerUnlock: "Unlock",
+         organizerCancel: "Cancel",
         allTracks: "All tracks",
          noFilterResults: "No visions match this filter.",
          galleryCount: "Showing {shown} of {total} visions",
@@ -1304,6 +1361,9 @@
         delete: "حذف",
         reviewError: "تعذر تحميل قائمة المراجعة.",
         organizerLocked: "تم قفل لوحة المنظم لهذه الجلسة.",
+         organizerKeyLabel: "رمز المنظم",
+         organizerUnlock: "فتح",
+         organizerCancel: "إلغاء",
         allTracks: "كل المسارات",
          noFilterResults: "لا توجد رؤى تطابق عامل التصفية.",
          galleryCount: "عرض {shown} من أصل {total} رؤية",
@@ -1518,12 +1578,19 @@
       if (target && !target.disabled) animateInteraction(target);
     });
 
+    function showOrganizerLogin() {
+      organizerLogin.hidden = false;
+      organizerKeyInput.value = "";
+      organizerKeyInput.focus();
+    }
+
+    function hideOrganizerLogin() {
+      organizerLogin.hidden = true;
+      organizerKeyInput.value = "";
+    }
+
     function ensureOrganizerKey() {
-      if (!organizerKey) {
-        organizerKey = prompt(currentLanguage === "ar" ? "أدخل رمز المنظم:" : "Enter the organizer key:");
-        if (!organizerKey) throw new Error(t("organizerRequired"));
-        sessionStorage.setItem("imagineSaudiOrganizerKey", organizerKey);
-      }
+      if (!organizerKey) throw new Error(t("organizerRequired"));
       return organizerKey;
     }
 
@@ -1540,6 +1607,10 @@
     }
 
     async function unlockOrganizerControls() {
+      if (!organizerKey) {
+        showOrganizerLogin();
+        return;
+      }
       organizerAccess.disabled = true;
       organizerAccess.classList.add("is-processing");
       try {
@@ -1547,6 +1618,7 @@
         organizerUnlocked = true;
         organizerDetails.hidden = false;
         organizerAccess.hidden = true;
+        hideOrganizerLogin();
         await loadReviewQueue();
       } catch (error) {
         organizerAccess.classList.add("is-rejected");
@@ -1565,6 +1637,7 @@
         organizerUnlocked = true;
         organizerDetails.hidden = false;
         organizerAccess.hidden = true;
+        hideOrganizerLogin();
         await loadReviewQueue();
       } catch (error) {
         organizerUnlocked = false;
@@ -1919,6 +1992,18 @@
     });
 
     organizerAccess.addEventListener("click", unlockOrganizerControls);
+    organizerLogin.addEventListener("submit", (event) => {
+      event.preventDefault();
+      const key = organizerKeyInput.value.trim();
+      if (!key) {
+        organizerKeyInput.focus();
+        return;
+      }
+      organizerKey = key;
+      sessionStorage.setItem("imagineSaudiOrganizerKey", organizerKey);
+      unlockOrganizerControls();
+    });
+    organizerLoginCancel.addEventListener("click", hideOrganizerLogin);
     organizerRefresh.addEventListener("click", loadReviewQueue);
     organizerExport.addEventListener("click", downloadOrganizerCsv);
     organizerLock.addEventListener("click", lockOrganizerPanel);
