@@ -234,6 +234,7 @@ Before coding, inspect the latest `main` branch and the live deployment state. T
 - Added this living handoff and progress protocol.
 - Added the Organizer Overview + Live Results dashboard.
 - Added optional submission/voting deadlines, public countdown state, public results mode, and JSON export.
+- Fixed English hero line spacing and gradient-word margin to match the Arabic lockup rhythm on desktop and mobile.
 
 ### Verification and deployment
 
