@@ -91,26 +91,21 @@
 
     .brand-lockup, .status-lockup, .brand-copy { display: flex; align-items: center; }
     .brand-lockup { gap: 14px; }
-    .brand-mark {
+    .google-dev-logo {
       display: grid;
       width: 43px;
       height: 43px;
       place-items: center;
-      position: relative;
+      flex: 0 0 43px;
       border: 1px solid rgba(216, 208, 237, .48);
       border-radius: 13px;
       background: rgba(44, 117, 98, .24);
       box-shadow: inset 0 0 18px rgba(155, 138, 196, .14), 0 0 22px rgba(155, 138, 196, .12);
     }
-
-    .brand-mark::after {
-      width: 16px;
-      height: 16px;
-      border: 3px solid var(--blue);
-      border-right-color: var(--yellow);
-      border-bottom-color: var(--green);
-      border-radius: 50%;
-      content: "";
+    .google-dev-logo svg {
+      display: block;
+      width: 28px;
+      height: 28px;
     }
 
     .brand-copy { gap: 12px; }
@@ -693,7 +688,15 @@
   <main class="page-shell">
     <header class="topline">
       <div class="brand-lockup">
-        <div class="brand-mark" aria-hidden="true"></div>
+        <div class="google-dev-logo" role="img" aria-label="Google Developers logo">
+          <svg viewBox="0 0 48 48" aria-hidden="true" focusable="false">
+            <title>Google Developers</title>
+            <path fill="#EA4335" d="M24 9.5c3.23 0 6.13 1.11 8.41 3.29l6.26-6.26C34.87 3.18 29.76 1 24 1 14.61 1 6.55 6.38 2.61 14.22l7.3 5.66C11.69 13.95 17.27 9.5 24 9.5z"/>
+            <path fill="#4285F4" d="M46.98 24.55c0-1.64-.15-3.22-.42-4.73H24v9.02h12.94c-.56 3-2.25 5.54-4.8 7.24v6.02h7.75c4.53-4.17 7.09-10.31 7.09-17.55z"/>
+            <path fill="#FBBC05" d="M9.91 28.12c-.54-1.62-.85-3.35-.85-5.12s.31-3.5.85-5.12v-6.02h-7.3C.93 15.47 0 19.63 0 24s.93 8.53 2.61 12.14l7.3-6.02z"/>
+            <path fill="#34A853" d="M24 47c6.48 0 11.92-2.14 15.89-5.82l-7.75-6.02c-2.14 1.44-4.86 2.3-8.14 2.3-6.73 0-12.31-4.45-14.33-10.43H1.61v6.02C5.55 40.62 13.61 47 24 47z"/>
+          </svg>
+        </div>
         <div class="brand-copy">
           <div>
             <p class="eyebrow" data-en="Future Vision Competition / 2050" data-ar="مسابقة رؤى المستقبل / 2050">مسابقة رؤى المستقبل / 2050</p>
