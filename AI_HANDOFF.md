@@ -219,6 +219,7 @@ Before coding, inspect the latest `main` branch and the live deployment state. T
 - The public gallery supports search, track filtering, and sorting by featured order, votes, or newest.
 - Moderation and vote-cleanup safeguards are implemented in the backend.
 - `AI_HANDOFF.md` now contains the continuation protocol and feature roadmap.
+- The organizer panel now includes a live results board with ranked published visions, vote percentages, leader status, and tie detection.
 
 ### Completed recently
 
@@ -229,17 +230,19 @@ Before coding, inspect the latest `main` branch and the live deployment state. T
 - Added duplicate-publish protection.
 - Deactivated active votes when a published vision is deleted.
 - Added this living handoff and progress protocol.
+- Added the Organizer Overview + Live Results dashboard.
 
 ### Verification and deployment
 
 - Frontend JavaScript syntax has been checked with Node.
 - Apps Script syntax has been checked with Node-compatible parsing.
+- The organizer dashboard markup and inline JavaScript passed syntax and static wiring checks.
 - Apps Script health endpoint has returned `{ ok: true, status: "ready" }`.
 - GitHub Pages deployment is separate from Apps Script deployment.
 - Apps Script changes require copying the backend into Apps Script and deploying a new version.
 
 ### Next recommended step
 
-Build the Organizer Overview + Results dashboard inside the existing organizer menu. Use the existing Sheets data and preserve the current architecture.
+Add JSON export and a public countdown/results state. Keep the existing CSV export, data model, and organizer authorization unchanged.
 
 ---
