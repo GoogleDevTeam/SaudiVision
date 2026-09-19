@@ -55,11 +55,11 @@
 const SHEETS = {
   visions: {
     name: "Visions",
-    headers: ["id", "createdAt", "publishedAt", "status", "team", "track", "prompt", "image", "color", "height", "votes", "imageSource"]
+    headers: ["id", "createdAt", "publishedAt", "status", "team", "title", "track", "prompt", "problem", "impact", "beneficiaries", "tags", "image", "color", "height", "votes", "imageSource"]
   },
   submissions: {
     name: "Submissions",
-    headers: ["id", "createdAt", "updatedAt", "status", "team", "track", "prompt", "image", "color", "height", "submittedBy", "imageSource"]
+    headers: ["id", "createdAt", "updatedAt", "status", "team", "title", "track", "prompt", "problem", "impact", "beneficiaries", "tags", "image", "color", "height", "submittedBy", "imageSource"]
   },
   settings: {
     name: "Settings",
@@ -76,7 +76,7 @@ const SHEETS = {
 };
 
 const GUIDE_SHEET_NAME = "START HERE";
-const WORKBOOK_FORMAT_VERSION = "2026-09-19-v6";
+const WORKBOOK_FORMAT_VERSION = "2026-09-19-v7";
 const GEMINI_IMAGE_MODEL = "gemini-3.1-flash-image";
 const GEMINI_INTERACTIONS_URL = "https://generativelanguage.googleapis.com/v1beta/interactions";
 const THEME = {
@@ -107,7 +107,12 @@ const FIELD_NOTES = {
   color: "Hex accent color used by the gallery.",
   height: "Gallery image height in pixels, constrained by the backend.",
   votes: "Current active vote count for a published vision.",
-  submittedBy: "Optional participant or identity reference.",
+  submittedBy: "Optional participant or identity reference. Keep personal data minimal.",
+  title: "Short memorable title for the vision.",
+  problem: "The future problem or opportunity the team is addressing.",
+  impact: "Expected benefit for people, the environment, or the economy.",
+  beneficiaries: "People or communities who benefit from the idea.",
+  tags: "Comma-separated keywords for organizer search and filtering.",
   key: "Settings key. Supported keys are submissionsOpen, votingOpen, submissionDeadline, and votingDeadline.",
   value: "Setting value. Boolean settings are stored as true or false.",
   votedAt: "When the active vote was created.",
@@ -152,7 +157,13 @@ function route_(action, payload) {
   switch (action) {
     case "health":
       initializeSheets_();
-      return { ok: true, service: "Imagine Saudi 2050", status: "ready" };
+      return {
+        ok: true,
+        service: "Imagine Saudi 2050",
+        status: "ready",
+        workbookFormatVersion: WORKBOOK_FORMAT_VERSION,
+        sheets: Object.keys(SHEETS).map(function(key) { return SHEETS[key].name; }).concat([GUIDE_SHEET_NAME])
+      };
     case "visions":
       return getPublicVisions_();
     case "submit":
@@ -237,7 +248,7 @@ function ensureWorkbookPresentation_(spreadsheet) {
   const needsSetup = properties.getProperty("WORKBOOK_FORMAT_VERSION") !== WORKBOOK_FORMAT_VERSION ||
     !guide ||
     String(guide.getRange("A1").getValue()) !== "IMAGINE SAUDI 2050 | CONTROL CENTER" ||
-    guide.getLastRow() < 65;
+    guide.getLastRow() < 72;
   if (!needsSetup) return;
 
   const guideSheet = guide || spreadsheet.insertSheet(GUIDE_SHEET_NAME, 0);
@@ -287,8 +298,8 @@ function buildGuideSheet_(sheet) {
     ["", "", "", ""],
     ["SHEET MAP", "", "", ""],
     ["Sheet", "What it stores", "Important fields", "Organizer guidance"],
-    ["Visions", "Published gallery concepts and live vote counts.", "status, team, prompt, image, votes", "Public data source. Do not manually publish pending records here."],
-    ["Submissions", "All participant submissions and moderation history.", "status, team, prompt, imageSource", "Primary review queue. New records are always pending."],
+    ["Visions", "Published gallery concepts, structured impact details, and live vote counts.", "status, team, title, track, prompt, problem, impact, votes", "Public data source. Do not manually publish pending records here."],
+    ["Submissions", "All participant submissions, structured details, generated images, and moderation history.", "status, team, title, track, prompt, problem, impact, beneficiaries, tags", "Primary review queue. New records are always pending."],
     ["Settings", "Competition switches, optional deadlines, and update timestamps.", "submissionsOpen, votingOpen, submissionDeadline, votingDeadline", "Keep one row per supported setting."],
     ["Votes", "Vote history with current active state.", "voterId, visionId, active", "LockService protects race-sensitive updates."],
     ["Unvotes", "Audit trail for removed votes.", "voterId, visionId, unvotedAt", "Keep this history during the competition."],
@@ -320,8 +331,9 @@ function buildGuideSheet_(sheet) {
   sheet.getRange(1, 1, rows.length, 4).setValues(rows);
   sheet.getRange("A1:D1").merge();
   sheet.getRange("A2:D2").merge();
-  [4, 11, 21, 30, 38, 44, 66].forEach(function(row) {
-    sheet.getRange(row, 1, 1, 4).merge();
+  ["LIVE STATUS", "FIRST-TIME SETUP", "CONFIGURATION REFERENCE", "SHEET MAP", "OPERATING CHECKLIST", "FIELD DICTIONARY", "SECURITY AND SCALE NOTES"].forEach(function(title) {
+    const rowIndex = rows.findIndex(function(row) { return row[0] === title; });
+    if (rowIndex >= 0) sheet.getRange(rowIndex + 1, 1, 1, 4).merge();
   });
   sheet.setName(GUIDE_SHEET_NAME);
   sheet.setHiddenGridlines(true);
@@ -637,8 +649,13 @@ function publicVision_(record) {
     publishedAt: record.publishedAt,
     status: "published",
     team: String(record.team || ""),
+    title: String(record.title || ""),
     track: String(record.track || ""),
     prompt: String(record.prompt || ""),
+    problem: String(record.problem || ""),
+    impact: String(record.impact || ""),
+    beneficiaries: String(record.beneficiaries || ""),
+    tags: String(record.tags || ""),
     image: String(record.image || ""),
     imageSource: imageSource_(record.imageSource),
     color: String(record.color || "#D8D0ED"),
@@ -649,12 +666,24 @@ function publicVision_(record) {
 
 function submitVision_(payload) {
   const settings = getSettings_();
-  if (!settings.submissionsOpen) throw new Error("Submissions are currently closed.");
+  if (!settings.submissionsOpen || !deadlineIsOpen_(settings.submissionDeadline)) {
+    throw new Error("Submissions are currently closed or past their deadline.");
+  }
   const team = cleanText_(payload.team, 100, "Group name");
+  const title = cleanText_(payload.title, 120, "Vision title");
   const track = cleanText_(payload.track, 80, "Track");
   const prompt = cleanText_(payload.prompt, 2000, "Vision description");
+  const problem = cleanOptionalText_(payload.problem, 800);
+  const impact = cleanOptionalText_(payload.impact, 800);
+  const beneficiaries = cleanOptionalText_(payload.beneficiaries, 200);
+  const tags = cleanOptionalText_(payload.tags, 200);
   const submissionId = newId_();
-  const generatedImage = generateVisionImage_(submissionId, team, track, prompt);
+  const generatedImage = generateVisionImage_(submissionId, team, track, prompt, {
+    title: title,
+    problem: problem,
+    impact: impact,
+    beneficiaries: beneficiaries
+  });
   return withLock_(function() {
     const timestamp = now_();
     const submission = {
@@ -663,8 +692,13 @@ function submitVision_(payload) {
       updatedAt: timestamp,
       status: "pending",
       team: team,
+      title: title,
       track: track,
       prompt: prompt,
+      problem: problem,
+      impact: impact,
+      beneficiaries: beneficiaries,
+      tags: tags,
       image: generatedImage.url,
       imageSource: "generated",
       color: /^#[0-9a-f]{6}$/i.test(String(payload.color || "")) ? String(payload.color) : "#D8D0ED",
@@ -676,7 +710,8 @@ function submitVision_(payload) {
   });
 }
 
-function generateVisionImage_(submissionId, team, track, prompt) {
+function generateVisionImage_(submissionId, team, track, prompt, details) {
+  details = details || {};
   const apiKey = PropertiesService.getScriptProperties().getProperty("GEMINI_API_KEY");
   if (!apiKey) throw new Error("Live AI is not configured. Add GEMINI_API_KEY in Apps Script Project Settings.");
   const imagePrompt = [
@@ -686,6 +721,10 @@ function generateVisionImage_(submissionId, team, track, prompt) {
     "Do not include readable words, letters, logos, interface elements, borders, collages, or labels.",
     "Strategic track: " + track,
     "Group name: " + team,
+    "Vision title: " + String(details.title || ""),
+    "Problem or opportunity: " + String(details.problem || ""),
+    "Expected impact: " + String(details.impact || ""),
+    "Beneficiaries: " + String(details.beneficiaries || ""),
     "Participant vision: " + prompt
   ].join("\n");
   const response = UrlFetchApp.fetch(GEMINI_INTERACTIONS_URL, {
@@ -731,7 +770,13 @@ function getOrganizerSnapshot_() {
   const published = objectRows_(SHEETS.visions)
     .filter(function(record) { return String(record.status).toLowerCase() === "published"; })
     .map(publicVision_);
-  return { ok: true, settings: settings, pending: pending, published: published };
+  return {
+    ok: true,
+    settings: settings,
+    pending: pending,
+    published: published,
+    analytics: getCompetitionAnalytics_(pending, published)
+  };
 }
 
 function getPendingSubmissions_() {
@@ -743,8 +788,14 @@ function getPendingSubmissions_() {
         createdAt: record.createdAt,
         status: "pending",
         team: String(record.team || ""),
+        title: String(record.title || ""),
         track: String(record.track || ""),
         prompt: String(record.prompt || ""),
+        problem: String(record.problem || ""),
+        impact: String(record.impact || ""),
+        beneficiaries: String(record.beneficiaries || ""),
+        tags: String(record.tags || ""),
+        submittedBy: String(record.submittedBy || ""),
         image: String(record.image || ""),
         imageSource: imageSource_(record.imageSource),
         color: String(record.color || "#D8D0ED"),
@@ -780,8 +831,13 @@ function moderateSubmission_(submissionId, nextStatus) {
         publishedAt: timestamp,
         status: "published",
         team: submission.team,
+        title: submission.title,
         track: submission.track,
         prompt: submission.prompt,
+        problem: submission.problem,
+        impact: submission.impact,
+        beneficiaries: submission.beneficiaries,
+        tags: submission.tags,
         image: submission.image,
         imageSource: submission.imageSource,
         color: submission.color,
@@ -823,6 +879,35 @@ function deletePublishedVision_(visionId) {
   });
 }
 
+function deadlineIsOpen_(deadline) {
+  if (!deadline) return true;
+  const timestamp = new Date(deadline).getTime();
+  return Number.isFinite(timestamp) && timestamp > Date.now();
+}
+
+function getCompetitionAnalytics_(pending, published) {
+  const activePublishedIds = {};
+  published.forEach(function(vision) { activePublishedIds[String(vision.id)] = true; });
+  const activeVotes = objectRows_(SHEETS.votes).filter(function(record) {
+    return parseBoolean_(record.active, false) && activePublishedIds[String(record.visionId)];
+  });
+  const trackBreakdown = {};
+  published.forEach(function(vision) {
+    const track = String(vision.track || "Unassigned");
+    if (!trackBreakdown[track]) trackBreakdown[track] = { published: 0, votes: 0 };
+    trackBreakdown[track].published += 1;
+    trackBreakdown[track].votes += Number(vision.votes) || 0;
+  });
+  return {
+    totalSubmissions: objectRows_(SHEETS.submissions).length,
+    pendingCount: pending.length,
+    publishedCount: published.length,
+    activeVotes: activeVotes.length,
+    trackBreakdown: trackBreakdown,
+    generatedAt: now_()
+  };
+}
+
 function validVoterId_(value) {
   const voterId = cleanText_(value, 200, "Voter ID");
   if (!/^[a-zA-Z0-9._:-]+$/.test(voterId)) throw new Error("Invalid voter ID.");
@@ -832,7 +917,9 @@ function validVoterId_(value) {
 function voteForVision_(payload) {
   return withLock_(function() {
     const settings = getSettings_();
-    if (!settings.votingOpen) throw new Error("Voting is currently closed.");
+    if (!settings.votingOpen || !deadlineIsOpen_(settings.votingDeadline)) {
+      throw new Error("Voting is currently closed or past its deadline.");
+    }
 
     const voterId = validVoterId_(payload.voterId);
     const visionId = cleanText_(payload.visionId, 200, "Vision ID");
