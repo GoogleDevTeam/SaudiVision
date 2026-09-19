@@ -435,7 +435,11 @@
     .hero h1 .topic-white,
     .hero h1 .topic-purple {
       display: block;
-      margin-top: .14em;
+      margin-top: 0;
+      line-height: 1.1;
+    }
+    .hero h1 .topic-purple {
+      margin-top: .08em;
     }
     .hero h1 .topic-white {
       color: var(--off-white);
@@ -450,10 +454,12 @@
     }
     html[lang="ar"] .hero h1 .topic-white,
     html[lang="ar"] .hero h1 .topic-purple {
-      margin-top: .2em;
-      padding-bottom: .08em;
+      padding-bottom: .02em;
       font-size: .9em;
-      line-height: 1.18;
+      line-height: 1.1;
+    }
+    html[lang="ar"] .hero h1 .topic-purple {
+      margin-top: .08em;
     }
 
     .hero-subtitle {
@@ -1268,7 +1274,7 @@
     <section class="hero" aria-labelledby="page-title">
       <button class="language-toggle hero-language-toggle" id="language-toggle" type="button" aria-label="التبديل إلى الإنجليزية">عربي</button>
       <div class="hero-copy">
-        <h1 id="page-title" class="hero-lockup"><span class="topic-white" data-en="Today’s imagination" data-ar="خيال اليوم">خيال اليوم</span><br /><span class="topic-purple" data-en="Tomorrow’s reality" data-ar="واقع الغد">واقع الغد</span></h1>
+        <h1 id="page-title" class="hero-lockup"><span class="topic-white" data-en="Today’s imagination" data-ar="خيال اليوم">خيال اليوم</span><span class="topic-purple" data-en="Tomorrow’s reality" data-ar="واقع الغد">واقع الغد</span></h1>
         <p class="hero-subtitle" data-en="Imagine Saudi Arabia in 2050 — write your idea, preview its visual concept, then vote for the best vision." data-ar="تخيّل السعودية في عام 2050 — اكتبوا فكرتكم، شاهدوا تصورها البصري، ثم صوّتوا لأفضل رؤية.">
           تخيّل السعودية في عام 2050 — اكتبوا فكرتكم، شاهدوا تصورها البصري، ثم صوّتوا لأفضل رؤية.
         </p>
