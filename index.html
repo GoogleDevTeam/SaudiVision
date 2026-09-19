@@ -1565,14 +1565,14 @@
       .filter((vision) => vision && String(vision.status || "").toLowerCase() === "published");
     let voteInFlight = false;
     const TRACK_PROMPT_ENHANCERS = {
-      "Green Tech & Energy": { en: "Blend renewable energy, low-carbon materials, climate resilience, advanced manufacturing, and skilled green work in harmony with Saudi landscapes.", ar: "اجمعوا بين الطاقة المتجددة والمواد منخفضة الكربون والمرونة المناخية والتصنيع المتقدم والعمل الأخضر الماهر بانسجام مع طبيعة السعودية." },
-      "Smart Mobility & Future Cities": { en: "Show clean, accessible movement, walkable connected neighborhoods, circular buildings, protected nature, and credible next-generation destinations.", ar: "أظهروا تنقّلًا نظيفًا وسهل الوصول وأحياء مترابطة قابلة للمشي ومباني دائرية وطبيعة محمية ووجهات واقعية من الجيل القادم." },
-      "Heritage, Culture & Tourism": { en: "Blend Saudi heritage, crafts, language, historic places, arts, and hospitality with respectful technology and low-impact tourism that benefits local communities.", ar: "اخلطوا التراث والحرف واللغة والمواقع التاريخية والفنون والضيافة السعودية مع تقنية تحترم الهوية وسياحة منخفضة الأثر تفيد المجتمعات المحلية." },
-      "Human Potential & Wellbeing": { en: "Center inclusion, talent, creativity, lifelong learning, future skills, preventive care, mental wellbeing, and compassionate everyday life for all ages.", ar: "اجعلوا الشمول والموهبة والإبداع والتعلّم المستمر ومهارات المستقبل والوقاية والصحة النفسية وجودة الحياة الرحيمة لكل الأعمار محور الفكرة." },
-      "Water & Oceans": { en: "Visualize resilient water and coastal systems through conservation, desalination, reuse, smart distribution, marine science, clean seas, fisheries, and restored ecosystems across the Red Sea and Gulf.", ar: "صوّروا أنظمة مياه وسواحل مرنة عبر الترشيد والتحلية وإعادة الاستخدام والتوزيع الذكي وعلوم البحار ونظافة السواحل ومصائد الأسماك واستعادة النظم البيئية في البحر الأحمر والخليج." },
-      "Future Food & Agriculture": { en: "Show climate-smart Saudi food systems with local production, precision agriculture, vertical growing, and nourishing communities.", ar: "أظهروا أنظمة غذاء وزراعة سعودية ذكية مناخيًا تجمع الإنتاج المحلي والزراعة الدقيقة والزراعة الرأسية ومجتمعات صحية." },
-      "Digital Society & Governance": { en: "Show trusted, inclusive digital public services that make communities safer, more transparent, and easier to participate in.", ar: "أظهروا خدمات عامة رقمية موثوقة وشاملة تجعل المجتمعات أكثر أمانًا وشفافية وسهولة في المشاركة." },
-      "Other": { en: "Use the participant’s idea as the lead and build a broad, optimistic Saudi 2050 future scene without forcing it into another track.", ar: "اجعلوا فكرة المشارك هي الأساس وابنوا مشهدًا مستقبليًا سعوديًا متفائلًا لعام 2050 دون فرضها على مسار آخر." }
+      "Green Tech & Energy": { en: "Show one clear, optimistic Saudi scene where renewable energy, climate-resilient materials, advanced manufacturing, and human-scale green jobs work together. Use sunlight, shade, native landscape, and one believable hero system.", ar: "أظهروا مشهدًا سعوديًا واضحًا ومتفائلًا تتكامل فيه الطاقة المتجددة والمواد المقاومة للمناخ والتصنيع المتقدم والوظائف الخضراء التي تضع الإنسان أولًا، مع ضوء وظلال وطبيعة محلية ونظام رئيسي واقعي." },
+      "Smart Mobility & Future Cities": { en: "Show one believable journey through a connected Saudi district: clean mobility, walkable streets, circular buildings, shaded public space, protected nature, and a credible next-generation destination working as one system.", ar: "أظهروا رحلة واقعية واحدة داخل حي سعودي مترابط تجمع التنقل النظيف والشوارع القابلة للمشي والمباني الدائرية والمساحات العامة المظللة والطبيعة المحمية ووجهة من الجيل القادم كنظام واحد." },
+      "Heritage, Culture & Tourism": { en: "Show one living Saudi cultural moment where heritage, crafts, language, historic architecture, contemporary technology, and low-impact hospitality help local people and places thrive.", ar: "أظهروا لحظة ثقافية سعودية نابضة تتعاون فيها الهوية والحرف واللغة والعمارة التاريخية والتقنية المعاصرة والضيافة منخفضة الأثر لازدهار الناس والأماكن المحلية." },
+      "Human Potential & Wellbeing": { en: "Show people actively benefiting from a human-centered future: inclusive learning, practical skills, preventive care, creativity, mental wellbeing, and compassionate everyday spaces across generations.", ar: "أظهروا أشخاصًا يستفيدون فعليًا من مستقبل يضع الإنسان أولًا، يجمع التعلم الشامل والمهارات العملية والوقاية والإبداع والصحة النفسية ومساحات الحياة الرحيمة بين الأجيال." },
+      "Water & Oceans": { en: "Show one connected water-to-coast system in Saudi Arabia: efficient water use, desalination or reuse, smart distribution, restored ecosystems, clean seas, marine science, and sustainable coastal livelihoods in a single coherent scene.", ar: "أظهروا نظامًا سعوديًا مترابطًا من المياه إلى الساحل يجمع كفاءة الاستخدام والتحلية أو إعادة الاستخدام والتوزيع الذكي واستعادة النظم البيئية ونظافة البحار وعلوم البحار وسبل العيش الساحلية المستدامة في مشهد واحد متماسك." },
+      "Future Food & Agriculture": { en: "Show a climate-smart Saudi food system from production to community: local crops, precision or vertical growing, efficient water use, healthy food, and people gathering around the result.", ar: "أظهروا نظامًا غذائيًا وزراعيًا سعوديًا ذكيًا مناخيًا من الإنتاج إلى المجتمع، يضم محاصيل محلية وزراعة دقيقة أو رأسية وكفاءة في استخدام المياه وغذاءً صحيًا وناسًا يستفيدون من النتيجة." },
+      "Digital Society & Governance": { en: "Show trusted digital public services as a visible human experience: inclusive access, privacy, transparency, safer communities, and people participating confidently in decisions that affect daily life.", ar: "أظهروا الخدمات العامة الرقمية الموثوقة كتجربة إنسانية واضحة، تشمل الوصول للجميع والخصوصية والشفافية ومجتمعات أكثر أمانًا ومشاركة واثقة في القرارات اليومية." },
+      "Other": { en: "Use the participant’s idea as the lead. Turn it into one specific, optimistic Saudi 2050 scene with a clear focal subject, believable human benefit, and distinctive local setting without forcing another track.", ar: "اجعلوا فكرة المشارك هي الأساس وحوّلوها إلى مشهد سعودي محدد ومتفائل لعام 2050، بموضوع رئيسي واضح وفائدة إنسانية واقعية ومكان محلي مميز دون فرض مسار آخر." }
     };
     const copy = {
       en: {
@@ -1625,6 +1625,7 @@
          confirmDelete: "Delete this submission permanently? It will not be shown publicly.",
          demoBadge: "AI GENERATED",
          aiUnavailable: "Live AI is not configured yet. Ask the organizer to add the Gemini key.",
+         aiKeyMissing: "Gemini image generation is not ready. Add GEMINI_API_KEY in Apps Script Project Settings, then try again.",
          conceptArt: "concept art",
         voteError: "The vote could not be saved. Please try again.",
         reviewEmpty: "No pending submissions.",
@@ -1703,6 +1704,7 @@
          confirmDelete: "حذف هذه المشاركة نهائيًا؟ لن تظهر للجمهور.",
          demoBadge: "مولّد بالذكاء الاصطناعي",
          aiUnavailable: "لم يتم إعداد الذكاء الاصطناعي المباشر بعد. اطلبوا من المنظم إضافة مفتاح Gemini.",
+         aiKeyMissing: "توليد الصور عبر Gemini غير جاهز بعد. أضيفوا GEMINI_API_KEY في إعدادات مشروع Apps Script ثم حاولوا مرة أخرى.",
          conceptArt: "تصور بصري",
         voteError: "تعذر حفظ التصويت. حاول مرة أخرى.",
         reviewEmpty: "لا توجد مشاركات بانتظار المراجعة.",
@@ -2304,6 +2306,12 @@
       }
     }
 
+    async function ensureImageGenerationReady() {
+      const status = await googleRequest("aiStatus", {}, { method: "GET", timeout: 8000 });
+      if (!status?.imageGeneration?.configured) throw new Error(t("aiKeyMissing"));
+      return status;
+    }
+
     form.addEventListener("submit", async (event) => {
       event.preventDefault();
       if (!settings.submissionsOpen || isSubmissionLocked()) {
@@ -2335,7 +2343,7 @@
         "Water & Oceans": "#9B8AC4",
         "Future Food & Agriculture": "#D8D0ED",
         "Digital Society & Governance": "#2C7562"
-      };;
+      };;;
       const newVision = {
         id: `local-${Date.now()}`,
         team,
@@ -2353,6 +2361,7 @@
         imageSource: "generated"
       };
       try {
+        await ensureImageGenerationReady();
         await googleRequest("submit", newVision);
       } catch (error) {
         generateButton.disabled = false;
