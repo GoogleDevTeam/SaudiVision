@@ -281,8 +281,18 @@ Before coding, inspect the latest `main` branch and the live deployment state. T
 
 - Replaced the rough gear-like map placeholder with a real simplified boundary path, separated the logo/map/96 areas, removed the remaining flow-card rings, and removed the unused orbit animation. Final frontend commit: `faa228e6fb9e0932b1f5716c42ad5472dd5beca1`.
 
+### Performance and access update — 2026-09-19
+
+- Replaced the browser/app icon with the Shaqra University logo assets: shaqra-university-favicon.png and shaqra-university-logo.png.
+- Converted the top Google Developers mark into the organizer access trigger and removed the separate visible organizer button.
+- Added a short-lived public session cache, GET-based public vision reads, in-flight request deduplication, change detection, async image decoding, and reduced decorative DOM work. The gallery no longer rebuilds and reloads every image when no data changed.
+- Added the organizerSnapshot backend route so organizer refresh loads settings, pending submissions, and published results in one authenticated request.
+- Removed the repeated full workbook initialization from normal sheet reads; formatting/setup remains on the health/setup path.
+- Frontend commits: b55a2bc2d8951a99b326057d39de7d5ba5fd3749, 95b05debc1897bf1c1c9c9d5fb1703e2dffcc274.
+- Backend commit: 0723ed9f5f6f12b6bb8604a2c7b55e09d99cb0e8. Brand asset commits: a4709d2468a647939f850cd7a1dcae45ca3f8f3f, a291f5daa4265fac6b4c4785e704756d6f9da317.
+- Source-level verification confirmed the new favicon, top-logo organizer trigger, 5-second polling, public GET path, snapshot route, and fast sheet lookup. GitHub Pages was still building the latest frontend at verification time.
+- The Apps Script source is updated in GitHub but still requires copying into Apps Script and deploying a new version to activate the faster organizer route.
+
 ### Next recommended step
 
-Wait for the latest GitHub Pages workflow to finish, then open the live site and enter the exact organizer key configured in Apps Script. If it is rejected, reset the Script Properties value rather than changing the frontend.
-
----
+Deploy the updated google-apps-script.gs to the existing Apps Script /exec deployment, then test organizer unlock, refresh, approve/delete, settings, and public sync on the live site.
