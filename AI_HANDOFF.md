@@ -364,6 +364,14 @@ Before coding, inspect the latest `main` branch and the live deployment state. T
 - Added stronger image-generation constraints: one coherent 16:9 editorial scene, plausible near-future design, restrained local palette, one focal subject, and no text, logos, flags, collages, or variations.
 - Source files updated: index.html and google-apps-script.gs. Apps Script still needs the updated backend source deployed once; after that, future API-key changes only require updating the Script property.
 
+### Spreadsheet operations and burst-safety upgrade — 2026-09-19
+
+- Added useful generation and moderation fields to Visions and Submissions: generation status, start/completion timestamps, attempts, safe error text, prompt version, Gemini model, image MIME type, Drive file ID, reviewed time, and reviewer role.
+- Added an Activity Log sheet for submission received, generation succeeded/failed, and moderation events. It stores safe operational details without secrets.
+- Submission handling now reserves a row under a short script lock before calling Gemini, so simultaneous requests cannot duplicate the same participant or race spreadsheet writes. Image generation happens outside the sheet lock, with up to three retries for transient Gemini/API failures.
+- Failed generations remain recorded with a retryable failed status instead of disappearing or crashing the workflow. The frontend submit request now allows normal image-generation latency.
+- Workbook format version is now v8. The health/setup path adds all new headers and formats the operational columns automatically.
+
 ### Next recommended step
 
-Copy the updated google-apps-script.gs into the existing Apps Script deployment and publish one new version. Add GEMINI_API_KEY in Apps Script Project Settings; then the live aiStatus check and image generation should become ready immediately. Run one submission to verify the image is created and the readable device metadata reaches the spreadsheet.
+Deploy the updated google-apps-script.gs once, open the health endpoint to let the v8 workbook setup run, and send a burst test of 10 submissions using different participant IDs. Review Submissions and Activity Log for generated, failed, and retried records. Do not use the same participant ID for the ten tests because one submission per participant per round remains intentional.
