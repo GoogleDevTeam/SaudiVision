@@ -225,7 +225,14 @@
     .brand-ar { margin: 0; color: var(--muted); font-family: "Cairo", sans-serif; font-size: .92rem; }
 
     .status-lockup { gap: 12px; flex: 0 0 auto; }
-    .header-language-toggle { flex: 0 0 auto; }
+    .hero-language-toggle {
+      position: absolute;
+      z-index: 4;
+      inset-inline-end: 0;
+      top: 4px;
+      min-width: 78px;
+      padding: 8px 12px;
+    }
     .status-lockup .brand-ar {
       padding-inline-end: 12px;
       border-inline-end: 1px solid var(--line);
@@ -858,11 +865,6 @@
       .submit-actions .generate-button { width: 100%; }
       .footer { align-items: flex-start; flex-direction: column; }
     }
-    @media (max-width: 380px) {
-      .topline { flex-wrap: wrap; row-gap: 7px; }
-      .language-toggle { order: 3; }
-    }
-
     /* Interaction motion layer */
     .google-dev-logo.organizer-access:hover { border-color: rgba(216, 208, 237, .78); }
     .organizer-login {
@@ -1080,7 +1082,6 @@
           <p class="brand-ar" lang="ar" dir="rtl" aria-label="تخيّل السعودية">تخيّل السعودية</p>
         </div>
       </div>
-      <button class="language-toggle header-language-toggle" id="language-toggle" type="button" aria-label="Switch language">عربي</button>
     </header>
 
     <form class="organizer-login" id="organizer-login" hidden>
@@ -1185,6 +1186,7 @@
     </details>
 
     <section class="hero" aria-labelledby="page-title">
+      <button class="language-toggle hero-language-toggle" id="language-toggle" type="button" aria-label="Switch language">عربي</button>
       <div class="hero-copy">
         <h1 id="page-title" class="hero-lockup"><span data-en="The future" data-ar="المستقبل">The future</span><br /><span class="gradient-word" data-en="is imagined." data-ar="نصنعه بالخيال.">is imagined.</span></h1>
         <p class="hero-subtitle" data-en="Imagine Saudi Arabia in 2050 — write your idea, preview its visual concept, then vote for the best vision." data-ar="تخيّل السعودية في عام 2050 — اكتبوا فكرتكم، شاهدوا تصورها البصري، ثم صوّتوا لأفضل رؤية.">
