@@ -371,8 +371,8 @@ Before coding, inspect the latest `main` branch and the live deployment state. T
 - Removed the forced 45-frame scroll-to-top loop so browser back/forward restoration and deep links behave normally.
 - Set the initial document direction to Arabic/RTL to match the default rendered language and reduce first-paint layout and screen-reader mismatch.
 - Added logical RTL-safe positioning, visible keyboard focus states, live submission status announcements, responsive countdown stacking, and a subtle IntersectionObserver reveal layer with reduced-motion support.
-- Added `.github/workflows/quality.yml` to validate inline frontend JavaScript, Apps Script syntax, and required brand assets on pushes and pull requests.
-- Source changes are ready in GitHub. The Apps Script backend must be copied and redeployed for the unvote deadline guard to become live; GitHub Pages will build the frontend and quality workflow from the next commit.
+- Prepared `.github/workflows/quality.yml` to validate inline frontend JavaScript, Apps Script syntax, and required brand assets on pushes and pull requests, but GitHub's connected contents API blocked creation of the `.github/workflows` path with a Cloudflare 403; it is not yet in the repository.
+- The three functional source changes are ready in GitHub. The Apps Script backend must be copied and redeployed for the unvote deadline guard to become live; GitHub Pages will build the frontend from the latest commit.
 
 ### Spreadsheet operations and burst-safety upgrade — 2026-09-19
 
