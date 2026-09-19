@@ -91,15 +91,27 @@
       animation: decorative-drift var(--drift-duration) ease-in-out var(--drift-delay) infinite alternate;
     }
     .decorative-logo {
-      width: clamp(30px, 3.4vw, 62px);
+      width: clamp(18px, 2vw, 36px);
       height: auto;
       filter: grayscale(1) brightness(2.1) contrast(.72);
+    }
+    .decorative-logo img {
+      display: block;
+      width: 100%;
+      height: auto;
+      max-width: 100%;
       mix-blend-mode: screen;
     }
     .decorative-silhouette {
-      width: clamp(88px, 12vw, 210px);
+      width: clamp(76px, 9vw, 150px);
       height: auto;
       overflow: visible;
+    }
+    .decorative-silhouette svg {
+      display: block;
+      width: 100%;
+      height: auto;
+      max-width: 100%;
       filter: drop-shadow(0 0 24px rgba(155, 138, 196, .2));
     }
     .decorative-silhouette path {
@@ -111,7 +123,7 @@
     .decorative-number {
       color: transparent;
       font-family: "Space Grotesk", sans-serif;
-      font-size: clamp(3rem, 5.8vw, 6.5rem);
+      font-size: clamp(2.25rem, 4vw, 4.5rem);
       font-weight: 700;
       letter-spacing: -.14em;
       line-height: .72;
@@ -1191,9 +1203,22 @@
 
   <script>
     if ("scrollRestoration" in history) history.scrollRestoration = "manual";
-    window.scrollTo(0, 0);
-    window.addEventListener("load", () => window.scrollTo(0, 0), { once: true });
-    window.addEventListener("pageshow", () => window.scrollTo(0, 0));
+    function resetPagePosition() {
+      window.scrollTo({ top: 0, left: 0, behavior: "auto" });
+      document.documentElement.scrollTop = 0;
+      document.body.scrollTop = 0;
+    }
+    resetPagePosition();
+    window.addEventListener("DOMContentLoaded", resetPagePosition, { once: true });
+    window.addEventListener("load", resetPagePosition, { once: true });
+    window.addEventListener("pageshow", resetPagePosition);
+    let topResetFrames = 0;
+    function holdPageAtTop() {
+      resetPagePosition();
+      topResetFrames += 1;
+      if (topResetFrames < 45) requestAnimationFrame(holdPageAtTop);
+    }
+    requestAnimationFrame(holdPageAtTop);
 
     /*
       Google Apps Script setup:
@@ -1212,38 +1237,58 @@
     const decorativeLayer = document.getElementById("page-logo-scatter");
     const DECORATIVE_MAP_PATH = "M 87.5 170.0 L 86.2 165.7 L 83.4 162.6 L 82.6 158.6 L 77.7 155.0 L 72.7 146.5 L 70.0 138.2 L 63.4 131.3 L 59.2 129.6 L 52.9 120.0 L 51.8 112.9 L 52.2 106.9 L 46.7 95.7 L 42.2 91.8 L 37.1 89.7 L 34.0 83.9 L 34.5 81.6 L 31.9 76.4 L 29.1 74.1 L 25.4 66.6 L 19.6 58.4 L 14.7 51.5 L 10.0 51.5 L 11.5 46.0 L 11.9 42.4 L 13.1 38.4 L 23.7 40.0 L 27.8 36.9 L 30.0 33.2 L 37.3 31.8 L 38.9 28.4 L 42.0 26.7 L 32.5 16.6 L 51.6 11.5 L 53.4 10.0 L 64.8 12.7 L 79.0 19.8 L 105.8 40.2 L 123.5 41.0 L 132.0 42.0 L 134.3 46.8 L 141.1 46.5 L 144.8 55.2 L 149.5 57.6 L 151.1 61.1 L 157.6 65.4 L 158.1 69.5 L 157.2 72.9 L 158.4 76.3 L 161.1 79.1 L 162.4 82.5 L 163.8 84.9 L 166.7 86.9 L 169.3 86.2 L 171.1 90.1 L 171.5 92.4 L 175.1 102.7 L 203.7 107.8 L 205.6 105.6 L 210.0 112.8 L 203.7 133.0 L 175.1 143.2 L 147.7 147.0 L 138.8 151.6 L 132.0 162.2 L 127.6 163.9 L 125.2 160.5 L 121.6 161.0 L 112.4 160.0 L 110.6 159.0 L 99.7 159.2 L 97.1 160.2 L 93.2 157.5 L 90.7 162.5 L 91.6 166.8 L 87.5 170.0 Z";
     function randomBetween(min, max) { return min + Math.random() * (max - min); }
-    function createDecorativeMark(kind) {
+    function decorationGeometry(kind) {
+      if (kind === "logo") {
+        const width = randomBetween(18, 34); return { width, height: width * .75 };
+      }
+      if (kind === "silhouette") {
+        const width = randomBetween(76, 144); return { width, height: width * (180 / 220) };
+      }
+      const fontSize = randomBetween(30, 56); return { width: fontSize * .72, height: fontSize * .72, fontSize };
+    }
+    function boxesOverlap(first, second, gap) {
+      return !(first.right + gap <= second.left || second.right + gap <= first.left || first.bottom + gap <= second.top || second.bottom + gap <= first.top);
+    }
+    function createDecorativeMark(kind, geometry) {
       const mark = document.createElement("div");
       mark.className = "decorative-mark decorative-" + kind;
-      mark.style.left = randomBetween(2, 88).toFixed(2) + "%";
-      mark.style.top = randomBetween(2, 96).toFixed(2) + "%";
-      mark.style.setProperty("--rotation", randomBetween(-18, 18).toFixed(1) + "deg");
-      mark.style.setProperty("--scale", randomBetween(.72, 1.16).toFixed(2));
+      if (kind === "number") mark.style.fontSize = geometry.fontSize.toFixed(1) + "px";
+      else mark.style.width = geometry.width.toFixed(1) + "px";
+      mark.style.setProperty("--rotation", randomBetween(-10, 10).toFixed(1) + "deg");
+      mark.style.setProperty("--scale", randomBetween(.82, 1.02).toFixed(2));
       mark.style.setProperty("--drift-duration", randomBetween(5, 11).toFixed(1) + "s");
       mark.style.setProperty("--drift-delay", randomBetween(-8, 0).toFixed(1) + "s");
-      mark.style.opacity = randomBetween(.045, .12).toFixed(3);
+      mark.style.opacity = randomBetween(.035, .085).toFixed(3);
       if (kind === "logo") {
-        const image = document.createElement("img");
-        image.src = "google-developers-logo.png"; image.alt = ""; image.decoding = "async";
-        mark.appendChild(image);
+        const image = document.createElement("img"); image.src = "google-developers-logo.png"; image.alt = ""; image.decoding = "async"; mark.appendChild(image);
       } else if (kind === "silhouette") {
-        const svg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
-        svg.setAttribute("viewBox", "0 0 220 180"); svg.setAttribute("role", "presentation");
-        const path = document.createElementNS("http://www.w3.org/2000/svg", "path"); path.setAttribute("d", DECORATIVE_MAP_PATH);
-        svg.appendChild(path); mark.appendChild(svg);
-      } else {
-        mark.textContent = "96";
-      }
+        const svg = document.createElementNS("http://www.w3.org/2000/svg", "svg"); svg.setAttribute("viewBox", "0 0 220 180"); svg.setAttribute("role", "presentation");
+        const path = document.createElementNS("http://www.w3.org/2000/svg", "path"); path.setAttribute("d", DECORATIVE_MAP_PATH); svg.appendChild(path); mark.appendChild(svg);
+      } else { mark.textContent = "96"; }
       return mark;
     }
     function spawnBackgroundDecorations() {
       if (!decorativeLayer) return;
       decorativeLayer.replaceChildren();
+      const bounds = decorativeLayer.getBoundingClientRect();
+      const placed = [];
+      const placementGap = 34;
       const spawnCount = 20;
       for (let index = 0; index < spawnCount; index += 1) {
         const roll = Math.random();
         const kind = roll < .50 ? "logo" : roll < .80 ? "silhouette" : "number";
-        decorativeLayer.appendChild(createDecorativeMark(kind));
+        const geometry = decorationGeometry(kind);
+        let placement = null;
+        for (let attempt = 0; attempt < 160 && !placement; attempt += 1) {
+          const left = randomBetween(0, Math.max(0, bounds.width - geometry.width));
+          const top = randomBetween(0, Math.max(0, bounds.height - geometry.height));
+          const candidate = { left, top, right: left + geometry.width, bottom: top + geometry.height };
+          if (placed.every(existing => !boxesOverlap(candidate, existing, placementGap))) placement = candidate;
+        }
+        if (!placement) continue;
+        const mark = createDecorativeMark(kind, geometry);
+        mark.style.left = placement.left.toFixed(1) + "px"; mark.style.top = placement.top.toFixed(1) + "px";
+        decorativeLayer.appendChild(mark); placed.push(placement);
       }
     }
     spawnBackgroundDecorations();
