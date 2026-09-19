@@ -1050,7 +1050,9 @@
       50% { box-shadow: 0 0 0 8px rgba(155, 138, 196, .08); }
     }
     @media (prefers-reduced-motion: reduce) {
-      *, *::before, *::after {
+      :root:not([data-motion="full"]) *,
+      :root:not([data-motion="full"]) *::before,
+      :root:not([data-motion="full"]) *::after {
         animation-duration: .001ms !important;
         animation-iteration-count: 1 !important;
         scroll-behavior: auto !important;
@@ -1108,6 +1110,29 @@
     }
     @media (hover: none) {
       .google-dev-logo.organizer-access:hover { border-color: rgba(216, 208, 237, .48); }
+    }
+
+    /* Text animation test: readable entrance motion with a restrained glow. */
+    @keyframes text-rise-test {
+      from { opacity: 0; transform: translateY(14px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    @keyframes text-glow-test {
+      0%, 100% { text-shadow: 0 0 0 rgba(216, 208, 237, 0); }
+      50% { text-shadow: 0 0 22px rgba(216, 208, 237, .22); }
+    }
+    .hero h1 .topic-white { animation: text-rise-test .78s cubic-bezier(.2,.8,.2,1) both; }
+    .hero h1 .topic-purple {
+      animation: text-rise-test .78s .12s cubic-bezier(.2,.8,.2,1) both, text-glow-test 2.4s .72s ease both;
+    }
+    .hero-subtitle { animation: text-rise-test .62s .28s cubic-bezier(.2,.8,.2,1) both; }
+    .section-title { animation: text-rise-test .58s .12s cubic-bezier(.2,.8,.2,1) both; }
+    .vision-card .team-name { animation: text-glow-test 1.3s .18s ease both; }
+    @media (max-width: 700px) {
+      .hero h1 .topic-white, .hero h1 .topic-purple { animation-duration: .58s; }
+      .hero h1 .topic-purple { animation-duration: .58s, 2s; animation-delay: .06s, .55s; }
+      .hero-subtitle { animation-duration: .48s; }
+      .section-title { animation-duration: .44s; }
     }
 
     /* Text rhythm and reading comfort */
@@ -1207,6 +1232,27 @@
     @media (max-width: 860px) { .organizer-summary { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
     @media (max-width: 700px) { .organizer-summary { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
   </style>
+  <script>
+    (() => {
+      try {
+        const params = new URLSearchParams(window.location.search);
+        const requestedMotion = params.get("motion");
+        if (requestedMotion === "full" || requestedMotion === "reduce") {
+          localStorage.setItem("imagineSaudiMotion", requestedMotion);
+          params.delete("motion");
+          const cleanQuery = params.toString();
+          const cleanUrl = window.location.pathname + (cleanQuery ? "?" + cleanQuery : "") + window.location.hash;
+          window.history.replaceState({}, document.title, cleanUrl);
+        }
+        const motionPreference = localStorage.getItem("imagineSaudiMotion");
+        if (motionPreference === "full" || motionPreference === "reduce") {
+          document.documentElement.dataset.motion = motionPreference;
+        }
+      } catch (error) {
+        // Motion should never prevent the page from loading in privacy mode.
+      }
+    })();
+  </script>
 </head>
 <body>
   <main class="page-shell">
