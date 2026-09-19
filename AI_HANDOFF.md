@@ -293,6 +293,13 @@ Before coding, inspect the latest `main` branch and the live deployment state. T
 - Source-level verification confirmed the new favicon, top-logo organizer trigger, 5-second polling, public GET path, snapshot route, and fast sheet lookup. GitHub Pages was still building the latest frontend at verification time.
 - The Apps Script source is updated in GitHub but still requires copying into Apps Script and deploying a new version to activate the faster organizer route.
 
+### Organizer unlock fix — 2026-09-19
+
+- Restored the original Google Developers favicon/apple icon treatment while keeping the top Google mark as the organizer access trigger.
+- The deployed Apps Script still returns Unknown action for organizerSnapshot until the updated backend is deployed. The frontend now falls back to the existing pending + public visions routes automatically.
+- Added a 12-second request timeout, AbortController cleanup, and clearer bilingual timeout messaging so organizer unlock cannot wait indefinitely.
+- Frontend fix commit: 824ba9f7ab16c023bb8f0bffa05ad550b9492e04.
+
 ### Next recommended step
 
 Deploy the updated google-apps-script.gs to the existing Apps Script /exec deployment, then test organizer unlock, refresh, approve/delete, settings, and public sync on the live site.
