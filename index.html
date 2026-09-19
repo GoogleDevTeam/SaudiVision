@@ -1,9 +1,10 @@
 <!DOCTYPE html>
-<html lang="en" dir="ltr">
+<html lang="ar" dir="rtl">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <meta name="theme-color" content="#073B35" />
+  <meta name="description" content="Imagine Saudi 2050 — a bilingual future-vision competition for Google Developer Groups on Campus at Shaqra University." />
   <title>Imagine Saudi 2050 — Future Vision Competition</title>
   <link rel="icon" type="image/png" sizes="64x64" href="google-developers-favicon.png" />
   <link rel="apple-touch-icon" href="google-developers-favicon.png" />
@@ -244,7 +245,7 @@
       transition: color .2s ease, border-color .2s ease;
     }
     .organizer-details summary::-webkit-details-marker { display: none; }
-    .organizer-details summary::before { margin-right: 7px; content: "⚙"; color: var(--cyan); }
+    .organizer-details summary::before { margin-inline-end: 7px; content: "⚙"; color: var(--cyan); }
     .organizer-details[open] summary, .organizer-details summary:hover { border-color: rgba(216, 208, 237, .45); color: var(--ink); }
     .organizer-panel {
       display: grid;
@@ -290,6 +291,7 @@
     }
     .toggle input:checked + .toggle-track { background: rgba(44, 117, 98, .65); }
     .toggle input:checked + .toggle-track::before { background: var(--off-white); transform: translateX(19px); }
+    .toggle input:focus-visible + .toggle-track { outline: 2px solid var(--light-lavender); outline-offset: 3px; }
     .organizer-status {
       grid-column: 1 / -1;
       margin: 0;
@@ -562,7 +564,7 @@
     .public-status-kicker { color: var(--cyan); font-size: .62rem; letter-spacing: .12em; text-transform: uppercase; }
     .public-status h3 { margin: 4px 0 0; font-size: .98rem; }
     .public-status p { margin: 4px 0 0; color: var(--dim); font-family: "Cairo", sans-serif; font-size: .68rem; }
-    .public-countdown { min-width: 145px; text-align: right; }
+    .public-countdown { min-width: 145px; text-align: end; }
     .public-countdown span { display: block; color: var(--dim); font-family: "Cairo", sans-serif; font-size: .65rem; }
     .public-countdown strong { display: block; margin-top: 3px; color: var(--light-lavender); font-size: 1.18rem; letter-spacing: .08em; }
     .public-results { margin: 0 0 26px; padding: 17px; border: 1px solid rgba(216, 208, 237, .2); border-radius: 14px; background: rgba(4, 43, 37, .56); }
@@ -673,7 +675,7 @@
     .card-index {
       position: absolute;
       top: 14px;
-      left: 14px;
+      inset-inline-start: 14px;
       padding: 5px 8px;
       border: 1px solid rgba(255,255,255,.17);
       border-radius: 7px;
@@ -684,7 +686,7 @@
     }
     .image-source-badge {
       position: absolute;
-      right: 14px;
+      inset-inline-end: 14px;
       bottom: 14px;
       padding: 5px 8px;
       border: 1px solid rgba(216, 208, 237, .3);
@@ -719,7 +721,7 @@
       font-size: .84rem;
       line-height: 1.7;
     }
-    .prompt::before { margin-right: 6px; color: var(--cyan); content: "↳"; font-family: sans-serif; }
+    .prompt::before { margin-inline-end: 6px; color: var(--cyan); content: "↳"; font-family: sans-serif; }
 
     .footer {
       display: flex;
@@ -760,13 +762,25 @@
     @keyframes float-card { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-5px); } }
     @keyframes count-bump { 50% { color: var(--light-lavender); transform: scale(1.08); } }
     @keyframes review-in { from { opacity: 0; transform: translateX(12px); } to { opacity: 1; transform: translateX(0); } }
+    @keyframes edge-sweep { from { transform: translateX(-115%) skewX(-18deg); } to { transform: translateX(115%) skewX(-18deg); } }
     .counter-number.bump { animation: count-bump .45s ease; }
     .review-item { animation: review-in .45s both; }
     .review-item:nth-child(2) { animation-delay: .06s; }
     .review-item:nth-child(3) { animation-delay: .12s; }
     .review-item:nth-child(4) { animation-delay: .18s; }
+    .reveal-on-scroll {
+      opacity: 0;
+      transform: translateY(24px);
+    }
+    .reveal-on-scroll.is-visible {
+      opacity: 1;
+      transform: translateY(0);
+      transition: opacity .75s ease, transform .75s cubic-bezier(.2,.8,.2,1);
+      transition-delay: var(--reveal-delay, 0ms);
+    }
     @media (prefers-reduced-motion: reduce) {
       *, *::before, *::after { scroll-behavior: auto !important; animation-duration: .01ms !important; animation-iteration-count: 1 !important; transition-duration: .01ms !important; }
+      .reveal-on-scroll { opacity: 1; transform: none; }
     }
 
     @media (max-width: 1180px) { .gallery-grid { column-count: 3; } }
@@ -810,6 +824,9 @@
       .submit-actions { align-items: flex-start; flex-direction: column; }
       .gallery-grid { column-count: 1; }
       .gallery-toolbar { align-items: flex-start; flex-direction: column; gap: 10px; }
+      .public-status { align-items: flex-start; flex-direction: column; }
+      .public-countdown { min-width: 0; text-align: start; }
+      .submit-actions .generate-button { width: 100%; }
       .footer { align-items: flex-start; flex-direction: column; }
     }
 
@@ -859,6 +876,10 @@
     button, input, select, textarea, .vision-card, .review-item, .control-card, .toggle-track {
       transition: transform .2s ease, opacity .2s ease, box-shadow .2s ease, border-color .2s ease, background-color .2s ease;
     }
+    button:focus-visible, input:focus-visible, select:focus-visible, textarea:focus-visible, summary:focus-visible {
+      outline: 2px solid var(--light-lavender);
+      outline-offset: 3px;
+    }
     button:not(:disabled):active { transform: translateY(1px) scale(.98); }
     input:focus, select:focus, textarea:focus { transform: translateY(-1px); box-shadow: 0 0 0 3px rgba(155, 138, 196, .18); }
     .vision-card:hover { transform: translateY(-4px); }
@@ -868,6 +889,16 @@
     .is-rejected { animation: error-shake .45s ease; }
     .is-changing { animation: control-flash .45s ease; }
     .is-submitting { animation: submit-pulse 1.2s ease-in-out infinite; }
+    .flow-step::after {
+      position: absolute;
+      inset: 0 auto 0 -55%;
+      width: 28%;
+      pointer-events: none;
+      content: "";
+      background: linear-gradient(100deg, transparent, rgba(216, 208, 237, .14), transparent);
+      transform: translateX(-115%) skewX(-18deg);
+    }
+    .flow-step:hover::after { animation: edge-sweep .9s ease both; }
     @keyframes interaction-pop {
       0% { transform: scale(1); }
       45% { transform: scale(.96); }
@@ -1153,7 +1184,7 @@
       <div class="submit-intro">
         <p class="submit-kicker" data-en="Your future / starts here" data-ar="مستقبلكم / يبدأ هنا">Your future / starts here</p>
         <h2 id="submit-heading" data-en="Put your imagination on stage." data-ar="خلّوا خيالكم يُعرض على المسرح.">خلّوا خيالكم يُعرض على المسرح.</h2>
-        <p data-en="Write a short description. The current demo uses a concept-image preview, then sends your submission to the organizer for approval. A real AI image service can be connected later from the backend." data-ar="اكتبوا وصفًا قصيرًا. تستخدم النسخة الحالية صورة تجريبية للتصور، ثم ترسل المشاركة إلى المنظم للموافقة. يمكن ربط خدمة توليد صور حقيقية لاحقًا من خلال الواجهة الخلفية.">اكتبوا وصفًا قصيرًا. تستخدم النسخة الحالية صورة تجريبية للتصور، ثم ترسل المشاركة إلى المنظم للموافقة. يمكن ربط خدمة توليد صور حقيقية لاحقًا من خلال الواجهة الخلفية.</p>
+         <p data-en="Write a short description. A single server-generated visual will be created for your idea, then held for organizer approval before it appears in the gallery." data-ar="اكتبوا وصفًا قصيرًا. سيتم إنشاء تصور بصري واحد لفكرتكم على الخادم، ثم يُرسل إلى المنظم للموافقة قبل ظهوره في المعرض.">اكتبوا وصفًا قصيرًا. سيتم إنشاء تصور بصري واحد لفكرتكم على الخادم، ثم يُرسل إلى المنظم للموافقة قبل ظهوره في المعرض.</p>
         <p class="closed-message" id="closed-message" data-en="Submissions are currently closed — the organizer can reopen them above." data-ar="التقديم مغلق حاليًا — يمكن للمنظم فتحه من لوحة التحكم.">التقديم مغلق حاليًا — يمكن للمنظم فتحه من لوحة التحكم.</p>
       </div>
       <form class="vision-form" id="vision-form">
@@ -1187,7 +1218,7 @@
           <small class="field-helper" data-en="The clearer the story, the stronger the generated visual and organizer review." data-ar="كلما كانت القصة أوضح، كان التصور البصري والمراجعة أقوى.">The clearer the story, the stronger the generated visual and organizer review.</small>
         </div>
         <div class="submit-actions">
-          <span class="form-note" id="form-note" data-en="AI visual generated server-side, then held for organizer approval." data-ar="يتم إنشاء التصور بالذكاء الاصطناعي ثم إرساله لموافقة المنظم.">AI visual generated server-side, then held for organizer approval.</span>
+           <span class="form-note" id="form-note" role="status" aria-live="polite" data-en="AI visual generated server-side, then held for organizer approval." data-ar="يتم إنشاء التصور بالذكاء الاصطناعي ثم إرساله لموافقة المنظم.">يتم إنشاء التصور بالذكاء الاصطناعي ثم إرساله لموافقة المنظم.</span>
           <button class="generate-button" id="generate-button" type="submit" data-en="✦ Turn idea into image" data-ar="✦ حوّلوا الفكرة إلى صورة">✦ Turn idea into image</button>
         </div>
       </form>
@@ -1241,23 +1272,7 @@
   </main>
 
   <script>
-    if ("scrollRestoration" in history) history.scrollRestoration = "manual";
-    function resetPagePosition() {
-      window.scrollTo({ top: 0, left: 0, behavior: "auto" });
-      document.documentElement.scrollTop = 0;
-      document.body.scrollTop = 0;
-    }
-    resetPagePosition();
-    window.addEventListener("DOMContentLoaded", resetPagePosition, { once: true });
-    window.addEventListener("load", resetPagePosition, { once: true });
-    window.addEventListener("pageshow", resetPagePosition);
-    let topResetFrames = 0;
-    function holdPageAtTop() {
-      resetPagePosition();
-      topResetFrames += 1;
-      if (topResetFrames < 45) requestAnimationFrame(holdPageAtTop);
-    }
-    requestAnimationFrame(holdPageAtTop);
+    if ("scrollRestoration" in history) history.scrollRestoration = "auto";
 
     /*
       Google Apps Script setup:
@@ -1842,6 +1857,20 @@
       return Number.isFinite(timestamp) ? new Date(timestamp).toISOString() : "";
     }
 
+    function deadlineIsOpen(value) {
+      if (!value) return true;
+      const timestamp = Date.parse(value);
+      return Number.isFinite(timestamp) && timestamp > Date.now();
+    }
+
+    function submissionsCurrentlyOpen() {
+      return settings.submissionsOpen && deadlineIsOpen(settings.submissionDeadline);
+    }
+
+    function votingCurrentlyOpen() {
+      return settings.votingOpen && deadlineIsOpen(settings.votingDeadline);
+    }
+
     function syncDeadlineInputs() {
       submissionDeadlineInput.value = isoToDateTimeInput(settings.submissionDeadline);
       votingDeadlineInput.value = isoToDateTimeInput(settings.votingDeadline);
@@ -1870,7 +1899,7 @@
     }
 
     function updatePublicCompetitionState() {
-      const phase = !settings.votingOpen ? "results" : !settings.submissionsOpen ? "voting" : "submissions";
+      const phase = !votingCurrentlyOpen() ? "results" : !submissionsCurrentlyOpen() ? "voting" : "submissions";
       const phaseCopy = {
         submissions: ["phaseSubmissions", "phaseSubmissionsDetail"],
         voting: ["phaseVoting", "phaseVotingDetail"],
@@ -1900,7 +1929,7 @@
       const selectedVision = localStorage.getItem("imagineSaudiVote");
       const isVoted = selectedVision === visionKey(vision) || selectedVision === vision.team;
       const anotherVisionVoted = Boolean(selectedVision && !isVoted);
-      const votingClosed = !settings.votingOpen;
+      const votingClosed = !votingCurrentlyOpen();
       const voteDisabled = votingClosed || anotherVisionVoted;
       const imageSource = String(vision.imageSource || "").toLowerCase();
       const isDemoPreview = imageSource === "demo-preview";
@@ -2108,6 +2137,26 @@
       window.setTimeout(() => element.classList.remove(className), 700);
     }
 
+    function setupRevealAnimations() {
+      const targets = document.querySelectorAll(".event-flow, .submit-panel, .public-status, .public-results, .gallery-toolbar, .gallery-controls, .footer");
+      targets.forEach((element, index) => {
+        element.classList.add("reveal-on-scroll");
+        element.style.setProperty("--reveal-delay", Math.min(index * 55, 275) + "ms");
+      });
+      if (!("IntersectionObserver" in window)) {
+        targets.forEach((element) => element.classList.add("is-visible"));
+        return;
+      }
+      const observer = new IntersectionObserver((entries, instance) => {
+        entries.forEach((entry) => {
+          if (!entry.isIntersecting) return;
+          entry.target.classList.add("is-visible");
+          instance.unobserve(entry.target);
+        });
+      }, { threshold: 0.12, rootMargin: "0px 0px -8% 0px" });
+      targets.forEach((element) => observer.observe(element));
+    }
+
     document.addEventListener("pointerdown", (event) => {
       const target = event.target.closest("button, .toggle-track");
       if (target && !target.disabled) animateInteraction(target);
@@ -2284,7 +2333,7 @@
       const selectedVision = localStorage.getItem("imagineSaudiVote");
       const selectedVisionKey = vision ? visionKey(vision) : "";
       const isSelected = Boolean(vision) && (selectedVision === selectedVisionKey || selectedVision === vision.team);
-      if (voteInFlight || !settings.votingOpen || !vision || (selectedVision && !isSelected)) return;
+      if (voteInFlight || !votingCurrentlyOpen() || !vision || (selectedVision && !isSelected)) return;
       const action = isSelected ? "unvote" : "vote";
       voteInFlight = true;
       voteButton?.classList.add("is-processing");
@@ -2314,7 +2363,7 @@
 
     form.addEventListener("submit", async (event) => {
       event.preventDefault();
-      if (!settings.submissionsOpen || isSubmissionLocked()) {
+      if (!submissionsCurrentlyOpen() || isSubmissionLocked()) {
         updateCompetitionMode(false);
         return;
       }
@@ -2332,6 +2381,7 @@
       form.classList.add("is-submitting");
       submissionPanel.classList.add("is-submitting");
       generateButton.disabled = true;
+      generateButton.setAttribute("aria-busy", "true");
        generateButton.classList.add("is-generating");
        generateButton.textContent = t("imageGeneratingButton");
       formNote.textContent = t("imageGenerating");
@@ -2365,7 +2415,10 @@
         await googleRequest("submit", newVision, { timeout: 90000 });
       } catch (error) {
         generateButton.disabled = false;
+        generateButton.removeAttribute("aria-busy");
         generateButton.classList.remove("is-generating");
+        form.classList.remove("is-submitting");
+        submissionPanel.classList.remove("is-submitting");
         formNote.textContent = error?.message || t("submitError");
         console.error("Live AI submission failed:", error);
         return;
@@ -2373,8 +2426,12 @@
 
       localStorage.setItem("imagineSaudiSubmittedRound", String(settings.submissionRound || "1"));
       form.reset();
+      updateTrackEnhancer();
       generateButton.disabled = false;
+      generateButton.removeAttribute("aria-busy");
        generateButton.classList.remove("is-generating");
+      form.classList.remove("is-submitting");
+      submissionPanel.classList.remove("is-submitting");
        generateButton.textContent = currentLanguage === "ar" ? "✦ حوّلوا الفكرة إلى صورة" : "✦ Turn idea into image";
       formNote.textContent = t("imageQueued");
       if (organizerDetails.open) await loadReviewQueue();
@@ -2624,19 +2681,21 @@
     function updateCompetitionMode(shouldSync = true) {
       syncControlInputs();
       organizerStatus.classList.remove("is-error");
-      submissionPanel.classList.toggle("is-closed", !settings.submissionsOpen);
+      const submissionsOpen = submissionsCurrentlyOpen();
+      const votingOpen = votingCurrentlyOpen();
+      submissionPanel.classList.toggle("is-closed", !submissionsOpen);
       formNote.textContent = isSubmissionLocked()
         ? t("submissionAlreadyUsed")
-        : settings.submissionsOpen ? t("imageDemo") : t("submissionClosed");
+        : submissionsOpen ? t("imageDemo") : t("submissionClosed");
       form.querySelectorAll("input, select, textarea, button").forEach((element) => {
-        element.disabled = !settings.submissionsOpen || isSubmissionLocked();
+        element.disabled = !submissionsOpen || isSubmissionLocked();
       });
       updateTrackEnhancer();
-      votingStatus.textContent = settings.votingOpen ? t("votingOpen") : t("votingClosed");
+      votingStatus.textContent = votingOpen ? t("votingOpen") : t("votingClosed");
       updatePublicCompetitionState();
-      organizerStatus.textContent = settings.submissionsOpen && settings.votingOpen
+      organizerStatus.textContent = submissionsOpen && votingOpen
         ? t("openCompetition")
-        : t("status").replace("{submissions}", settings.submissionsOpen ? t("open") : t("closed")).replace("{voting}", settings.votingOpen ? t("open") : t("closed"));
+        : t("status").replace("{submissions}", submissionsOpen ? t("open") : t("closed")).replace("{voting}", votingOpen ? t("open") : t("closed"));
       if (shouldSync) syncGallery();
     }
 
@@ -2751,6 +2810,7 @@
     languageToggle.addEventListener("click", () => applyLanguage(currentLanguage === "ar" ? "en" : "ar"));
     restorePublicCache();
     applyLanguage(currentLanguage);
+    setupRevealAnimations();
     restoreOrganizerSession();
     setInterval(syncGallery, 5000);
     setInterval(updatePublicCompetitionState, 1000);
