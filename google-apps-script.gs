@@ -1253,7 +1253,9 @@ function voteForVision_(payload) {
 function unvoteVision_(payload) {
   return withLock_(function() {
     const settings = getSettings_();
-    if (!settings.votingOpen) throw new Error("Voting is currently closed.");
+    if (!settings.votingOpen || !deadlineIsOpen_(settings.votingDeadline)) {
+      throw new Error("Voting is currently closed or past its deadline.");
+    }
 
     const voterId = validVoterId_(payload.voterId);
     const visionId = cleanText_(payload.visionId, 200, "Vision ID");
