@@ -436,9 +436,13 @@
       display: block;
       margin-top: .14em;
       color: transparent;
-      background: linear-gradient(100deg, var(--green) 5%, var(--lavender, #9B8AC4) 48%, var(--light-lavender, #D8D0ED) 94%);
+      background: linear-gradient(105deg, var(--green) 0%, var(--lavender, #9B8AC4) 38%, var(--light-lavender, #D8D0ED) 60%, var(--green) 100%);
+      background-size: 220% 100%;
       -webkit-background-clip: text;
       background-clip: text;
+      text-shadow: 0 0 36px rgba(155, 138, 196, .14);
+      will-change: background-position;
+      animation: hero-word-shimmer 9s ease-in-out infinite alternate;
     }
 
     .hero-subtitle {
@@ -828,6 +832,10 @@
     @keyframes brand-title-shimmer {
       0% { background-position: 0% 50%; }
       100% { background-position: 100% 50%; }
+    }
+    @keyframes hero-word-shimmer {
+      0% { background-position: 0% 50%; filter: saturate(.96); }
+      100% { background-position: 100% 50%; filter: saturate(1.12); }
     }
     @keyframes logo-card-breathe {
       0%, 100% { box-shadow: inset 0 0 24px rgba(216, 208, 237, .045), 0 12px 30px rgba(0, 0, 0, .12); }
@@ -1244,7 +1252,7 @@
     <section class="hero" aria-labelledby="page-title">
       <button class="language-toggle hero-language-toggle" id="language-toggle" type="button" aria-label="Switch language">عربي</button>
       <div class="hero-copy">
-        <h1 id="page-title" class="hero-lockup"><span data-en="The future" data-ar="المستقبل">The future</span><br /><span class="gradient-word" data-en="is imagined." data-ar="نصنعه بالخيال.">is imagined.</span></h1>
+        <h1 id="page-title" class="hero-lockup"><span data-en="The future" data-ar="المستقبل">The future</span><br /><span class="gradient-word" data-en="We make it with imagination." data-ar="نصنعه بالخيال.">is imagined.</span></h1>
         <p class="hero-subtitle" data-en="Imagine Saudi Arabia in 2050 — write your idea, preview its visual concept, then vote for the best vision." data-ar="تخيّل السعودية في عام 2050 — اكتبوا فكرتكم، شاهدوا تصورها البصري، ثم صوّتوا لأفضل رؤية.">
           تخيّل السعودية في عام 2050 — اكتبوا فكرتكم، شاهدوا تصورها البصري، ثم صوّتوا لأفضل رؤية.
         </p>
