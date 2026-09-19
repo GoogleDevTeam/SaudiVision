@@ -1044,17 +1044,6 @@
       0%, 100% { box-shadow: 0 0 0 rgba(155, 138, 196, 0); }
       50% { box-shadow: 0 0 0 8px rgba(155, 138, 196, .08); }
     }
-    @media (prefers-reduced-motion: reduce) {
-      :root:not([data-motion="full"]) *,
-      :root:not([data-motion="full"]) *::before,
-      :root:not([data-motion="full"]) *::after {
-        animation-duration: .001ms !important;
-        animation-iteration-count: 1 !important;
-        scroll-behavior: auto !important;
-        transition-duration: .001ms !important;
-      }
-    }
-
     /* Mobile-first motion polish: GPU-friendly transforms, touch-safe interactions, and lighter ambient work. */
     @keyframes mobile-rise {
       from { opacity: 0; transform: translateY(12px); }
