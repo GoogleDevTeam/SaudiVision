@@ -142,27 +142,27 @@ const DEFAULT_SETTINGS = {
 };
 
 const TRACK_PROMPT_ENHANCERS_ = {
-  "Green Tech & Energy": "Blend renewable energy, low-carbon materials, climate resilience, advanced manufacturing, and skilled green work in harmony with Saudi landscapes.",
-  "Smart Mobility & Future Cities": "Show clean, accessible movement, walkable connected neighborhoods, circular buildings, protected nature, and credible next-generation destinations.",
-  "Heritage, Culture & Tourism": "Blend Saudi heritage, crafts, language, historic places, arts, and hospitality with respectful technology and low-impact tourism that benefits local communities.",
-  "Human Potential & Wellbeing": "Center inclusion, talent, creativity, lifelong learning, future skills, preventive care, mental wellbeing, and compassionate everyday life for all ages.",
-  "Water & Oceans": "Visualize resilient water and coastal systems through conservation, desalination, reuse, smart distribution, marine science, clean seas, fisheries, and restored ecosystems across the Red Sea and Gulf.",
-  "Future Food & Agriculture": "Show climate-smart Saudi food systems with local production, precision agriculture, vertical growing, and nourishing communities.",
-  "Digital Society & Governance": "Show trusted, inclusive digital public services that make communities safer, more transparent, and easier to participate in.",
-  "Other": "Use the participant’s idea as the lead and build a broad, optimistic Saudi 2050 future scene without forcing another track.",
+  "Green Tech & Energy": "Show one clear, optimistic Saudi scene where renewable energy, climate-resilient materials, advanced manufacturing, and human-scale green jobs work together. Use sunlight, shade, native landscape, and one believable hero system.",
+  "Smart Mobility & Future Cities": "Show one believable journey through a connected Saudi district: clean mobility, walkable streets, circular buildings, shaded public space, protected nature, and a credible next-generation destination working as one system.",
+  "Heritage, Culture & Tourism": "Show one living Saudi cultural moment where heritage, crafts, language, historic architecture, contemporary technology, and low-impact hospitality help local people and places thrive.",
+  "Human Potential & Wellbeing": "Show people actively benefiting from a human-centered future: inclusive learning, practical skills, preventive care, creativity, mental wellbeing, and compassionate everyday spaces across generations.",
+  "Water & Oceans": "Show one connected water-to-coast system in Saudi Arabia: efficient water use, desalination or reuse, smart distribution, restored ecosystems, clean seas, marine science, and sustainable coastal livelihoods in a single coherent scene.",
+  "Future Food & Agriculture": "Show a climate-smart Saudi food system from production to community: local crops, precision or vertical growing, efficient water use, healthy food, and people gathering around the result.",
+  "Digital Society & Governance": "Show trusted digital public services as a visible human experience: inclusive access, privacy, transparency, safer communities, and people participating confidently in decisions that affect daily life.",
+  "Other": "Use the participant’s idea as the lead. Turn it into one specific, optimistic Saudi 2050 scene with a clear focal subject, believable human benefit, and distinctive local setting without forcing another track.",
   // Legacy values remain supported for existing submissions and historical records.
-  "Green Tech": "Blend renewable energy, low-carbon materials, climate resilience, advanced manufacturing, and skilled green work in harmony with Saudi landscapes.",
-  "Advanced Energy & Industry": "Blend renewable energy, low-carbon materials, climate resilience, advanced manufacturing, and skilled green work in harmony with Saudi landscapes.",
-  "Smart Mobility": "Show clean, accessible movement, walkable connected neighborhoods, circular buildings, protected nature, and credible next-generation destinations.",
-  "NEOM": "Show clean, accessible movement, walkable connected neighborhoods, circular buildings, protected nature, and credible next-generation destinations.",
-  "Circular Cities": "Show clean, accessible movement, walkable connected neighborhoods, circular buildings, protected nature, and credible next-generation destinations.",
-  "Heritage AI": "Blend Saudi heritage, crafts, language, historic places, arts, and hospitality with respectful technology and low-impact tourism that benefits local communities.",
-  "Tourism & Culture": "Blend Saudi heritage, crafts, language, historic places, arts, and hospitality with respectful technology and low-impact tourism that benefits local communities.",
-  "Human Potential": "Center inclusion, talent, creativity, lifelong learning, future skills, preventive care, mental wellbeing, and compassionate everyday life for all ages.",
-  "Health & Wellbeing": "Center inclusion, talent, creativity, lifelong learning, future skills, preventive care, mental wellbeing, and compassionate everyday life for all ages.",
-  "Education & Skills": "Center inclusion, talent, creativity, lifelong learning, future skills, preventive care, mental wellbeing, and compassionate everyday life for all ages.",
-  "Water Security": "Visualize resilient water and coastal systems through conservation, desalination, reuse, smart distribution, marine science, clean seas, fisheries, and restored ecosystems across the Red Sea and Gulf.",
-  "Blue Economy": "Visualize resilient water and coastal systems through conservation, desalination, reuse, smart distribution, marine science, clean seas, fisheries, and restored ecosystems across the Red Sea and Gulf."
+  "Green Tech": "Show one clear, optimistic Saudi scene where renewable energy, climate-resilient materials, advanced manufacturing, and human-scale green jobs work together. Use sunlight, shade, native landscape, and one believable hero system.",
+  "Advanced Energy & Industry": "Show one clear, optimistic Saudi scene where renewable energy, climate-resilient materials, advanced manufacturing, and human-scale green jobs work together. Use sunlight, shade, native landscape, and one believable hero system.",
+  "Smart Mobility": "Show one believable journey through a connected Saudi district: clean mobility, walkable streets, circular buildings, shaded public space, protected nature, and a credible next-generation destination working as one system.",
+  "NEOM": "Show one believable journey through a connected Saudi district: clean mobility, walkable streets, circular buildings, shaded public space, protected nature, and a credible next-generation destination working as one system.",
+  "Circular Cities": "Show one believable journey through a connected Saudi district: clean mobility, walkable streets, circular buildings, shaded public space, protected nature, and a credible next-generation destination working as one system.",
+  "Heritage AI": "Show one living Saudi cultural moment where heritage, crafts, language, historic architecture, contemporary technology, and low-impact hospitality help local people and places thrive.",
+  "Tourism & Culture": "Show one living Saudi cultural moment where heritage, crafts, language, historic architecture, contemporary technology, and low-impact hospitality help local people and places thrive.",
+  "Human Potential": "Show people actively benefiting from a human-centered future: inclusive learning, practical skills, preventive care, creativity, mental wellbeing, and compassionate everyday spaces across generations.",
+  "Health & Wellbeing": "Show people actively benefiting from a human-centered future: inclusive learning, practical skills, preventive care, creativity, mental wellbeing, and compassionate everyday spaces across generations.",
+  "Education & Skills": "Show people actively benefiting from a human-centered future: inclusive learning, practical skills, preventive care, creativity, mental wellbeing, and compassionate everyday spaces across generations.",
+  "Water Security": "Show one connected water-to-coast system in Saudi Arabia: efficient water use, desalination or reuse, smart distribution, restored ecosystems, clean seas, marine science, and sustainable coastal livelihoods in a single coherent scene.",
+  "Blue Economy": "Show one connected water-to-coast system in Saudi Arabia: efficient water use, desalination or reuse, smart distribution, restored ecosystems, clean seas, marine science, and sustainable coastal livelihoods in a single coherent scene."
 };
 
 function trackPromptEnhancer_(track) {
@@ -196,6 +196,19 @@ function doPost(event) {
   }
 }
 
+function geminiApiKey_() {
+  return String(PropertiesService.getScriptProperties().getProperty("GEMINI_API_KEY") || "").trim();
+}
+
+function geminiStatus_() {
+  const configured = Boolean(geminiApiKey_());
+  return {
+    configured: configured,
+    status: configured ? "ready" : "needs_api_key",
+    model: GEMINI_IMAGE_MODEL
+  };
+}
+
 function route_(action, payload) {
   switch (action) {
     case "health":
@@ -205,8 +218,11 @@ function route_(action, payload) {
         service: "Imagine Saudi 2050",
         status: "ready",
         workbookFormatVersion: WORKBOOK_FORMAT_VERSION,
-        sheets: Object.keys(SHEETS).map(function(key) { return SHEETS[key].name; }).concat([GUIDE_SHEET_NAME])
+        sheets: Object.keys(SHEETS).map(function(key) { return SHEETS[key].name; }).concat([GUIDE_SHEET_NAME]),
+        imageGeneration: geminiStatus_()
       };
+    case "aiStatus":
+      return { ok: true, service: "Imagine Saudi 2050", imageGeneration: geminiStatus_() };
     case "visions":
       return getPublicVisions_();
     case "submit":
@@ -821,14 +837,16 @@ function participantHasSubmitted_(participantId, submissionRound) {
 
 function generateVisionImage_(submissionId, team, track, prompt, details) {
   details = details || {};
-  const apiKey = PropertiesService.getScriptProperties().getProperty("GEMINI_API_KEY");
+  const apiKey = geminiApiKey_();
   if (!apiKey) throw new Error("Live AI is not configured. Add GEMINI_API_KEY in Apps Script Project Settings.");
   const imagePrompt = [
     "Create one polished editorial concept image for a Saudi Arabia 2050 future vision competition.",
     "Show an optimistic, plausible, human-centered future with strong Saudi environmental and cultural context.",
-    "Use a cinematic wide composition, refined architectural or landscape detail, and premium magazine-quality lighting.",
+    "Make one coherent wide editorial scene with one clear focal subject and only a small number of supporting details.",
+    "Prefer plausible near-future Saudi design over generic science fiction; make the climate, materials, local setting, and human benefit visually legible.",
+    "Use a cinematic 16:9 composition, natural depth, premium magazine-quality lighting, and a restrained palette inspired by Saudi landscapes.",
     "Generate exactly ONE single image only. Do not return multiple images, a collage, variations, or any text response beyond the image.",
-    "Do not include readable words, letters, logos, interface elements, borders, collages, or labels.",
+    "Do not include readable words, letters, logos, flags, interface elements, borders, collages, or labels.",
     "Strategic track: " + track,
     "Track-specific visual direction: " + trackPromptEnhancer_(track),
     "Group name: " + team,
