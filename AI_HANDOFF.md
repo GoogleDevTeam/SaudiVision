@@ -372,6 +372,13 @@ Before coding, inspect the latest `main` branch and the live deployment state. T
 - Failed generations remain recorded with a retryable failed status instead of disappearing or crashing the workflow. The frontend submit request now allows normal image-generation latency.
 - Workbook format version is now v8. The health/setup path adds all new headers and formats the operational columns automatically.
 
+### Description-led prompt enhancer update — 2026-09-19
+
+- Changed the eight canonical enhancers from detailed scene instructions into broad thematic lenses.
+- Gemini now treats the participant description as the primary creative brief, preserves its concrete details, and combines related ideas instead of replacing them with a track-specific storyline.
+- The selected track supplies context only; it cannot narrow, contradict, or add an unrelated concept to the participant's idea.
+- Bumped the prompt version to v5 so the spreadsheet shows which submissions used the new description-led behavior.
+
 ### Next recommended step
 
-Deploy the updated google-apps-script.gs once, open the health endpoint to let the v8 workbook setup run, and send a burst test of 10 submissions using different participant IDs. Review Submissions and Activity Log for generated, failed, and retried records. Do not use the same participant ID for the ten tests because one submission per participant per round remains intentional.
+Deploy the updated google-apps-script.gs once, then test descriptions that intentionally combine two or three ideas. Confirm the generated image follows the participant's wording while using the selected track only as a broad lens.
