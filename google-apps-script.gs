@@ -82,6 +82,7 @@ const SHEETS = {
 const GUIDE_SHEET_NAME = "START HERE";
 const WORKBOOK_FORMAT_VERSION = "2026-09-19-v8";
 const IMAGE_PROMPT_VERSION = "2026-09-19-v4";
+const GENERATION_SLOT_KEY = "IMAGINE_SAUDI_GEMINI_GENERATION_SLOT";
 const GEMINI_IMAGE_MODEL = "gemini-3.1-flash-image";
 const GEMINI_INTERACTIONS_URL = "https://generativelanguage.googleapis.com/v1beta/interactions";
 const THEME = {
@@ -859,11 +860,13 @@ function submitVision_(payload) {
   });
 
   try {
-    const generated = generateVisionImageWithRetry_(submissionId, team, track, prompt, {
-      title: title,
-      problem: problem,
-      impact: impact,
-      beneficiaries: beneficiaries
+    const generated = withGenerationSlot_(function() {
+      return generateVisionImageWithRetry_(submissionId, team, track, prompt, {
+        title: title,
+        problem: problem,
+        impact: impact,
+        beneficiaries: beneficiaries
+      });
     });
     const completedAt = now_();
     withLock_(function() {
@@ -895,7 +898,7 @@ function submitVision_(payload) {
           updatedAt: completedAt,
           generationStatus: "failed",
           generationCompletedAt: completedAt,
-          generationAttempts: failed.generationAttempts || 1,
+          generationAttempts: Number(error.generationAttempts) || 1,
           generationError: message
         });
         logActivity_("generation_failed", "failed", failed, message, { retryable: isRetryableGenerationError_(error) });
@@ -938,6 +941,42 @@ function isRetryableGenerationError_(error) {
   return /429|500|502|503|504|rate limit|temporarily|timeout|overloaded|try again/.test(message);
 }
 
+function withGenerationSlot_(callback) {
+  const cache = CacheService.getScriptCache();
+  const token = newId_();
+  const deadline = Date.now() + 240000;
+  while (Date.now() < deadline) {
+    const lock = LockService.getScriptLock();
+    let acquired = false;
+    if (lock.tryLock(5000)) {
+      try {
+        if (!cache.get(GENERATION_SLOT_KEY)) {
+          cache.put(GENERATION_SLOT_KEY, token, 300);
+          acquired = true;
+        }
+      } finally {
+        lock.releaseLock();
+      }
+    }
+    if (acquired) {
+      try {
+        return callback();
+      } finally {
+        const releaseLock = LockService.getScriptLock();
+        if (releaseLock.tryLock(5000)) {
+          try {
+            if (cache.get(GENERATION_SLOT_KEY) === token) cache.remove(GENERATION_SLOT_KEY);
+          } finally {
+            releaseLock.releaseLock();
+          }
+        }
+      }
+    }
+    Utilities.sleep(750);
+  }
+  throw new Error("Image generation is busy. The submission was recorded; try again shortly.");
+}
+
 function generateVisionImageWithRetry_(submissionId, team, track, prompt, details) {
   let lastError = null;
   for (let attempt = 1; attempt <= 3; attempt += 1) {
@@ -946,6 +985,7 @@ function generateVisionImageWithRetry_(submissionId, team, track, prompt, detail
       return { image: image, attempts: attempt };
     } catch (error) {
       lastError = error;
+      error.generationAttempts = attempt;
       if (!isRetryableGenerationError_(error) || attempt === 3) throw error;
       Utilities.sleep(1000 * Math.pow(2, attempt - 1));
     }
