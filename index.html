@@ -1268,7 +1268,7 @@
     </details>
 
     <section class="hero" aria-labelledby="page-title">
-      <button class="language-toggle hero-language-toggle" id="language-toggle" type="button" aria-label="Switch language">عربي</button>
+      <button class="language-toggle hero-language-toggle" id="language-toggle" type="button" aria-label="التبديل إلى الإنجليزية">عربي</button>
       <div class="hero-copy">
         <h1 id="page-title" class="hero-lockup"><span data-en="The future" data-ar="المستقبل">المستقبل</span><br /><span class="gradient-word" data-en="Today’s imagination, tomorrow’s reality." data-ar="خيال اليوم، واقع الغد">خيال اليوم، واقع الغد</span></h1>
         <p class="hero-subtitle" data-en="Imagine Saudi Arabia in 2050 — write your idea, preview its visual concept, then vote for the best vision." data-ar="تخيّل السعودية في عام 2050 — اكتبوا فكرتكم، شاهدوا تصورها البصري، ثم صوّتوا لأفضل رؤية.">
@@ -1736,6 +1736,11 @@
         unavailable: "Source unavailable — retrying",
         awaiting: "Awaiting first sync...",
         lastSync: "Last sync",
+        cached: "cached",
+        countdownDays: "d",
+        countdownHours: "h",
+        countdownMinutes: "m",
+        countdownSeconds: "s",
         votingOpen: "Voting open",
         votingClosed: "Voting closed",
         phaseSubmissions: "Submissions are open",
@@ -1816,6 +1821,11 @@
         unavailable: "المصدر غير متاح — جارٍ إعادة المحاولة",
         awaiting: "بانتظار المزامنة الأولى...",
         lastSync: "آخر مزامنة",
+        cached: "مخزّن مؤقتًا",
+        countdownDays: "ي",
+        countdownHours: "س",
+        countdownMinutes: "د",
+        countdownSeconds: "ث",
         votingOpen: "التصويت مفتوح",
         votingClosed: "التصويت مغلق",
         phaseSubmissions: "التقديم مفتوح",
@@ -2029,7 +2039,7 @@
       const hours = Math.floor((totalSeconds % 86400) / 3600);
       const minutes = Math.floor((totalSeconds % 3600) / 60);
       const seconds = totalSeconds % 60;
-      return days + "d " + String(hours).padStart(2, "0") + "h " + String(minutes).padStart(2, "0") + "m " + String(seconds).padStart(2, "0") + "s";
+      return days + t("countdownDays") + " " + String(hours).padStart(2, "0") + t("countdownHours") + " " + String(minutes).padStart(2, "0") + t("countdownMinutes") + " " + String(seconds).padStart(2, "0") + t("countdownSeconds");
     }
 
     function renderPublicResults() {
@@ -2040,7 +2050,7 @@
       });
       publicResultsList.innerHTML = ranked.length
         ? ranked.slice(0, 5).map((vision, index) =>
-          '<div class="public-result-item"><span class="public-result-rank">' + (index + 1) + '</span><div class="public-result-copy"><strong>' + escapeHTML(vision.team || "—") + '</strong><span>' + escapeHTML(vision.track || "") + '</span></div><span class="public-result-score">' + t("resultsVoteLabel").replace("{votes}", Number(vision.votes) || 0) + '</span></div>'
+          '<div class="public-result-item"><span class="public-result-rank">' + (index + 1) + '</span><div class="public-result-copy"><strong>' + escapeHTML(vision.team || "—") + '</strong><span>' + escapeHTML(trackLabel(vision.track)) + '</span></div><span class="public-result-score">' + t("resultsVoteLabel").replace("{votes}", Number(vision.votes) || 0) + '</span></div>'
         ).join("")
         : '<p class="gallery-empty">' + t("resultsEmpty") + '</p>';
     }
@@ -2243,7 +2253,7 @@
         updateGalleryFilters();
         renderGallery();
         count.textContent = String(activeVisions.length);
-        note.textContent = t("lastSync") + " · cached";
+        note.textContent = t("lastSync") + " · " + t("cached");
         syncState.textContent = t("receiving");
         return true;
       } catch (error) {
