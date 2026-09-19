@@ -164,6 +164,9 @@ function route_(action, payload) {
     case "pending":
       requireAdmin_(payload);
       return { ok: true, visions: getPendingSubmissions_() };
+    case "organizerSnapshot":
+      requireAdmin_(payload);
+      return getOrganizerSnapshot_();
     case "publish":
       requireAdmin_(payload);
       return moderateSubmission_(payload.visionId, "published");
@@ -476,8 +479,13 @@ function formatDataSheet_(sheet, definition) {
 }
 
 function getSheet_(definition) {
-  const spreadsheet = initializeSheets_();
-  return spreadsheet.getSheetByName(definition.name);
+  const spreadsheet = getSpreadsheet_();
+  const existing = spreadsheet.getSheetByName(definition.name);
+  if (existing) return existing;
+  const sheet = spreadsheet.insertSheet(definition.name);
+  sheet.getRange(1, 1, 1, definition.headers.length).setValues([definition.headers]);
+  sheet.setFrozenRows(1);
+  return sheet;
 }
 
 function rows_(sheet) {
@@ -715,6 +723,15 @@ function generateVisionImage_(submissionId, team, track, prompt) {
   const file = DriveApp.createFile(blob);
   file.setSharing(DriveApp.Access.ANYONE_WITH_LINK, DriveApp.Permission.VIEW);
   return { url: "https://drive.google.com/uc?export=view&id=" + file.getId(), mimeType: mimeType };
+}
+
+function getOrganizerSnapshot_() {
+  const settings = getSettings_();
+  const pending = getPendingSubmissions_();
+  const published = objectRows_(SHEETS.visions)
+    .filter(function(record) { return String(record.status).toLowerCase() === "published"; })
+    .map(publicVision_);
+  return { ok: true, settings: settings, pending: pending, published: published };
 }
 
 function getPendingSubmissions_() {
