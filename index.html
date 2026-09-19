@@ -5,8 +5,9 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <meta name="theme-color" content="#073B35" />
   <title>Imagine Saudi 2050 — Future Vision Competition</title>
-  <link rel="icon" type="image/png" sizes="64x64" href="google-developers-favicon.png" />
-  <link rel="apple-touch-icon" href="google-developers-favicon.png" />
+  <link rel="icon" type="image/png" sizes="64x64" href="shaqra-university-favicon.png" />
+  <link rel="apple-touch-icon" href="shaqra-university-logo.png" />
+  <link rel="preload" as="image" href="google-developers-logo.png" fetchpriority="high" />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet" />
@@ -163,6 +164,9 @@
     .brand-lockup { gap: 14px; }
     .google-dev-logo {
       display: grid;
+      appearance: none;
+      padding: 0;
+      cursor: pointer;
       width: 43px;
       height: 43px;
       place-items: center;
@@ -178,6 +182,8 @@
       height: 24px;
       object-fit: contain;
     }
+    .google-dev-logo.organizer-access:focus-visible { outline: 2px solid var(--light-lavender); outline-offset: 4px; }
+    .google-dev-logo.organizer-access.is-unlocked { border-color: var(--light-lavender); box-shadow: inset 0 0 18px rgba(155, 138, 196, .22), 0 0 26px rgba(155, 138, 196, .24); }
 
     .brand-copy { gap: 12px; }
     .brand-copy::after {
@@ -611,6 +617,8 @@
     .gallery-grid {
       column-count: 4;
       column-gap: 18px;
+      content-visibility: auto;
+      contain-intrinsic-size: 900px;
     }
 
     .vision-card {
@@ -793,19 +801,7 @@
     }
 
     /* Interaction motion layer */
-    .organizer-access {
-      margin: 24px 0 2px;
-      padding: 8px 12px;
-      border: 1px solid rgba(216, 208, 237, .22);
-      border-radius: 9px;
-      cursor: pointer;
-      background: rgba(155, 138, 196, .08);
-      color: var(--dim);
-      font-size: .68rem;
-      letter-spacing: .06em;
-      text-transform: uppercase;
-    }
-    .organizer-access:hover { border-color: rgba(216, 208, 237, .5); color: var(--ink); }
+    .google-dev-logo.organizer-access:hover { border-color: rgba(216, 208, 237, .78); }
     .organizer-login {
       display: flex;
       flex-wrap: wrap;
@@ -990,9 +986,9 @@
 
     <header class="topline">
       <div class="brand-lockup">
-        <div class="google-dev-logo" role="img" aria-label="Google Developers logo">
+        <button class="google-dev-logo organizer-access" id="organizer-access" type="button" aria-label="Organizer access" title="Organizer access">
           <img src="google-developers-logo.png" alt="" width="32" height="24" decoding="async" />
-        </div>
+        </button>
         <div class="brand-copy">
           <div>
             <p class="eyebrow" data-en="Future Vision Competition / 2050" data-ar="مسابقة رؤى المستقبل / 2050">مسابقة رؤى المستقبل / 2050</p>
@@ -1006,7 +1002,6 @@
       </div>
     </header>
 
-    <button class="organizer-access" id="organizer-access" type="button" data-en="🔒 Organizer access" data-ar="🔒 دخول المنظم">🔒 Organizer access</button>
     <form class="organizer-login" id="organizer-login" hidden>
       <div class="organizer-login-field">
         <label for="organizer-key-input" data-en="Organizer key" data-ar="رمز المنظم">Organizer key</label>
@@ -1177,7 +1172,7 @@
     <section aria-labelledby="gallery-heading">
       <div class="gallery-toolbar">
         <h2 class="section-title" id="gallery-heading" data-en="Vision gallery" data-ar="معرض الرؤى">Vision gallery</h2>
-        <div class="sync-state"><span id="voting-status" data-en="Voting open" data-ar="التصويت مفتوح">Voting open</span><span class="sync-icon">↻</span><span id="sync-state" data-en="Syncing every 08 seconds" data-ar="تتم المزامنة كل 08 ثوانٍ">Syncing every 08 seconds</span></div>
+        <div class="sync-state"><span id="voting-status" data-en="Voting open" data-ar="التصويت مفتوح">Voting open</span><span class="sync-icon">↻</span><span id="sync-state" data-en="Syncing every 05 seconds" data-ar="تتم المزامنة كل 05 ثوانٍ">Syncing every 05 seconds</span></div>
       </div>
       <div class="public-status" id="public-status" aria-live="polite">
         <div>
@@ -1299,7 +1294,7 @@
       if (!decorativeLayer) return;
       decorativeLayer.replaceChildren();
       const bounds = decorativeLayer.getBoundingClientRect();
-      const spawnCount = 20;
+      const spawnCount = 14;
       const columns = Math.max(2, Math.floor(bounds.width / 170));
       const rows = Math.ceil(spawnCount / columns);
       const cellWidth = bounds.width / columns;
@@ -1402,6 +1397,11 @@
       }
     ];
     let activeVisions = sourceVisions;
+    const PUBLIC_CACHE_KEY = "imagineSaudiPublicCache";
+    const PUBLIC_CACHE_TTL = 120000;
+    let publicSyncInFlight = null;
+    let lastGalleryDataSignature = "";
+    let hasRemoteSync = false;
 
     const gallery = document.getElementById("gallery-grid");
     const count = document.getElementById("vision-count");
@@ -1785,7 +1785,7 @@
       return `
         <article class="vision-card" style="animation-delay:${Math.min(index * 55, 500)}ms">
           <div class="vision-image-wrap">
-            <img class="vision-image" style="height:${safeImageHeight(vision.height)}px" src="${safeImage}" alt="${escapeHTML(vision.team)} ${t("conceptArt")}" loading="lazy"
+            <img class="vision-image" style="height:${safeImageHeight(vision.height)}px" src="${safeImage}" alt="${escapeHTML(vision.team)} ${t("conceptArt")}" loading="lazy" decoding="async"
               onerror="this.onerror=null;this.src='${placeholderImage}'" />
             <div class="image-glow"></div>
             <span class="card-index">VISION / ${String(index + 1).padStart(2, "0")}</span>
@@ -1843,13 +1843,15 @@
       });
     }
 
-    async function googleRequest(action, payload = {}) {
+    async function googleRequest(action, payload = {}, options = {}) {
       if (!GOOGLE_APPS_SCRIPT_URL) return null;
-      const url = `${GOOGLE_APPS_SCRIPT_URL}${action ? `?action=${encodeURIComponent(action)}` : ""}`;
+      const method = options.method || "POST";
+      const url = GOOGLE_APPS_SCRIPT_URL + (action ? "?action=" + encodeURIComponent(action) : "");
       const response = await fetch(url, {
-        method: "POST",
-        headers: { "Content-Type": "text/plain;charset=utf-8" },
-        body: JSON.stringify({ action, ...payload })
+        method,
+        headers: method === "GET" ? undefined : { "Content-Type": "text/plain;charset=utf-8" },
+        body: method === "GET" ? undefined : JSON.stringify({ action, ...payload }),
+        cache: "no-store"
       });
       if (!response.ok) {
         if ([404, 502, 503, 504].includes(response.status)) throw new Error("Backend unavailable.");
@@ -1858,6 +1860,55 @@
       const result = await response.json();
       if (result.ok === false) throw new Error(result.error || "Google backend error");
       return result;
+    }
+
+    function applyPublicSettings(nextSettings) {
+      if (!nextSettings) return;
+      const asBoolean = (value) => value === true || String(value).toLowerCase() === "true";
+      settings.submissionsOpen = asBoolean(nextSettings.submissionsOpen);
+      settings.votingOpen = asBoolean(nextSettings.votingOpen);
+      settings.submissionDeadline = nextSettings.submissionDeadline || "";
+      settings.votingDeadline = nextSettings.votingDeadline || "";
+      syncDeadlineInputs();
+      syncControlInputs();
+      updateCompetitionMode(false);
+    }
+
+    function publicDataSignature(visions) {
+      return JSON.stringify({
+        settings: {
+          submissionsOpen: settings.submissionsOpen,
+          votingOpen: settings.votingOpen,
+          submissionDeadline: settings.submissionDeadline,
+          votingDeadline: settings.votingDeadline
+        },
+        visions: visions.map((vision) => ({
+          id: vision.id, createdAt: vision.createdAt, publishedAt: vision.publishedAt,
+          team: vision.team, track: vision.track, prompt: vision.prompt, image: vision.image,
+          color: vision.color, height: vision.height, votes: vision.votes, imageSource: vision.imageSource
+        }))
+      });
+    }
+
+    function restorePublicCache() {
+      if (!GOOGLE_APPS_SCRIPT_URL || hasRemoteSync) return false;
+      try {
+        const cached = JSON.parse(sessionStorage.getItem(PUBLIC_CACHE_KEY) || "null");
+        if (!cached || !Array.isArray(cached.visions) || Date.now() - Number(cached.savedAt || 0) > PUBLIC_CACHE_TTL) return false;
+        applyPublicSettings(cached.settings);
+        activeVisions = cached.visions.filter((vision) => String(vision.status || "published").toLowerCase() === "published");
+        hasRemoteSync = true;
+        lastGalleryDataSignature = publicDataSignature(activeVisions);
+        updateGalleryFilters();
+        renderGallery();
+        count.textContent = String(activeVisions.length);
+        note.textContent = t("lastSync") + " · cached";
+        syncState.textContent = t("receiving");
+        return true;
+      } catch (error) {
+        sessionStorage.removeItem(PUBLIC_CACHE_KEY);
+        return false;
+      }
     }
 
     async function saveRemoteSettings() {
@@ -1934,7 +1985,8 @@
         await adminRequest("pending");
         organizerUnlocked = true;
         organizerDetails.hidden = false;
-        organizerAccess.hidden = true;
+        organizerDetails.open = true;
+        organizerAccess.classList.add("is-unlocked");
         hideOrganizerLogin();
         await loadReviewQueue();
       } catch (error) {
@@ -1953,7 +2005,7 @@
         await adminRequest("pending");
         organizerUnlocked = true;
         organizerDetails.hidden = false;
-        organizerAccess.hidden = true;
+        organizerAccess.classList.add("is-unlocked");
         hideOrganizerLogin();
         await loadReviewQueue();
       } catch (error) {
@@ -1966,21 +2018,17 @@
     // Uses the Google Apps Script backend when configured, otherwise local demo data.
     async function fetchVisionBatch() {
       if (GOOGLE_APPS_SCRIPT_URL) {
-        const result = await googleRequest("visions");
-        if (result.settings) {
-          settings.submissionsOpen = Boolean(result.settings.submissionsOpen);
-          settings.votingOpen = Boolean(result.settings.votingOpen);
-          settings.submissionDeadline = result.settings.submissionDeadline || "";
-          settings.votingDeadline = result.settings.votingDeadline || "";
-          syncDeadlineInputs();
-          syncControlInputs();
-          updateCompetitionMode(false);
-        }
-        return (result.visions || []).filter((vision) =>
+        const result = await googleRequest("visions", {}, { method: "GET" });
+        applyPublicSettings(result.settings);
+        const visions = (result.visions || []).filter((vision) =>
           String(vision.status || "").toLowerCase() === "published"
         );
+        try {
+          sessionStorage.setItem(PUBLIC_CACHE_KEY, JSON.stringify({ savedAt: Date.now(), settings: { ...settings }, visions }));
+        } catch (error) { /* A full session cache is non-fatal. */ }
+        return visions;
       }
-      await new Promise((resolve) => setTimeout(resolve, 420));
+      await new Promise((resolve) => setTimeout(resolve, 180));
       return [
         ...sourceVisions.map((vision) => ({ ...vision, status: "published", imageSource: vision.imageSource || "curated" })),
         ...localPublishedVisions.filter((vision) =>
@@ -2000,30 +2048,41 @@
     }
 
     async function syncGallery() {
-      syncState.textContent = t("receiving");
-      try {
-        const visions = await fetchVisionBatch();
-        activeVisions = visions;
-        updatePublicCompetitionState();
-        const selectedVision = localStorage.getItem("imagineSaudiVote");
-        if (selectedVision && !visions.some((vision) => visionKey(vision) === selectedVision || vision.team === selectedVision)) {
-          localStorage.removeItem("imagineSaudiVote");
+      if (publicSyncInFlight) return publicSyncInFlight;
+      publicSyncInFlight = (async () => {
+        syncState.textContent = t("receiving");
+        try {
+          const visions = await fetchVisionBatch();
+          activeVisions = visions;
+          hasRemoteSync = true;
+          updatePublicCompetitionState();
+          const selectedVision = localStorage.getItem("imagineSaudiVote");
+          if (selectedVision && !visions.some((vision) => visionKey(vision) === selectedVision || vision.team === selectedVision)) {
+            localStorage.removeItem("imagineSaudiVote");
+          }
+          const nextSignature = publicDataSignature(visions);
+          const dataChanged = nextSignature !== lastGalleryDataSignature;
+          if (dataChanged) {
+            lastGalleryDataSignature = nextSignature;
+            updateGalleryFilters();
+            renderGallery();
+          }
+          const countChanged = count.textContent !== String(visions.length);
+          count.textContent = visions.length;
+          if (countChanged) {
+            count.classList.remove("bump");
+            requestAnimationFrame(() => count.classList.add("bump"));
+          }
+          note.textContent = t("lastSync") + " · " + new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
+          syncState.textContent = t("connected");
+        } catch (error) {
+          syncState.textContent = t("retrying");
+          note.textContent = t("unavailable");
+          console.error("Gallery sync failed:", error);
         }
-        updateGalleryFilters();
-        renderGallery();
-        const countChanged = count.textContent !== String(visions.length);
-        count.textContent = visions.length;
-        if (countChanged) {
-          count.classList.remove("bump");
-          requestAnimationFrame(() => count.classList.add("bump"));
-        }
-        note.textContent = `${t("lastSync")} · ${new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}`;
-        syncState.textContent = t("connected");
-      } catch (error) {
-        syncState.textContent = t("retrying");
-        note.textContent = t("unavailable");
-        console.error("Gallery sync failed:", error);
-      }
+      })();
+      try { return await publicSyncInFlight; }
+      finally { publicSyncInFlight = null; }
     }
 
     async function voteForVision(index) {
@@ -2229,12 +2288,15 @@
     async function loadReviewQueue() {
       reviewQueue.innerHTML = `<p class="review-empty">${t("reviewLoading")}</p>`;
       try {
-        const pending = GOOGLE_APPS_SCRIPT_URL
-          ? (await adminRequest("pending")).visions || []
-          : pendingVisions;
-        pendingOrganizerRecords = pending;
+        const snapshot = GOOGLE_APPS_SCRIPT_URL
+          ? await adminRequest("organizerSnapshot")
+          : { settings, pending: pendingVisions, published: [...sourceVisions, ...localPublishedVisions] };
+        applyPublicSettings(snapshot.settings);
+        pendingOrganizerRecords = snapshot.pending || [];
+        publishedOrganizerRecords = snapshot.published || [];
         updateReviewFilters();
-        await loadPublishedQueue();
+        updateOrganizerSummary();
+        rerenderReviewQueues();
       } catch (error) {
         reviewQueue.innerHTML = `<p class="review-empty">${t("reviewError")}</p>`;
         publishedQueue.innerHTML = `<p class="review-empty">${t("reviewError")}</p>`;
@@ -2313,9 +2375,9 @@
       organizerUnlocked = false;
       sessionStorage.removeItem("imagineSaudiOrganizerKey");
       organizerDetails.open = false;
-      organizerDetails.hidden = true;
-      organizerAccess.hidden = false;
-      organizerStatus.textContent = t("organizerLocked");
+       organizerDetails.hidden = true;
+       organizerAccess.classList.remove("is-unlocked");
+       organizerStatus.textContent = t("organizerLocked");
       animateInteraction(organizerAccess, "is-confirmed");
     }
 
@@ -2394,7 +2456,15 @@
     submissionDeadlineInput.addEventListener("change", () => saveDeadlineSetting("submissionDeadline", submissionDeadlineInput, "imagineSaudiSubmissionDeadline"));
     votingDeadlineInput.addEventListener("change", () => saveDeadlineSetting("votingDeadline", votingDeadlineInput, "imagineSaudiVotingDeadline"));
 
-    organizerAccess.addEventListener("click", unlockOrganizerControls);
+    organizerAccess.addEventListener("click", () => {
+      if (organizerUnlocked) {
+        organizerDetails.hidden = false;
+        organizerDetails.open = true;
+        loadReviewQueue();
+      } else {
+        unlockOrganizerControls();
+      }
+    });
     organizerLogin.addEventListener("submit", (event) => {
       event.preventDefault();
       const key = organizerKeyInput.value.trim();
@@ -2421,9 +2491,10 @@
       if (organizerDetails.open) loadReviewQueue();
     });
     languageToggle.addEventListener("click", () => applyLanguage(currentLanguage === "ar" ? "en" : "ar"));
+    restorePublicCache();
     applyLanguage(currentLanguage);
     restoreOrganizerSession();
-    setInterval(syncGallery, 8000);
+    setInterval(syncGallery, 5000);
     setInterval(updatePublicCompetitionState, 1000);
   </script>
 </body>
