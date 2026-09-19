@@ -505,13 +505,20 @@ function rows_(sheet) {
   return sheet.getRange(2, 1, sheet.getLastRow() - 1, sheet.getLastColumn()).getValues();
 }
 
+function sheetHeaders_(sheet) {
+  return sheet.getRange(1, 1, 1, Math.max(1, sheet.getLastColumn())).getValues()[0];
+}
+
 function objectRows_(definition) {
   const sheet = getSheet_(definition);
-  const headers = definition.headers;
+  const headers = sheetHeaders_(sheet);
   return rows_(sheet).map(function(row, index) {
     const record = { _row: index + 2, _sheet: sheet };
     headers.forEach(function(header, column) {
-      record[header] = row[column];
+      if (header) record[header] = row[column];
+    });
+    definition.headers.forEach(function(header) {
+      if (record[header] === undefined) record[header] = "";
     });
     return record;
   });
@@ -519,7 +526,8 @@ function objectRows_(definition) {
 
 function appendRecord_(definition, record) {
   const sheet = getSheet_(definition);
-  const values = definition.headers.map(function(header) {
+  const headers = sheetHeaders_(sheet);
+  const values = headers.map(function(header) {
     return record[header] === undefined ? "" : record[header];
   });
   sheet.appendRow(values);
