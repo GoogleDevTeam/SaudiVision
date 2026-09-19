@@ -453,6 +453,12 @@ Before coding, inspect the latest `main` branch and the live deployment state. T
 - It now has independent space and a larger readable touch target without changing header height or competing with the institution logo.
 - Frontend commit: `6809bd787e3f05888f76b964ef48b54a0675a5d3`.
 
+### Top header cleanup — 2026-09-19
+
+- Removed the top header label **مسابقة رؤى المستقبل / 2050** to create more breathing room.
+- Kept the main hero title, institution logo, language switch, and organizer controls unchanged.
+- Frontend commit: `59e370648365361b60fb5e2a538307ca25b3a54f`.
+
 ### Next recommended step
 
 Deploy the updated google-apps-script.gs once, then test descriptions that intentionally combine two or three ideas. Confirm the generated image follows the participant's wording while using the selected track only as a broad lens.
