@@ -61,11 +61,26 @@
       mask-image: linear-gradient(to bottom, #000, transparent 80%);
     }
 
-    body::after { display: none; }
+    body::after {
+      position: fixed;
+      z-index: 0;
+      inset: -18%;
+      opacity: .22;
+      pointer-events: none;
+      content: "";
+      background:
+        radial-gradient(ellipse at 50% 108%, rgba(44, 117, 98, .42), transparent 47%),
+        radial-gradient(ellipse at 22% 92%, rgba(155, 138, 196, .2), transparent 38%),
+        linear-gradient(180deg, transparent 18%, rgba(216, 208, 237, .035) 56%, rgba(44, 117, 98, .16) 100%);
+      filter: blur(22px);
+      transform: translate3d(0, 10%, 0) scale(1.08);
+      animation: rise-build 26s ease-in-out infinite alternate;
+    }
 
     .page-shell {
       position: relative;
       isolation: isolate;
+      z-index: 1;
       width: min(calc(100% - (var(--page-gutter) * 2)), 1720px);
       margin: 0 auto;
       padding: 36px 0 80px;
@@ -708,6 +723,11 @@
     @keyframes ambient-shift {
       from { background-position: 0% 0%; }
       to { background-position: 100% 35%; }
+    }
+    @keyframes rise-build {
+      0% { opacity: .14; transform: translate3d(0, 11%, 0) scale(1.08); }
+      52% { opacity: .26; transform: translate3d(0, 0%, 0) scale(1.03); }
+      100% { opacity: .2; transform: translate3d(0, -7%, 0) scale(1); }
     }
     @keyframes drift-shape {
       from { transform: translate3d(0, 0, 0) rotate(24deg); }
