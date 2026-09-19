@@ -478,6 +478,7 @@
     .field.full { grid-column: 1 / -1; }
     .track-field select { min-height: 50px; padding-block: 8px; border-color: rgba(155, 138, 196, .48); box-shadow: inset 0 0 18px rgba(155, 138, 196, .07); font-size: .84rem; font-weight: 600; }
     .track-field label { color: var(--light-lavender); font-size: .78rem; font-weight: 700; }
+    .track-enhancer { color: var(--cyan); min-height: 2.4em; }
     .field label { color: var(--muted); font-family: "Cairo", sans-serif; font-size: .73rem; }
     .field-helper { margin: -2px 0 0; color: var(--dim); font-family: "Cairo", sans-serif; font-size: .62rem; line-height: 1.45; }
     .field input, .field select, .field textarea {
@@ -1073,6 +1074,7 @@
          </div>
          <div class="organizer-actions">
            <button class="organizer-action" id="organizer-refresh" type="button" data-en="↻ Refresh all" data-ar="↻ تحديث الكل">↻ Refresh all</button>
+           <button class="organizer-action" id="organizer-reset-submissions" type="button" data-en="Reset participant submissions" data-ar="إعادة فتح مشاركات المشاركين">Reset participant submissions</button>
            <button class="organizer-action" id="organizer-export" type="button" data-en="↓ Export CSV" data-ar="↓ تصدير CSV">↓ Export CSV</button>
            <button class="organizer-action" id="organizer-export-json" type="button" data-en="{ } Export JSON" data-ar="{ } تصدير JSON">{ } Export JSON</button>
            <button class="organizer-action danger" id="organizer-lock" type="button" data-en="Lock organizer panel" data-ar="قفل لوحة المنظم">Lock organizer panel</button>
@@ -1170,8 +1172,16 @@
             <option value="Water Security" data-en="Water Security" data-ar="أمن المياه / Water Security">أمن المياه / Water Security</option>
             <option value="Blue Economy" data-en="Blue Economy" data-ar="الاقتصاد الأزرق / Blue Economy">الاقتصاد الأزرق / Blue Economy</option>
             <option value="Circular Cities" data-en="Circular Cities" data-ar="المدن الدائرية / Circular Cities">المدن الدائرية / Circular Cities</option>
+            <option value="Future Food & Agriculture" data-en="Future Food & Agriculture" data-ar="الغذاء والزراعة المستقبلية / Future Food & Agriculture">الغذاء والزراعة المستقبلية / Future Food &amp; Agriculture</option>
+            <option value="Health & Wellbeing" data-en="Health & Wellbeing" data-ar="الصحة وجودة الحياة / Health & Wellbeing">الصحة وجودة الحياة / Health &amp; Wellbeing</option>
+            <option value="Education & Skills" data-en="Education & Skills" data-ar="التعليم والمهارات / Education & Skills">التعليم والمهارات / Education &amp; Skills</option>
+            <option value="Tourism & Culture" data-en="Tourism & Culture" data-ar="السياحة والثقافة / Tourism & Culture">السياحة والثقافة / Tourism &amp; Culture</option>
+            <option value="Digital Society & Governance" data-en="Digital Society & Governance" data-ar="المجتمع الرقمي والحوكمة / Digital Society & Governance">المجتمع الرقمي والحوكمة / Digital Society &amp; Governance</option>
+            <option value="Advanced Energy & Industry" data-en="Advanced Energy & Industry" data-ar="الطاقة والصناعة المتقدمة / Advanced Energy & Industry">الطاقة والصناعة المتقدمة / Advanced Energy &amp; Industry</option>
+            <option value="Other" data-en="Other" data-ar="أخرى / Other">أخرى / Other</option>
           </select>
           <small class="field-helper" data-en="Choose the strategic direction that best fits your vision." data-ar="اختاروا المسار الاستراتيجي الأقرب إلى رؤيتكم.">Choose the strategic direction that best fits your vision.</small>
+          <small class="field-helper track-enhancer" id="track-enhancer" aria-live="polite"></small>
         </div>
         <div class="field full">
           <label for="title-input" data-en="Vision title" data-ar="عنوان الرؤية">Vision title</label>
@@ -1429,6 +1439,8 @@
     const note = document.getElementById("sync-note");
     const syncState = document.getElementById("sync-state");
     const form = document.getElementById("vision-form");
+    const trackInput = document.getElementById("track-input");
+    const trackEnhancer = document.getElementById("track-enhancer");
     const formNote = document.getElementById("form-note");
     const generateButton = document.getElementById("generate-button");
     const submissionPanel = document.getElementById("submission-panel");
@@ -1447,6 +1459,7 @@
     const organizerLeader = document.getElementById("organizer-leader");
     const resultsLeaderboard = document.getElementById("results-leaderboard");
     const organizerRefresh = document.getElementById("organizer-refresh");
+    const organizerResetSubmissions = document.getElementById("organizer-reset-submissions");
     const organizerExport = document.getElementById("organizer-export");
     const organizerExportJson = document.getElementById("organizer-export-json");
     const organizerLock = document.getElementById("organizer-lock");
@@ -1474,13 +1487,19 @@
       submissionsOpen: localStorage.getItem("imagineSaudiSubmissions") !== "false",
       votingOpen: localStorage.getItem("imagineSaudiVoting") !== "false",
       submissionDeadline: localStorage.getItem("imagineSaudiSubmissionDeadline") || "",
-      votingDeadline: localStorage.getItem("imagineSaudiVotingDeadline") || ""
+      votingDeadline: localStorage.getItem("imagineSaudiVotingDeadline") || "",
+      submissionRound: localStorage.getItem("imagineSaudiSubmissionRound") || "1"
     };
     const voterId = localStorage.getItem("imagineSaudiVoterId") ||
       (window.crypto && typeof window.crypto.randomUUID === "function"
         ? window.crypto.randomUUID()
         : `voter-${Date.now()}-${Math.random().toString(36).slice(2)}`);
     localStorage.setItem("imagineSaudiVoterId", voterId);
+    const participantId = localStorage.getItem("imagineSaudiParticipantId") ||
+      (window.crypto && typeof window.crypto.randomUUID === "function"
+        ? window.crypto.randomUUID()
+        : "participant-" + Date.now() + "-" + Math.random().toString(36).slice(2));
+    localStorage.setItem("imagineSaudiParticipantId", participantId);
     let currentLanguage = localStorage.getItem("imagineSaudiLanguage") || "ar";
     let organizerKey = sessionStorage.getItem("imagineSaudiOrganizerKey") || "";
     let organizerUnlocked = false;
@@ -1505,6 +1524,23 @@
     let localPublishedVisions = readLocalArray("imagineSaudiPublished")
       .filter((vision) => vision && String(vision.status || "").toLowerCase() === "published");
     let voteInFlight = false;
+    const TRACK_PROMPT_ENHANCERS = {
+      "Green Tech": { en: "Prioritize renewable energy, low-carbon materials, climate resilience, and visible harmony with Saudi landscapes.", ar: "ركّزوا على الطاقة المتجددة والمواد منخفضة الكربون والمرونة المناخية وانسجام واضح مع طبيعة السعودية." },
+      "Smart Mobility": { en: "Show clean, accessible movement between Saudi communities through intelligent transport, walkability, and connected infrastructure.", ar: "أظهروا تنقّلًا نظيفًا وسهل الوصول بين المجتمعات السعودية عبر النقل الذكي والمشي والبنية المترابطة." },
+      "Heritage AI": { en: "Blend Saudi heritage, crafts, language, and historic places with respectful, human-centered artificial intelligence.", ar: "اخلطوا التراث والحرف واللغة والمواقع التاريخية السعودية مع ذكاء اصطناعي يحترم الإنسان والهوية." },
+      "NEOM": { en: "Imagine a bold, credible next-generation Saudi destination with advanced architecture, nature protection, and human wellbeing.", ar: "تخيّلوا وجهة سعودية جريئة وواقعية من الجيل القادم تجمع العمارة المتقدمة وحماية الطبيعة وجودة حياة الإنسان." },
+      "Human Potential": { en: "Center people, inclusion, talent, creativity, and healthier everyday life in a future built around human potential.", ar: "اجعلوا الإنسان والشمول والموهبة والإبداع وجودة الحياة اليومية محور مستقبل يبني على القدرات البشرية." },
+      "Water Security": { en: "Visualize resilient Saudi water systems using conservation, desalination, reuse, smart distribution, and restored ecosystems.", ar: "صوّروا أنظمة مياه سعودية مرنة تجمع الترشيد والتحلية وإعادة الاستخدام والتوزيع الذكي واستعادة النظم البيئية." },
+      "Blue Economy": { en: "Highlight responsible coastal innovation, marine science, clean seas, fisheries, and sustainable economic life along the Red Sea and Gulf.", ar: "أبرزوا الابتكار الساحلي المسؤول وعلوم البحار ونظافة السواحل ومصائد الأسماك والاقتصاد المستدام على البحر الأحمر والخليج." },
+      "Circular Cities": { en: "Show cities that design out waste through repair, reuse, renewable materials, efficient buildings, and regenerative public spaces.", ar: "أظهروا مدنًا تقلل الهدر عبر الإصلاح وإعادة الاستخدام والمواد المتجددة والمباني الكفؤة والمساحات العامة المتجددة." },
+      "Future Food & Agriculture": { en: "Show climate-smart Saudi food systems with local production, precision agriculture, vertical growing, and nourishing communities.", ar: "أظهروا أنظمة غذاء وزراعة سعودية ذكية مناخيًا تجمع الإنتاج المحلي والزراعة الدقيقة والزراعة الرأسية ومجتمعات صحية." },
+      "Health & Wellbeing": { en: "Depict preventive care, accessible health technology, active communities, mental wellbeing, and compassionate care for all ages.", ar: "صوّروا الوقاية والتقنيات الصحية الميسّرة والمجتمعات النشطة والصحة النفسية ورعاية رحيمة لكل الأعمار." },
+      "Education & Skills": { en: "Imagine joyful lifelong learning, practical future skills, creative classrooms, and equal access to knowledge across Saudi Arabia.", ar: "تخيّلوا تعلّمًا مستمرًا ممتعًا ومهارات مستقبلية عملية وفصولًا إبداعية ووصولًا عادلًا إلى المعرفة في السعودية." },
+      "Tourism & Culture": { en: "Celebrate authentic Saudi places, stories, arts, and hospitality through low-impact tourism that benefits local communities.", ar: "احتفوا بالأماكن والقصص والفنون والضيافة السعودية الأصيلة عبر سياحة منخفضة الأثر تفيد المجتمعات المحلية." },
+      "Digital Society & Governance": { en: "Show trusted, inclusive digital public services that make communities safer, more transparent, and easier to participate in.", ar: "أظهروا خدمات عامة رقمية موثوقة وشاملة تجعل المجتمعات أكثر أمانًا وشفافية وسهولة في المشاركة." },
+      "Advanced Energy & Industry": { en: "Visualize clean industry, advanced manufacturing, robotics, and energy systems creating skilled work without losing human scale.", ar: "صوّروا صناعة نظيفة وتصنيعًا متقدمًا وروبوتات وأنظمة طاقة تخلق أعمالًا ماهرة وتحافظ على البعد الإنساني." },
+      "Other": { en: "Use the participant’s idea as the lead and build a broad, optimistic Saudi 2050 future scene without forcing it into another track.", ar: "اجعلوا فكرة المشارك هي الأساس وابنوا مشهدًا واسعًا ومتفائلًا لمستقبل السعودية 2050 دون فرضها على مسار آخر." }
+    };
     const copy = {
       en: {
         receiving: "Receiving new visions...",
@@ -1536,8 +1572,13 @@
         status: "Submissions {submissions} · Voting {voting}.",
         open: "open",
         closed: "closed",
-         imageDemo: "Live AI preview generated with Gemini.",
-         imageGenerating: "Creating your live AI visual preview...",
+         imageDemo: "One single AI image is generated with Gemini for each submission.",
+         imageGenerating: "Creating your one-image AI visual...",
+         trackEnhancerPrefix: "Image prompt enhancer: ",
+         submissionAlreadyUsed: "You already submitted once in this round. The organizer can reset submissions for another round.",
+         resetSubmissions: "Reset participant submissions",
+         resetSubmissionsConfirm: "Start a new submission round? Existing submissions will stay safe, and each participant can submit once again.",
+         submissionReset: "Submission round reset. Participants can submit once again.",
          imageGeneratingButton: "⟳ Creating AI visual...",
          imageAdded: "Your vision was published to the gallery.",
         imageQueued: "Your vision was received and is waiting for organizer approval.",
@@ -1609,8 +1650,13 @@
         status: "المشاركات {submissions} · التصويت {voting}.",
         open: "مفتوحة",
         closed: "مغلقة",
-         imageDemo: "تصور مباشر مولّد باستخدام Gemini.",
-         imageGenerating: "جارٍ إنشاء تصور بصري مباشر بالذكاء الاصطناعي...",
+         imageDemo: "يتم إنشاء صورة واحدة فقط بالذكاء الاصطناعي لكل مشاركة باستخدام Gemini.",
+         imageGenerating: "يتم الآن إنشاء الصورة الوحيدة للمشاركة...",
+         trackEnhancerPrefix: "مُحسّن مطالبة الصورة: ",
+         submissionAlreadyUsed: "لقد أرسلتم مشاركة واحدة في هذه الجولة. يستطيع المنظم إعادة فتح المشاركات لبدء جولة جديدة.",
+         resetSubmissions: "إعادة فتح مشاركات المشاركين",
+         resetSubmissionsConfirm: "بدء جولة تقديم جديدة؟ ستبقى المشاركات الحالية محفوظة، وسيتمكن كل مشارك من الإرسال مرة أخرى.",
+         submissionReset: "تمت إعادة فتح جولة التقديم. يمكن للمشاركين الإرسال مرة أخرى.",
          imageGeneratingButton: "⟳ جارٍ إنشاء التصور بالذكاء الاصطناعي...",
          imageAdded: "تم نشر رؤيتكم في المعرض.",
         imageQueued: "تم استلام رؤيتكم وهي بانتظار موافقة المنظم.",
@@ -1697,6 +1743,15 @@
       return copy[currentLanguage][key] || copy.en[key] || key;
     }
 
+    function updateTrackEnhancer() {
+      const enhancer = TRACK_PROMPT_ENHANCERS[trackInput.value] || TRACK_PROMPT_ENHANCERS.Other;
+      trackEnhancer.textContent = t("trackEnhancerPrefix") + enhancer[currentLanguage];
+    }
+
+    function isSubmissionLocked() {
+      return localStorage.getItem("imagineSaudiSubmittedRound") === String(settings.submissionRound || "1");
+    }
+
     function applyLanguage(language) {
       currentLanguage = language === "en" ? "en" : "ar";
       localStorage.setItem("imagineSaudiLanguage", currentLanguage);
@@ -1718,6 +1773,7 @@
         element.setAttribute("aria-label", element.dataset[currentLanguage === "ar" ? "ariaAr" : "ariaEn"]);
       });
       updateCompetitionMode(false);
+      updateTrackEnhancer();
       updateGalleryFilters();
       syncGallery();
       if (organizerDetails.open) loadReviewQueue();
@@ -1939,6 +1995,8 @@
       settings.votingOpen = asBoolean(nextSettings.votingOpen);
       settings.submissionDeadline = nextSettings.submissionDeadline || "";
       settings.votingDeadline = nextSettings.votingDeadline || "";
+      settings.submissionRound = String(nextSettings.submissionRound || settings.submissionRound || "1");
+      localStorage.setItem("imagineSaudiSubmissionRound", settings.submissionRound);
       syncDeadlineInputs();
       syncControlInputs();
       updateCompetitionMode(false);
@@ -1950,7 +2008,8 @@
           submissionsOpen: settings.submissionsOpen,
           votingOpen: settings.votingOpen,
           submissionDeadline: settings.submissionDeadline,
-          votingDeadline: settings.votingDeadline
+          votingDeadline: settings.votingDeadline,
+          submissionRound: settings.submissionRound
         },
         visions: visions.map((vision) => ({
           id: vision.id, createdAt: vision.createdAt, publishedAt: vision.publishedAt,
@@ -2214,7 +2273,10 @@
 
     form.addEventListener("submit", async (event) => {
       event.preventDefault();
-      if (!settings.submissionsOpen) return;
+      if (!settings.submissionsOpen || isSubmissionLocked()) {
+        updateCompetitionMode(false);
+        return;
+      }
       const data = new FormData(form);
       const team = String(data.get("team") || "").trim();
       const title = String(data.get("title") || "").trim();
@@ -2245,6 +2307,8 @@
         title,
         track,
         prompt,
+        participantId,
+        submissionRound: settings.submissionRound,
         image: "",
         color: colors[track] || "#D8D0ED",
          height: 280 + (((sourceVisions.length + localPublishedVisions.length) * 37) % 100),
@@ -2262,6 +2326,7 @@
         return;
       }
 
+      localStorage.setItem("imagineSaudiSubmittedRound", String(settings.submissionRound || "1"));
       form.reset();
       generateButton.disabled = false;
        generateButton.classList.remove("is-generating");
@@ -2515,10 +2580,13 @@
       syncControlInputs();
       organizerStatus.classList.remove("is-error");
       submissionPanel.classList.toggle("is-closed", !settings.submissionsOpen);
+      formNote.textContent = isSubmissionLocked()
+        ? t("submissionAlreadyUsed")
+        : settings.submissionsOpen ? t("imageDemo") : t("submissionClosed");
       form.querySelectorAll("input, select, textarea, button").forEach((element) => {
-        element.disabled = !settings.submissionsOpen;
+        element.disabled = !settings.submissionsOpen || isSubmissionLocked();
       });
-      formNote.textContent = settings.submissionsOpen ? t("imageDemo") : t("submissionClosed");
+      updateTrackEnhancer();
       votingStatus.textContent = settings.votingOpen ? t("votingOpen") : t("votingClosed");
       updatePublicCompetitionState();
       organizerStatus.textContent = settings.submissionsOpen && settings.votingOpen
@@ -2579,6 +2647,31 @@
 
     submissionDeadlineInput.addEventListener("change", () => saveDeadlineSetting("submissionDeadline", submissionDeadlineInput, "imagineSaudiSubmissionDeadline"));
     votingDeadlineInput.addEventListener("change", () => saveDeadlineSetting("votingDeadline", votingDeadlineInput, "imagineSaudiVotingDeadline"));
+    trackInput.addEventListener("change", updateTrackEnhancer);
+
+    async function resetParticipantSubmissions() {
+      if (!window.confirm(t("resetSubmissionsConfirm"))) return;
+      organizerResetSubmissions.disabled = true;
+      try {
+        if (GOOGLE_APPS_SCRIPT_URL) {
+          const result = await adminRequest("resetSubmissions", {});
+          applyPublicSettings(result.settings || { submissionRound: result.submissionRound });
+        } else {
+          settings.submissionRound = String((Number(settings.submissionRound) || 1) + 1);
+          localStorage.setItem("imagineSaudiSubmissionRound", settings.submissionRound);
+        }
+        localStorage.removeItem("imagineSaudiSubmittedRound");
+        organizerStatus.textContent = t("submissionReset");
+        organizerStatus.classList.remove("is-error");
+        updateCompetitionMode(false);
+      } catch (error) {
+        showOrganizerError(error);
+      } finally {
+        organizerResetSubmissions.disabled = false;
+      }
+    }
+
+    organizerResetSubmissions.addEventListener("click", resetParticipantSubmissions);
 
     organizerAccess.addEventListener("click", async () => {
       if (organizerUnlocked) {
