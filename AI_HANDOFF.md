@@ -41,7 +41,7 @@ This is an interactive future-vision competition for Google Developer Groups on 
 The flow is:
 
 1. A participant submits a group name, strategic track, and Saudi Arabia 2050 vision.
-2. The frontend creates a deterministic demo concept preview. It is not real AI image generation yet.
+2. The frontend asks the Apps Script backend for one server-generated concept image, then keeps the submission pending until organizer approval. Local demo mode remains available when the backend URL is empty.
 3. Every new submission enters `pending`.
 4. Organizers review pending submissions.
 5. Organizers approve/publish or permanently delete submissions.
@@ -90,7 +90,7 @@ The experience should remain deep green, projector-friendly, modern Saudi, softl
 - Public gallery search by team, track, and vision text.
 - Public gallery track filter.
 - Public gallery sorting by featured order, vote count, or newest.
-- Demo preview labels so the frontend does not falsely claim real AI image generation.
+- Clear generated-image and demo-preview labels so the frontend does not confuse live generation with local fallback content.
 
 ### Recent fixes
 
@@ -137,7 +137,7 @@ Never ask for, print, commit, or expose `ADMIN_KEY`. It is stored in Apps Script
 - Preserve the existing Google Sheet tabs and workflow.
 - Use small, targeted changes.
 - Run JavaScript syntax checks after frontend or Apps Script changes.
-- Do not claim real AI image generation works; the current source is `demo-preview`.
+- Do not claim local fallback images are AI-generated; live submissions use `imageSource: generated` only after the backend succeeds.
 
 ## Recommended next implementation
 
@@ -363,6 +363,16 @@ Before coding, inspect the latest `main` branch and the live deployment state. T
 - The frontend checks aiStatus immediately before submission and shows a direct setup message instead of waiting for a failed image request.
 - Added stronger image-generation constraints: one coherent 16:9 editorial scene, plausible near-future design, restrained local palette, one focal subject, and no text, logos, flags, collages, or variations.
 - Source files updated: index.html and google-apps-script.gs. Apps Script still needs the updated backend source deployed once; after that, future API-key changes only require updating the Script property.
+
+### Professional hardening and motion pass — 2026-09-19
+
+- Fixed deadline consistency across the frontend and backend: expired submission deadlines now close the form, expired voting deadlines now show results mode, and unvote is rejected after the voting deadline.
+- Fixed a submission-state bug where the “submitting” pulse could remain active forever after success or failure.
+- Removed the forced 45-frame scroll-to-top loop so browser back/forward restoration and deep links behave normally.
+- Set the initial document direction to Arabic/RTL to match the default rendered language and reduce first-paint layout and screen-reader mismatch.
+- Added logical RTL-safe positioning, visible keyboard focus states, live submission status announcements, responsive countdown stacking, and a subtle IntersectionObserver reveal layer with reduced-motion support.
+- Added `.github/workflows/quality.yml` to validate inline frontend JavaScript, Apps Script syntax, and required brand assets on pushes and pull requests.
+- Source changes are ready in GitHub. The Apps Script backend must be copied and redeployed for the unvote deadline guard to become live; GitHub Pages will build the frontend and quality workflow from the next commit.
 
 ### Spreadsheet operations and burst-safety upgrade — 2026-09-19
 
