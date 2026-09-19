@@ -389,6 +389,13 @@ Before coding, inspect the latest `main` branch and the live deployment state. T
 - The selected track supplies context only; it cannot narrow, contradict, or add an unrelated concept to the participant's idea.
 - Bumped the prompt version to v5 so the spreadsheet shows which submissions used the new description-led behavior.
 
+### Visual copy update — 2026-09-19
+
+- Updated the three public event-flow cards to match the supplied Arabic reference: imagine and describe the Saudi 2050 idea, turn it into an AI image, then vote for the design that best reflects the Kingdom's future.
+- Kept the English translations aligned with the Arabic copy and changed no submission, moderation, voting, or backend behavior.
+- Frontend commit: `afe33d25a978135e77ef4441516e0f676bff307d`.
+- GitHub Pages should build the updated frontend from the new commit; Apps Script does not need redeployment for this copy-only change.
+
 ### Next recommended step
 
 Deploy the updated google-apps-script.gs once, then test descriptions that intentionally combine two or three ideas. Confirm the generated image follows the participant's wording while using the selected track only as a broad lens.
