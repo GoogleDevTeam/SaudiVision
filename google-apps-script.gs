@@ -142,21 +142,27 @@ const DEFAULT_SETTINGS = {
 };
 
 const TRACK_PROMPT_ENHANCERS_ = {
-  "Green Tech": "Prioritize renewable energy, low-carbon materials, climate resilience, and harmony with Saudi landscapes.",
-  "Smart Mobility": "Show clean, accessible movement through intelligent transport, walkability, and connected infrastructure.",
-  "Heritage AI": "Blend Saudi heritage, crafts, language, and historic places with respectful, human-centered AI.",
-  "NEOM": "Imagine a credible next-generation Saudi destination with advanced architecture, nature protection, and human wellbeing.",
-  "Human Potential": "Center people, inclusion, talent, creativity, and healthier everyday life.",
-  "Water Security": "Visualize resilient water systems using conservation, desalination, reuse, smart distribution, and restored ecosystems.",
-  "Blue Economy": "Highlight responsible coastal innovation, marine science, clean seas, fisheries, and sustainable life along the Red Sea and Gulf.",
-  "Circular Cities": "Show cities that design out waste through repair, reuse, renewable materials, efficient buildings, and regenerative public spaces.",
-  "Future Food & Agriculture": "Show climate-smart food systems with local production, precision agriculture, vertical growing, and nourishing communities.",
-  "Health & Wellbeing": "Depict preventive care, accessible health technology, active communities, mental wellbeing, and compassionate care for all ages.",
-  "Education & Skills": "Imagine joyful lifelong learning, practical future skills, creative classrooms, and equal access to knowledge.",
-  "Tourism & Culture": "Celebrate authentic Saudi places, stories, arts, and hospitality through low-impact tourism that benefits local communities.",
+  "Green Tech & Energy": "Blend renewable energy, low-carbon materials, climate resilience, advanced manufacturing, and skilled green work in harmony with Saudi landscapes.",
+  "Smart Mobility & Future Cities": "Show clean, accessible movement, walkable connected neighborhoods, circular buildings, protected nature, and credible next-generation destinations.",
+  "Heritage, Culture & Tourism": "Blend Saudi heritage, crafts, language, historic places, arts, and hospitality with respectful technology and low-impact tourism that benefits local communities.",
+  "Human Potential & Wellbeing": "Center inclusion, talent, creativity, lifelong learning, future skills, preventive care, mental wellbeing, and compassionate everyday life for all ages.",
+  "Water & Oceans": "Visualize resilient water and coastal systems through conservation, desalination, reuse, smart distribution, marine science, clean seas, fisheries, and restored ecosystems across the Red Sea and Gulf.",
+  "Future Food & Agriculture": "Show climate-smart Saudi food systems with local production, precision agriculture, vertical growing, and nourishing communities.",
   "Digital Society & Governance": "Show trusted, inclusive digital public services that make communities safer, more transparent, and easier to participate in.",
-  "Advanced Energy & Industry": "Visualize clean industry, advanced manufacturing, robotics, and energy systems creating skilled work.",
-  "Other": "Use the participant’s idea as the lead and build a broad, optimistic Saudi 2050 future scene without forcing another track."
+  "Other": "Use the participant’s idea as the lead and build a broad, optimistic Saudi 2050 future scene without forcing another track.",
+  // Legacy values remain supported for existing submissions and historical records.
+  "Green Tech": "Blend renewable energy, low-carbon materials, climate resilience, advanced manufacturing, and skilled green work in harmony with Saudi landscapes.",
+  "Advanced Energy & Industry": "Blend renewable energy, low-carbon materials, climate resilience, advanced manufacturing, and skilled green work in harmony with Saudi landscapes.",
+  "Smart Mobility": "Show clean, accessible movement, walkable connected neighborhoods, circular buildings, protected nature, and credible next-generation destinations.",
+  "NEOM": "Show clean, accessible movement, walkable connected neighborhoods, circular buildings, protected nature, and credible next-generation destinations.",
+  "Circular Cities": "Show clean, accessible movement, walkable connected neighborhoods, circular buildings, protected nature, and credible next-generation destinations.",
+  "Heritage AI": "Blend Saudi heritage, crafts, language, historic places, arts, and hospitality with respectful technology and low-impact tourism that benefits local communities.",
+  "Tourism & Culture": "Blend Saudi heritage, crafts, language, historic places, arts, and hospitality with respectful technology and low-impact tourism that benefits local communities.",
+  "Human Potential": "Center inclusion, talent, creativity, lifelong learning, future skills, preventive care, mental wellbeing, and compassionate everyday life for all ages.",
+  "Health & Wellbeing": "Center inclusion, talent, creativity, lifelong learning, future skills, preventive care, mental wellbeing, and compassionate everyday life for all ages.",
+  "Education & Skills": "Center inclusion, talent, creativity, lifelong learning, future skills, preventive care, mental wellbeing, and compassionate everyday life for all ages.",
+  "Water Security": "Visualize resilient water and coastal systems through conservation, desalination, reuse, smart distribution, marine science, clean seas, fisheries, and restored ecosystems across the Red Sea and Gulf.",
+  "Blue Economy": "Visualize resilient water and coastal systems through conservation, desalination, reuse, smart distribution, marine science, clean seas, fisheries, and restored ecosystems across the Red Sea and Gulf."
 };
 
 function trackPromptEnhancer_(track) {
