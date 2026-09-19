@@ -55,11 +55,11 @@
 const SHEETS = {
   visions: {
     name: "Visions",
-    headers: ["id", "createdAt", "publishedAt", "status", "team", "title", "track", "prompt", "problem", "impact", "beneficiaries", "tags", "image", "color", "height", "votes", "imageSource"]
+    headers: ["id", "createdAt", "publishedAt", "status", "team", "title", "track", "prompt", "problem", "impact", "beneficiaries", "tags", "image", "color", "height", "votes", "participantId", "submissionRound", "deviceId", "deviceLabel", "browser", "browserVersion", "operatingSystem", "deviceType", "platform", "screen", "timezone", "language", "userAgent", "imageSource"]
   },
   submissions: {
     name: "Submissions",
-    headers: ["id", "createdAt", "updatedAt", "status", "team", "title", "track", "prompt", "problem", "impact", "beneficiaries", "tags", "image", "color", "height", "submittedBy", "participantId", "submissionRound", "imageSource"]
+    headers: ["id", "createdAt", "updatedAt", "status", "team", "title", "track", "prompt", "problem", "impact", "beneficiaries", "tags", "image", "color", "height", "submittedBy", "participantId", "submissionRound", "deviceId", "deviceLabel", "browser", "browserVersion", "operatingSystem", "deviceType", "platform", "screen", "timezone", "language", "userAgent", "imageSource"]
   },
   settings: {
     name: "Settings",
@@ -119,7 +119,18 @@ const FIELD_NOTES = {
   active: "Whether this vote is currently active.",
   unvotedAt: "When a voter removed their vote.",
   participantId: "Anonymous browser participant identifier for one submission per round.",
-  submissionRound: "Submission eligibility round. Organizer reset increments this value."
+  submissionRound: "Submission eligibility round. Organizer reset increments this value.",
+  deviceId: "Stable anonymous browser ID derived from the participant session token.",
+  deviceLabel: "Readable browser/version, operating system, and device type label.",
+  browser: "Detected browser family.",
+  browserVersion: "Detected browser version.",
+  operatingSystem: "Detected operating system family.",
+  deviceType: "Desktop, tablet, or mobile.",
+  platform: "Browser-reported platform string.",
+  screen: "Screen width, height, and pixel ratio.",
+  timezone: "Browser timezone.",
+  language: "Browser language preference.",
+  userAgent: "Browser user-agent string, truncated to 500 characters."
 };
 
 const DEFAULT_SETTINGS = {
@@ -727,6 +738,17 @@ function submitVision_(payload) {
   const prompt = cleanText_(payload.prompt, 2000, "Vision description");
   const participantId = cleanText_(payload.participantId, 160, "Participant session");
   const submissionRound = String(settings.submissionRound || "1");
+  const deviceId = cleanOptionalText_(payload.deviceId || "", 80);
+  const deviceLabel = cleanOptionalText_(payload.deviceLabel || "", 180);
+  const browser = cleanOptionalText_(payload.browser || "", 80);
+  const browserVersion = cleanOptionalText_(payload.browserVersion || "", 40);
+  const operatingSystem = cleanOptionalText_(payload.operatingSystem || "", 100);
+  const deviceType = cleanOptionalText_(payload.deviceType || "", 40);
+  const platform = cleanOptionalText_(payload.platform || "", 120);
+  const screen = cleanOptionalText_(payload.screen || "", 80);
+  const timezone = cleanOptionalText_(payload.timezone || "", 100);
+  const language = cleanOptionalText_(payload.language || "", 40);
+  const userAgent = cleanOptionalText_(payload.userAgent || "", 500);
   if (participantHasSubmitted_(participantId, submissionRound)) {
     throw new Error("This participant has already submitted in the current round.");
   }
@@ -763,7 +785,20 @@ function submitVision_(payload) {
       imageSource: "generated",
       color: /^#[0-9a-f]{6}$/i.test(String(payload.color || "")) ? String(payload.color) : "#D8D0ED",
       height: cleanNumber_(payload.height, 280, 180, 520),
-      submittedBy: cleanOptionalText_(payload.submittedBy || "", 120)
+      submittedBy: cleanOptionalText_(payload.submittedBy || "", 120),
+      participantId: participantId,
+      submissionRound: submissionRound,
+      deviceId: deviceId,
+      deviceLabel: deviceLabel,
+      browser: browser,
+      browserVersion: browserVersion,
+      operatingSystem: operatingSystem,
+      deviceType: deviceType,
+      platform: platform,
+      screen: screen,
+      timezone: timezone,
+      language: language,
+      userAgent: userAgent
     };
     appendRecord_(SHEETS.submissions, submission);
     return { ok: true, status: "pending", submissionId: submission.id, imageSource: submission.imageSource };
@@ -866,6 +901,19 @@ function getPendingSubmissions_() {
         beneficiaries: String(record.beneficiaries || ""),
         tags: String(record.tags || ""),
         submittedBy: String(record.submittedBy || ""),
+        participantId: String(record.participantId || ""),
+        submissionRound: String(record.submissionRound || "1"),
+        deviceId: String(record.deviceId || ""),
+        deviceLabel: String(record.deviceLabel || ""),
+        browser: String(record.browser || ""),
+        browserVersion: String(record.browserVersion || ""),
+        operatingSystem: String(record.operatingSystem || ""),
+        deviceType: String(record.deviceType || ""),
+        platform: String(record.platform || ""),
+        screen: String(record.screen || ""),
+        timezone: String(record.timezone || ""),
+        language: String(record.language || ""),
+        userAgent: String(record.userAgent || ""),
         image: String(record.image || ""),
         imageSource: imageSource_(record.imageSource),
         color: String(record.color || "#D8D0ED"),
@@ -912,7 +960,20 @@ function moderateSubmission_(submissionId, nextStatus) {
         imageSource: submission.imageSource,
         color: submission.color,
         height: submission.height,
-        votes: 0
+        votes: 0,
+        participantId: submission.participantId,
+        submissionRound: submission.submissionRound,
+        deviceId: submission.deviceId,
+        deviceLabel: submission.deviceLabel,
+        browser: submission.browser,
+        browserVersion: submission.browserVersion,
+        operatingSystem: submission.operatingSystem,
+        deviceType: submission.deviceType,
+        platform: submission.platform,
+        screen: submission.screen,
+        timezone: submission.timezone,
+        language: submission.language,
+        userAgent: submission.userAgent
       });
     }
     return { ok: true, status: nextStatus, submissionId: String(submission.id) };
