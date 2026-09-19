@@ -444,6 +444,12 @@
       will-change: background-position;
       animation: hero-word-shimmer 9s ease-in-out infinite alternate;
     }
+    html[lang="ar"] .hero h1 .gradient-word {
+      background: linear-gradient(105deg, #8D79C2 0%, var(--lavender, #9B8AC4) 32%, #F0EBFA 52%, var(--light-lavender, #D8D0ED) 64%, #7C68B0 100%);
+      background-size: 250% 100%;
+      text-shadow: 0 0 42px rgba(155, 138, 196, .22);
+      animation: arabic-hero-shimmer 12s ease-in-out infinite alternate;
+    }
 
     .hero-subtitle {
       max-width: 660px;
@@ -836,6 +842,11 @@
     @keyframes hero-word-shimmer {
       0% { background-position: 0% 50%; filter: saturate(.96); }
       100% { background-position: 100% 50%; filter: saturate(1.12); }
+    }
+    @keyframes arabic-hero-shimmer {
+      0% { background-position: 0% 50%; filter: saturate(.88) brightness(.98); }
+      48% { filter: saturate(1.04) brightness(1.06); }
+      100% { background-position: 100% 50%; filter: saturate(1.08) brightness(1.02); }
     }
     @keyframes logo-card-breathe {
       0%, 100% { box-shadow: inset 0 0 24px rgba(216, 208, 237, .045), 0 12px 30px rgba(0, 0, 0, .12); }
