@@ -1441,14 +1441,12 @@
       } else { mark.textContent = "96"; }
       return mark;
     }
-    function shuffledSlots(columns, rows) {
+    function spreadSlots(columns, rows, count) {
       const slots = [];
-      for (let row = 0; row < rows; row += 1) {
-        for (let column = 0; column < columns; column += 1) slots.push({ row, column });
-      }
-      for (let index = slots.length - 1; index > 0; index -= 1) {
-        const swapIndex = Math.floor(Math.random() * (index + 1));
-        [slots[index], slots[swapIndex]] = [slots[swapIndex], slots[index]];
+      for (let index = 0; index < count; index += 1) {
+        const row = index % rows;
+        const column = Math.floor(Math.random() * columns);
+        slots.push({ row, column });
       }
       return slots;
     }
@@ -1456,13 +1454,13 @@
       if (!decorativeLayer) return;
       decorativeLayer.replaceChildren();
       const bounds = decorativeLayer.getBoundingClientRect();
-      const spawnCount = 18;
+      const spawnCount = 20;
       const columns = Math.max(2, Math.floor(bounds.width / 170));
-      const rows = Math.ceil(spawnCount / columns);
+      const rows = Math.max(8, Math.ceil(spawnCount / columns));
       const cellWidth = bounds.width / columns;
       const cellHeight = bounds.height / rows;
       const padding = 12;
-      const slots = shuffledSlots(columns, rows);
+      const slots = spreadSlots(columns, rows, spawnCount);
       for (let index = 0; index < spawnCount; index += 1) {
         const roll = Math.random();
         const kind = roll < .50 ? "logo" : roll < .80 ? "silhouette" : "number";
