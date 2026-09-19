@@ -207,6 +207,13 @@
     .brand-ar { margin: 0; color: var(--muted); font-family: "Cairo", sans-serif; font-size: .92rem; }
 
     .status-lockup { gap: 12px; }
+    .status-lockup .brand-ar {
+      padding-inline-end: 12px;
+      border-inline-end: 1px solid var(--line);
+      color: var(--ink);
+      font-weight: 700;
+      letter-spacing: .01em;
+    }
     .language-toggle {
       min-width: 58px;
       padding: 7px 10px;
@@ -470,6 +477,7 @@
     .field { display: flex; flex-direction: column; gap: 7px; }
     .field.full { grid-column: 1 / -1; }
     .field label { color: var(--muted); font-family: "Cairo", sans-serif; font-size: .73rem; }
+    .field-helper { margin: -2px 0 0; color: var(--dim); font-family: "Cairo", sans-serif; font-size: .62rem; line-height: 1.45; }
     .field input, .field select, .field textarea {
       width: 100%;
       border: 1px solid rgba(255,255,255,.13);
@@ -690,6 +698,8 @@
     .vision-content { padding: 22px 22px 24px; }
     .card-meta { display: flex; align-items: center; justify-content: space-between; gap: 10px; }
     .team-name { margin: 0; font-size: 1rem; font-weight: 700; }
+    .team-subline { display: block; margin-top: 3px; color: var(--dim); font-family: "Cairo", sans-serif; font-size: .68rem; }
+    .impact-note { margin: 9px 0 0; padding-inline-start: 10px; border-inline-start: 2px solid var(--green); color: var(--dim); font-family: "Cairo", sans-serif; font-size: .72rem; line-height: 1.55; }
     .track-badge {
       padding: 5px 8px;
       border: 1px solid currentColor;
@@ -943,7 +953,7 @@
     @media (max-width: 520px) {
       }
     .published-review { margin-top: 12px; }
-    .organizer-summary { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 8px; margin: 12px 0; }
+    .organizer-summary { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 8px; margin: 12px 0; }
     .organizer-metric { padding: 12px; border: 1px solid var(--line); border-radius: 11px; background: rgba(155, 138, 196, .06); }
     .organizer-metric span { display: block; color: var(--dim); font-family: "Cairo", sans-serif; font-size: .62rem; line-height: 1.4; text-transform: uppercase; }
     .organizer-metric strong { display: block; margin-top: 5px; color: var(--ink); font-size: 1.2rem; }
@@ -977,6 +987,7 @@
     .review-tools { margin: 2px 0 12px; }
     .review-tools input { flex: 1 1 220px; min-width: 180px; }
     .review-tools select { flex: 0 1 180px; }
+    @media (max-width: 860px) { .organizer-summary { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
     @media (max-width: 700px) { .organizer-summary { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
   </style>
 </head>
@@ -994,10 +1005,10 @@
             <p class="eyebrow" data-en="Future Vision Competition / 2050" data-ar="مسابقة رؤى المستقبل / 2050">مسابقة رؤى المستقبل / 2050</p>
             <p class="brand-name"><span>Imagine</span> Saudi 2050</p>
           </div>
-          <p class="brand-ar" lang="ar" dir="rtl">تخيّل السعودية</p>
         </div>
       </div>
       <div class="status-lockup">
+        <p class="brand-ar" lang="ar" dir="rtl" aria-label="تخيّل السعودية">تخيّل السعودية</p>
         <button class="language-toggle" id="language-toggle" type="button" aria-label="Switch language">عربي</button>
       </div>
     </header>
@@ -1054,7 +1065,8 @@
          <div class="organizer-summary" aria-label="Organizer summary" data-aria-en="Organizer summary" data-aria-ar="ملخص المنظم">
            <div class="organizer-metric"><span data-en="Pending" data-ar="قيد المراجعة">Pending</span><strong id="organizer-pending-count">—</strong></div>
            <div class="organizer-metric"><span data-en="Published" data-ar="منشورة">Published</span><strong id="organizer-published-count">—</strong></div>
-           <div class="organizer-metric"><span data-en="Total votes" data-ar="إجمالي الأصوات">Total votes</span><strong id="organizer-vote-count">—</strong></div>
+           <div class="organizer-metric"><span data-en="All submissions" data-ar="كل المشاركات">All submissions</span><strong id="organizer-total-count">—</strong></div>
+           <div class="organizer-metric"><span data-en="Active votes" data-ar="الأصوات النشطة">Active votes</span><strong id="organizer-vote-count">—</strong></div>
            <div class="organizer-metric"><span data-en="Last refresh" data-ar="آخر تحديث">Last refresh</span><strong id="organizer-last-refresh">—</strong></div>
          </div>
          <div class="organizer-actions">
@@ -1143,7 +1155,7 @@
       <form class="vision-form" id="vision-form">
         <div class="field">
           <label for="team-input" data-en="Group name" data-ar="اسم المجموعة">اسم المجموعة</label>
-          <input id="team-input" name="team" placeholder="مثال: فريق أُفُق" data-placeholder-en="Example: Horizon team" data-placeholder-ar="مثال: فريق أُفُق" required />
+          <input id="team-input" name="team" placeholder="مثال: فريق أُفُق" data-placeholder-en="Example: Horizon team" data-placeholder-ar="مثال: فريق أُفُق" maxlength="100" required />
         </div>
         <div class="field">
           <label for="track-input" data-en="Strategic track" data-ar="المسار الاستراتيجي">المسار الاستراتيجي</label>
@@ -1159,12 +1171,34 @@
           </select>
         </div>
         <div class="field full">
+          <label for="title-input" data-en="Vision title" data-ar="عنوان الرؤية">عنوان الرؤية</label>
+          <input id="title-input" name="title" placeholder="Example: Riyadh Breathes" data-placeholder-en="Example: Riyadh Breathes" data-placeholder-ar="مثال: الرياض تتنفس" maxlength="120" required />
+          <small class="field-helper" data-en="Give your idea a memorable name for the gallery." data-ar="امنحوا فكرتكم اسمًا مميزًا يظهر في المعرض.">Give your idea a memorable name for the gallery.</small>
+        </div>
+        <div class="field">
+          <label for="problem-input" data-en="Problem or opportunity" data-ar="التحدي أو الفرصة">Problem or opportunity</label>
+          <textarea id="problem-input" name="problem" maxlength="800" placeholder="What should change by 2050?" data-placeholder-en="What should change by 2050?" data-placeholder-ar="ما الذي يجب أن يتغير بحلول 2050؟"></textarea>
+        </div>
+        <div class="field">
+          <label for="impact-input" data-en="Expected impact" data-ar="الأثر المتوقع">Expected impact</label>
+          <textarea id="impact-input" name="impact" maxlength="800" placeholder="How will this improve life?" data-placeholder-en="How will this improve life?" data-placeholder-ar="كيف ستُحسّن الفكرة الحياة؟"></textarea>
+        </div>
+        <div class="field">
+          <label for="beneficiaries-input" data-en="Who benefits?" data-ar="من المستفيد؟">Who benefits?</label>
+          <input id="beneficiaries-input" name="beneficiaries" maxlength="200" placeholder="Example: families, visitors, farmers" data-placeholder-en="Example: families, visitors, farmers" data-placeholder-ar="مثال: العائلات، الزوار، المزارعون" />
+        </div>
+        <div class="field">
+          <label for="tags-input" data-en="Keywords" data-ar="الكلمات المفتاحية">Keywords</label>
+          <input id="tags-input" name="tags" maxlength="200" placeholder="Example: water, AI, culture" data-placeholder-en="Example: water, AI, culture" data-placeholder-ar="مثال: المياه، الذكاء الاصطناعي، الثقافة" />
+        </div>
+        <div class="field full">
           <label for="prompt-input" data-en="Describe your Saudi 2050 vision" data-ar="وصف رؤيتكم للسعودية 2050">وصف رؤيتكم للسعودية 2050</label>
-          <textarea id="prompt-input" name="prompt" placeholder="مثال: مدن صحراوية خضراء تنتج طاقتها وتجمع مياهها من الهواء..." data-placeholder-en="Example: Green desert cities that produce their own energy and collect water from the air..." data-placeholder-ar="مثال: مدن صحراوية خضراء تنتج طاقتها وتجمع مياهها من الهواء..." required></textarea>
+          <textarea id="prompt-input" name="prompt" maxlength="2000" placeholder="مثال: مدن صحراوية خضراء تنتج طاقتها وتجمع مياهها من الهواء..." data-placeholder-en="Example: Green desert cities that produce their own energy and collect water from the air..." data-placeholder-ar="مثال: مدن صحراوية خضراء تنتج طاقتها وتجمع مياهها من الهواء..." required></textarea>
+          <small class="field-helper" data-en="The clearer the story, the stronger the generated visual and organizer review." data-ar="كلما كانت القصة أوضح، كان التصور البصري والمراجعة أقوى.">The clearer the story, the stronger the generated visual and organizer review.</small>
         </div>
         <div class="submit-actions">
-          <span class="form-note" id="form-note" data-en="Demo preview only — no AI image service is connected yet." data-ar="تصور تجريبي فقط — لم يتم ربط خدمة توليد صور بالذكاء الاصطناعي بعد.">تصور تجريبي فقط — لم يتم ربط خدمة توليد صور بالذكاء الاصطناعي بعد.</span>
-          <button class="generate-button" id="generate-button" type="submit" data-en="✦ Turn idea into image" data-ar="✦ حوّلوا الفكرة إلى صورة">✦ حوّلوا الفكرة إلى صورة</button>
+          <span class="form-note" id="form-note" data-en="AI visual generated server-side, then held for organizer approval." data-ar="يتم إنشاء التصور بالذكاء الاصطناعي ثم إرساله لموافقة المنظم.">AI visual generated server-side, then held for organizer approval.</span>
+          <button class="generate-button" id="generate-button" type="submit" data-en="✦ Turn idea into image" data-ar="✦ حوّلوا الفكرة إلى صورة">✦ Turn idea into image</button>
         </div>
       </form>
     </section>
@@ -1420,6 +1454,7 @@
     const organizerStatus = document.getElementById("organizer-status");
     const organizerPendingCount = document.getElementById("organizer-pending-count");
     const organizerPublishedCount = document.getElementById("organizer-published-count");
+    const organizerTotalCount = document.getElementById("organizer-total-count");
     const organizerVoteCount = document.getElementById("organizer-vote-count");
     const organizerLastRefresh = document.getElementById("organizer-last-refresh");
     const organizerLeader = document.getElementById("organizer-leader");
@@ -1464,6 +1499,7 @@
     let organizerUnlocked = false;
     let pendingOrganizerRecords = [];
     let publishedOrganizerRecords = [];
+    let organizerAnalytics = null;
     function readLocalArray(key) {
       try {
         const value = JSON.parse(localStorage.getItem(key) || "[]");
@@ -1542,6 +1578,8 @@
          leader: "Leader",
          tied: "Tie",
          resultsVotes: "{votes} votes · {percent}%",
+        impactLabel: "Impact",
+        demoPreview: "DEMO PREVIEW",
         allTracks: "All tracks",
          noFilterResults: "No visions match this filter.",
          galleryCount: "Showing {shown} of {total} visions",
@@ -1613,6 +1651,8 @@
          leader: "المتصدر",
          tied: "تعادل",
          resultsVotes: "{votes} تصويت · {percent}٪",
+        impactLabel: "الأثر",
+        demoPreview: "تصور تجريبي",
         allTracks: "كل المسارات",
          noFilterResults: "لا توجد رؤى تطابق عامل التصفية.",
          galleryCount: "عرض {shown} من أصل {total} رؤية",
@@ -1791,14 +1831,18 @@
               onerror="this.onerror=null;this.src='${placeholderImage}'" />
             <div class="image-glow"></div>
             <span class="card-index">VISION / ${String(index + 1).padStart(2, "0")}</span>
-            ${isDemoPreview || isGeneratedImage ? `<span class="image-source-badge">${isGeneratedImage ? t("demoBadge") : "DEMO PREVIEW"}</span>` : ""}
+            ${isDemoPreview || isGeneratedImage ? `<span class="image-source-badge">${isGeneratedImage ? t("demoBadge") : t("demoPreview")}</span>` : ""}
           </div>
           <div class="vision-content">
             <div class="card-meta">
-              <h3 class="team-name">${escapeHTML(vision.team)}</h3>
-               <span class="track-badge" style="color:${safeColor(vision.color)}">${escapeHTML(vision.track)}</span>
+              <div>
+                <h3 class="team-name">${escapeHTML(vision.title || vision.team)}</h3>
+                <span class="team-subline">${escapeHTML(vision.team)}</span>
+              </div>
+              <span class="track-badge" style="color:${safeColor(vision.color)}">${escapeHTML(vision.track)}</span>
             </div>
             <p class="prompt">${escapeHTML(vision.prompt)}</p>
+            ${vision.impact ? `<p class="impact-note"><strong>${t("impactLabel")}:</strong> ${escapeHTML(vision.impact)}</p>` : ""}
             <div class="vote-row">
               <span class="vote-count" id="vote-count-${index}">${vision.votes || 0} ${t("votes")}</span>
               <button class="vote-button${isVoted ? " voted" : ""}" id="vote-${index}" type="button" onclick="voteForVision(${index})" ${voteDisabled ? "disabled" : ""}>
@@ -1913,8 +1957,9 @@
         },
         visions: visions.map((vision) => ({
           id: vision.id, createdAt: vision.createdAt, publishedAt: vision.publishedAt,
-          team: vision.team, track: vision.track, prompt: vision.prompt, image: vision.image,
-          color: vision.color, height: vision.height, votes: vision.votes, imageSource: vision.imageSource
+          team: vision.team, title: vision.title, track: vision.track, prompt: vision.prompt,
+          problem: vision.problem, impact: vision.impact, beneficiaries: vision.beneficiaries, tags: vision.tags,
+          image: vision.image, color: vision.color, height: vision.height, votes: vision.votes, imageSource: vision.imageSource
         }))
       });
     }
@@ -2148,10 +2193,15 @@
       event.preventDefault();
       if (!settings.submissionsOpen) return;
       const data = new FormData(form);
-      const team = String(data.get("team")).trim();
-      const track = String(data.get("track"));
-      const prompt = String(data.get("prompt")).trim();
-      if (!team || !prompt) return;
+      const team = String(data.get("team") || "").trim();
+      const title = String(data.get("title") || "").trim();
+      const track = String(data.get("track") || "");
+      const prompt = String(data.get("prompt") || "").trim();
+      const problem = String(data.get("problem") || "").trim();
+      const impact = String(data.get("impact") || "").trim();
+      const beneficiaries = String(data.get("beneficiaries") || "").trim();
+      const tags = String(data.get("tags") || "").trim();
+      if (!team || !title || !prompt) return;
       if (!GOOGLE_APPS_SCRIPT_URL) {
         formNote.textContent = t("aiUnavailable");
         return;
@@ -2173,8 +2223,13 @@
       const newVision = {
         id: `local-${Date.now()}`,
         team,
+        title,
         track,
         prompt,
+        problem,
+        impact,
+        beneficiaries,
+        tags,
         image: "",
         color: colors[track] || "#D8D0ED",
          height: 280 + (((sourceVisions.length + localPublishedVisions.length) * 37) % 100),
@@ -2211,7 +2266,8 @@
       const query = reviewSearch.value.trim().toLowerCase();
       const track = reviewTrackFilter.value;
       return records.filter((vision) => {
-        const text = [vision.team, vision.track, vision.prompt].map((value) => String(value || "").toLowerCase()).join(" ");
+        const text = [vision.team, vision.title, vision.track, vision.prompt, vision.problem, vision.impact, vision.beneficiaries, vision.tags]
+          .map((value) => String(value || "").toLowerCase()).join(" ");
         return (!query || text.includes(query)) && (!track || String(vision.track || "") === track);
       });
     }
@@ -2219,7 +2275,8 @@
     function updateOrganizerSummary() {
       organizerPendingCount.textContent = String(pendingOrganizerRecords.length);
       organizerPublishedCount.textContent = String(publishedOrganizerRecords.length);
-      organizerVoteCount.textContent = String(publishedOrganizerRecords.reduce((sum, vision) => sum + (Number(vision.votes) || 0), 0));
+      organizerTotalCount.textContent = String(organizerAnalytics?.totalSubmissions ?? (pendingOrganizerRecords.length + publishedOrganizerRecords.length));
+      organizerVoteCount.textContent = String(organizerAnalytics?.activeVotes ?? publishedOrganizerRecords.reduce((sum, vision) => sum + (Number(vision.votes) || 0), 0));
       organizerLastRefresh.textContent = new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
       renderResultsDashboard();
     }
@@ -2283,8 +2340,10 @@
       container.innerHTML = filtered.map((vision) => `
         <div class="review-item">
           <div>
-            <strong>${escapeHTML(vision.team)}</strong>
+            <strong>${escapeHTML(vision.title || vision.team)}</strong>
+            <span>${escapeHTML(vision.team)} · ${escapeHTML(vision.track || "")}</span>
             <span>${escapeHTML(vision.prompt)}</span>
+            ${vision.impact ? `<span>${escapeHTML(t("impactLabel"))}: ${escapeHTML(vision.impact)}</span>` : ""}
           </div>
           <div class="review-actions">
             ${action === "publish" ? `<button class="review-action approve" type="button" data-review-action="publish" data-review-id="${escapeHTML(vision.id)}">${t("approve")}</button>` : ""}
@@ -2325,6 +2384,7 @@
         applyPublicSettings(data.settings);
         pendingOrganizerRecords = data.pending || [];
         publishedOrganizerRecords = data.published || [];
+        organizerAnalytics = data.analytics || null;
         updateReviewFilters();
         updateOrganizerSummary();
         rerenderReviewQueues();
