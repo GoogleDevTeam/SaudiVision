@@ -1982,13 +1982,13 @@
       organizerAccess.disabled = true;
       organizerAccess.classList.add("is-processing");
       try {
-        await adminRequest("pending");
+        const snapshot = await adminRequest("organizerSnapshot");
         organizerUnlocked = true;
         organizerDetails.hidden = false;
         organizerDetails.open = true;
         organizerAccess.classList.add("is-unlocked");
         hideOrganizerLogin();
-        await loadReviewQueue();
+        await loadReviewQueue(snapshot);
       } catch (error) {
         organizerAccess.classList.add("is-rejected");
         showOrganizerError(error);
@@ -2002,12 +2002,12 @@
     async function restoreOrganizerSession() {
       if (!organizerKey) return;
       try {
-        await adminRequest("pending");
+        const snapshot = await adminRequest("organizerSnapshot");
         organizerUnlocked = true;
         organizerDetails.hidden = false;
         organizerAccess.classList.add("is-unlocked");
         hideOrganizerLogin();
-        await loadReviewQueue();
+        await loadReviewQueue(snapshot);
       } catch (error) {
         organizerUnlocked = false;
         organizerDetails.hidden = true;
@@ -2285,15 +2285,15 @@
       }
     }
 
-    async function loadReviewQueue() {
+    async function loadReviewQueue(snapshot = null) {
       reviewQueue.innerHTML = `<p class="review-empty">${t("reviewLoading")}</p>`;
       try {
-        const snapshot = GOOGLE_APPS_SCRIPT_URL
+        const data = snapshot || (GOOGLE_APPS_SCRIPT_URL
           ? await adminRequest("organizerSnapshot")
-          : { settings, pending: pendingVisions, published: [...sourceVisions, ...localPublishedVisions] };
-        applyPublicSettings(snapshot.settings);
-        pendingOrganizerRecords = snapshot.pending || [];
-        publishedOrganizerRecords = snapshot.published || [];
+          : { settings, pending: pendingVisions, published: [...sourceVisions, ...localPublishedVisions] });
+        applyPublicSettings(data.settings);
+        pendingOrganizerRecords = data.pending || [];
+        publishedOrganizerRecords = data.published || [];
         updateReviewFilters();
         updateOrganizerSummary();
         rerenderReviewQueues();
