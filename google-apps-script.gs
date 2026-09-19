@@ -81,7 +81,7 @@ const SHEETS = {
 
 const GUIDE_SHEET_NAME = "START HERE";
 const WORKBOOK_FORMAT_VERSION = "2026-09-19-v8";
-const IMAGE_PROMPT_VERSION = "2026-09-19-v4";
+const IMAGE_PROMPT_VERSION = "2026-09-19-v5";
 const GENERATION_SLOT_KEY = "IMAGINE_SAUDI_GEMINI_GENERATION_SLOT";
 const GEMINI_IMAGE_MODEL = "gemini-3.1-flash-image";
 const GEMINI_INTERACTIONS_URL = "https://generativelanguage.googleapis.com/v1beta/interactions";
@@ -163,27 +163,27 @@ const DEFAULT_SETTINGS = {
 };
 
 const TRACK_PROMPT_ENHANCERS_ = {
-  "Green Tech & Energy": "Show one clear, optimistic Saudi scene where renewable energy, climate-resilient materials, advanced manufacturing, and human-scale green jobs work together. Use sunlight, shade, native landscape, and one believable hero system.",
-  "Smart Mobility & Future Cities": "Show one believable journey through a connected Saudi district: clean mobility, walkable streets, circular buildings, shaded public space, protected nature, and a credible next-generation destination working as one system.",
-  "Heritage, Culture & Tourism": "Show one living Saudi cultural moment where heritage, crafts, language, historic architecture, contemporary technology, and low-impact hospitality help local people and places thrive.",
-  "Human Potential & Wellbeing": "Show people actively benefiting from a human-centered future: inclusive learning, practical skills, preventive care, creativity, mental wellbeing, and compassionate everyday spaces across generations.",
-  "Water & Oceans": "Show one connected water-to-coast system in Saudi Arabia: efficient water use, desalination or reuse, smart distribution, restored ecosystems, clean seas, marine science, and sustainable coastal livelihoods in a single coherent scene.",
-  "Future Food & Agriculture": "Show a climate-smart Saudi food system from production to community: local crops, precision or vertical growing, efficient water use, healthy food, and people gathering around the result.",
-  "Digital Society & Governance": "Show trusted digital public services as a visible human experience: inclusive access, privacy, transparency, safer communities, and people participating confidently in decisions that affect daily life.",
-  "Other": "Use the participant’s idea as the lead. Turn it into one specific, optimistic Saudi 2050 scene with a clear focal subject, believable human benefit, and distinctive local setting without forcing another track.",
+  "Green Tech & Energy": "Use sustainability, resilience, resource-aware innovation, and responsible energy as a broad lens. Let the participant decide the technology, setting, people, and visual story.",
+  "Smart Mobility & Future Cities": "Use connected places, accessible movement, adaptable neighborhoods, and future urban life as a broad lens. Follow the participant's own journey and priorities.",
+  "Heritage, Culture & Tourism": "Use Saudi identity, memory, place, culture, creativity, and responsible exchange as broad context. Let the description determine how heritage or tourism appears.",
+  "Human Potential & Wellbeing": "Use people, inclusion, learning, health, creativity, and everyday quality of life as broad context. Let the participant's description determine the human outcome.",
+  "Water & Oceans": "Use water, coasts, marine life, resource stewardship, and resilient ecosystems as a broad lens. Preserve the participant's own connection between the ideas.",
+  "Future Food & Agriculture": "Use food, agriculture, nourishment, local production, and resource-aware growing as broad context. Let the description define the system and its people.",
+  "Digital Society & Governance": "Use trusted technology, participation, access, privacy, and human-centered public life as broad context. Follow the participant's actual problem and proposed change.",
+  "Other": "Use the participant's description as the complete creative brief. Carry its meaning into one coherent Saudi 2050 concept without forcing an unrelated track.",
   // Legacy values remain supported for existing submissions and historical records.
-  "Green Tech": "Show one clear, optimistic Saudi scene where renewable energy, climate-resilient materials, advanced manufacturing, and human-scale green jobs work together. Use sunlight, shade, native landscape, and one believable hero system.",
-  "Advanced Energy & Industry": "Show one clear, optimistic Saudi scene where renewable energy, climate-resilient materials, advanced manufacturing, and human-scale green jobs work together. Use sunlight, shade, native landscape, and one believable hero system.",
-  "Smart Mobility": "Show one believable journey through a connected Saudi district: clean mobility, walkable streets, circular buildings, shaded public space, protected nature, and a credible next-generation destination working as one system.",
-  "NEOM": "Show one believable journey through a connected Saudi district: clean mobility, walkable streets, circular buildings, shaded public space, protected nature, and a credible next-generation destination working as one system.",
-  "Circular Cities": "Show one believable journey through a connected Saudi district: clean mobility, walkable streets, circular buildings, shaded public space, protected nature, and a credible next-generation destination working as one system.",
-  "Heritage AI": "Show one living Saudi cultural moment where heritage, crafts, language, historic architecture, contemporary technology, and low-impact hospitality help local people and places thrive.",
-  "Tourism & Culture": "Show one living Saudi cultural moment where heritage, crafts, language, historic architecture, contemporary technology, and low-impact hospitality help local people and places thrive.",
-  "Human Potential": "Show people actively benefiting from a human-centered future: inclusive learning, practical skills, preventive care, creativity, mental wellbeing, and compassionate everyday spaces across generations.",
-  "Health & Wellbeing": "Show people actively benefiting from a human-centered future: inclusive learning, practical skills, preventive care, creativity, mental wellbeing, and compassionate everyday spaces across generations.",
-  "Education & Skills": "Show people actively benefiting from a human-centered future: inclusive learning, practical skills, preventive care, creativity, mental wellbeing, and compassionate everyday spaces across generations.",
-  "Water Security": "Show one connected water-to-coast system in Saudi Arabia: efficient water use, desalination or reuse, smart distribution, restored ecosystems, clean seas, marine science, and sustainable coastal livelihoods in a single coherent scene.",
-  "Blue Economy": "Show one connected water-to-coast system in Saudi Arabia: efficient water use, desalination or reuse, smart distribution, restored ecosystems, clean seas, marine science, and sustainable coastal livelihoods in a single coherent scene."
+  "Green Tech": "Use sustainability, resilience, resource-aware innovation, and responsible energy as a broad lens. Let the participant decide the technology, setting, people, and visual story.",
+  "Advanced Energy & Industry": "Use sustainability, resilience, resource-aware innovation, and responsible energy as a broad lens. Let the participant decide the technology, setting, people, and visual story.",
+  "Smart Mobility": "Use connected places, accessible movement, adaptable neighborhoods, and future urban life as a broad lens. Follow the participant's own journey and priorities.",
+  "NEOM": "Use connected places, accessible movement, adaptable neighborhoods, and future urban life as a broad lens. Follow the participant's own journey and priorities.",
+  "Circular Cities": "Use connected places, accessible movement, adaptable neighborhoods, and future urban life as a broad lens. Follow the participant's own journey and priorities.",
+  "Heritage AI": "Use Saudi identity, memory, place, culture, creativity, and responsible exchange as broad context. Let the description determine how heritage or tourism appears.",
+  "Tourism & Culture": "Use Saudi identity, memory, place, culture, creativity, and responsible exchange as broad context. Let the description determine how heritage or tourism appears.",
+  "Human Potential": "Use people, inclusion, learning, health, creativity, and everyday quality of life as broad context. Let the participant's description determine the human outcome.",
+  "Health & Wellbeing": "Use people, inclusion, learning, health, creativity, and everyday quality of life as broad context. Let the participant's description determine the human outcome.",
+  "Education & Skills": "Use people, inclusion, learning, health, creativity, and everyday quality of life as broad context. Let the participant's description determine the human outcome.",
+  "Water Security": "Use water, coasts, marine life, resource stewardship, and resilient ecosystems as a broad lens. Preserve the participant's own connection between the ideas.",
+  "Blue Economy": "Use water, coasts, marine life, resource stewardship, and resilient ecosystems as a broad lens. Preserve the participant's own connection between the ideas."
 };
 
 function trackPromptEnhancer_(track) {
@@ -1005,14 +1005,17 @@ function generateVisionImage_(submissionId, team, track, prompt, details) {
     "Use a cinematic 16:9 composition, natural depth, premium magazine-quality lighting, and a restrained palette inspired by Saudi landscapes.",
     "Generate exactly ONE single image only. Do not return multiple images, a collage, variations, or any text response beyond the image.",
     "Do not include readable words, letters, logos, flags, interface elements, borders, collages, or labels.",
+    "The participant's description is the primary creative brief. Preserve its meaning, concrete details, named people or places, proposed mechanism, and desired impact.",
+    "If the description combines several related ideas, integrate them into one coherent concept instead of choosing one and discarding the others.",
+    "Use the selected strategic track only as a broad contextual lens. Never replace, narrow, contradict, or add an unrelated storyline to the participant's description.",
     "Strategic track: " + track,
-    "Track-specific visual direction: " + trackPromptEnhancer_(track),
+    "Broad track lens: " + trackPromptEnhancer_(track),
     "Group name: " + team,
     "Vision title: " + String(details.title || ""),
     "Problem or opportunity: " + String(details.problem || ""),
     "Expected impact: " + String(details.impact || ""),
     "Beneficiaries: " + String(details.beneficiaries || ""),
-    "Participant vision: " + prompt
+    "Participant description: " + prompt
   ].join("\n");
   const response = UrlFetchApp.fetch(GEMINI_INTERACTIONS_URL, {
     method: "post",
