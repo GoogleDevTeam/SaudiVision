@@ -444,7 +444,14 @@
       will-change: background-position;
       animation: hero-word-shimmer 9s ease-in-out infinite alternate;
     }
+    html[lang="ar"] .hero h1 {
+      line-height: 1.1;
+    }
     html[lang="ar"] .hero h1 .gradient-word {
+      margin-top: .2em;
+      padding-bottom: .08em;
+      font-size: .9em;
+      line-height: 1.18;
       background: linear-gradient(105deg, #8D79C2 0%, var(--lavender, #9B8AC4) 32%, #F0EBFA 52%, var(--light-lavender, #D8D0ED) 64%, #7C68B0 100%);
       background-size: 250% 100%;
       text-shadow: 0 0 42px rgba(155, 138, 196, .22);
