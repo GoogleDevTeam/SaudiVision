@@ -59,7 +59,7 @@ const SHEETS = {
   },
   submissions: {
     name: "Submissions",
-    headers: ["id", "createdAt", "updatedAt", "status", "team", "title", "track", "prompt", "problem", "impact", "beneficiaries", "tags", "image", "color", "height", "submittedBy", "imageSource"]
+    headers: ["id", "createdAt", "updatedAt", "status", "team", "title", "track", "prompt", "problem", "impact", "beneficiaries", "tags", "image", "color", "height", "submittedBy", "participantId", "submissionRound", "imageSource"]
   },
   settings: {
     name: "Settings",
@@ -113,19 +113,45 @@ const FIELD_NOTES = {
   impact: "Expected benefit for people, the environment, or the economy.",
   beneficiaries: "People or communities who benefit from the idea.",
   tags: "Comma-separated keywords for organizer search and filtering.",
-  key: "Settings key. Supported keys are submissionsOpen, votingOpen, submissionDeadline, and votingDeadline.",
+  key: "Settings key. Supported keys are submissionsOpen, votingOpen, submissionDeadline, votingDeadline, and submissionRound.",
   value: "Setting value. Boolean settings are stored as true or false.",
   votedAt: "When the active vote was created.",
   active: "Whether this vote is currently active.",
-  unvotedAt: "When a voter removed their vote."
+  unvotedAt: "When a voter removed their vote.",
+  participantId: "Anonymous browser participant identifier for one submission per round.",
+  submissionRound: "Submission eligibility round. Organizer reset increments this value."
 };
 
 const DEFAULT_SETTINGS = {
   submissionsOpen: true,
   votingOpen: true,
   submissionDeadline: "",
-  votingDeadline: ""
+  votingDeadline: "",
+  submissionRound: "1"
 };
+
+const TRACK_PROMPT_ENHANCERS_ = {
+  "Green Tech": "Prioritize renewable energy, low-carbon materials, climate resilience, and harmony with Saudi landscapes.",
+  "Smart Mobility": "Show clean, accessible movement through intelligent transport, walkability, and connected infrastructure.",
+  "Heritage AI": "Blend Saudi heritage, crafts, language, and historic places with respectful, human-centered AI.",
+  "NEOM": "Imagine a credible next-generation Saudi destination with advanced architecture, nature protection, and human wellbeing.",
+  "Human Potential": "Center people, inclusion, talent, creativity, and healthier everyday life.",
+  "Water Security": "Visualize resilient water systems using conservation, desalination, reuse, smart distribution, and restored ecosystems.",
+  "Blue Economy": "Highlight responsible coastal innovation, marine science, clean seas, fisheries, and sustainable life along the Red Sea and Gulf.",
+  "Circular Cities": "Show cities that design out waste through repair, reuse, renewable materials, efficient buildings, and regenerative public spaces.",
+  "Future Food & Agriculture": "Show climate-smart food systems with local production, precision agriculture, vertical growing, and nourishing communities.",
+  "Health & Wellbeing": "Depict preventive care, accessible health technology, active communities, mental wellbeing, and compassionate care for all ages.",
+  "Education & Skills": "Imagine joyful lifelong learning, practical future skills, creative classrooms, and equal access to knowledge.",
+  "Tourism & Culture": "Celebrate authentic Saudi places, stories, arts, and hospitality through low-impact tourism that benefits local communities.",
+  "Digital Society & Governance": "Show trusted, inclusive digital public services that make communities safer, more transparent, and easier to participate in.",
+  "Advanced Energy & Industry": "Visualize clean industry, advanced manufacturing, robotics, and energy systems creating skilled work.",
+  "Other": "Use the participant’s idea as the lead and build a broad, optimistic Saudi 2050 future scene without forcing another track."
+};
+
+function trackPromptEnhancer_(track) {
+  return TRACK_PROMPT_ENHANCERS_[String(track || "")] || TRACK_PROMPT_ENHANCERS_.Other;
+}
+
 
 function doGet(event) {
   const action = (event && event.parameter && event.parameter.action) || "health";
@@ -190,6 +216,9 @@ function route_(action, payload) {
     case "setSettings":
       requireAdmin_(payload);
       return saveSettings_(payload);
+    case "resetSubmissions":
+      requireAdmin_(payload);
+      return resetSubmissionRound_();
     default:
       throw new Error("Unknown action.");
   }
@@ -616,6 +645,7 @@ function getSettings_() {
     if (record.key === "votingOpen") settings.votingOpen = parseBoolean_(record.value, settings.votingOpen);
     if (record.key === "submissionDeadline") settings.submissionDeadline = parseDeadline_(record.value, settings.submissionDeadline);
     if (record.key === "votingDeadline") settings.votingDeadline = parseDeadline_(record.value, settings.votingDeadline);
+    if (record.key === "submissionRound") settings.submissionRound = String(record.value || settings.submissionRound);
   });
   return settings;
 }
@@ -639,6 +669,20 @@ function saveSettings_(payload) {
       }
     });
     return { ok: true, settings: settings };
+  });
+}
+
+function resetSubmissionRound_() {
+  return withLock_(function() {
+    const settings = getSettings_();
+    const nextRound = String((Number(settings.submissionRound) || 1) + 1);
+    const timestamp = now_();
+    const definition = SHEETS.settings;
+    const record = findRecord_(definition, "key", "submissionRound");
+    if (record) updateRecord_(record, { value: nextRound, updatedAt: timestamp });
+    else appendRecord_(definition, { key: "submissionRound", value: nextRound, updatedAt: timestamp });
+    settings.submissionRound = nextRound;
+    return { ok: true, submissionRound: nextRound, settings: settings };
   });
 }
 
@@ -681,6 +725,11 @@ function submitVision_(payload) {
   const title = cleanText_(payload.title, 120, "Vision title");
   const track = cleanText_(payload.track, 80, "Track");
   const prompt = cleanText_(payload.prompt, 2000, "Vision description");
+  const participantId = cleanText_(payload.participantId, 160, "Participant session");
+  const submissionRound = String(settings.submissionRound || "1");
+  if (participantHasSubmitted_(participantId, submissionRound)) {
+    throw new Error("This participant has already submitted in the current round.");
+  }
   const problem = cleanOptionalText_(payload.problem, 800);
   const impact = cleanOptionalText_(payload.impact, 800);
   const beneficiaries = cleanOptionalText_(payload.beneficiaries, 200);
@@ -693,6 +742,9 @@ function submitVision_(payload) {
     beneficiaries: beneficiaries
   });
   return withLock_(function() {
+    if (participantHasSubmitted_(participantId, submissionRound)) {
+      throw new Error("This participant has already submitted in the current round.");
+    }
     const timestamp = now_();
     const submission = {
       id: submissionId,
@@ -718,6 +770,14 @@ function submitVision_(payload) {
   });
 }
 
+function participantHasSubmitted_(participantId, submissionRound) {
+  return objectRows_(SHEETS.submissions).some(function(record) {
+    return String(record.participantId || "") === String(participantId || "") &&
+      String(record.submissionRound || "1") === String(submissionRound || "1") &&
+      String(record.status || "").toLowerCase() !== "deleted";
+  });
+}
+
 function generateVisionImage_(submissionId, team, track, prompt, details) {
   details = details || {};
   const apiKey = PropertiesService.getScriptProperties().getProperty("GEMINI_API_KEY");
@@ -726,8 +786,10 @@ function generateVisionImage_(submissionId, team, track, prompt, details) {
     "Create one polished editorial concept image for a Saudi Arabia 2050 future vision competition.",
     "Show an optimistic, plausible, human-centered future with strong Saudi environmental and cultural context.",
     "Use a cinematic wide composition, refined architectural or landscape detail, and premium magazine-quality lighting.",
+    "Generate exactly ONE single image only. Do not return multiple images, a collage, variations, or any text response beyond the image.",
     "Do not include readable words, letters, logos, interface elements, borders, collages, or labels.",
     "Strategic track: " + track,
+    "Track-specific visual direction: " + trackPromptEnhancer_(track),
     "Group name: " + team,
     "Vision title: " + String(details.title || ""),
     "Problem or opportunity: " + String(details.problem || ""),
