@@ -1163,21 +1163,14 @@
         </div>
         <div class="field full track-field">
           <label for="track-input" data-en="Strategic track" data-ar="المسار الاستراتيجي">Strategic track</label>
-          <select id="track-input" name="track">
-            <option value="Green Tech" data-en="Green Tech" data-ar="التقنية الخضراء / Green Tech">التقنية الخضراء / Green Tech</option>
-            <option value="Smart Mobility" data-en="Smart Mobility" data-ar="التنقل الذكي / Smart Mobility">التنقل الذكي / Smart Mobility</option>
-            <option value="Heritage AI" data-en="Heritage AI" data-ar="التراث والذكاء الاصطناعي / Heritage AI">التراث والذكاء الاصطناعي / Heritage AI</option>
-            <option value="NEOM" data-en="NEOM" data-ar="نيوم / NEOM">نيوم / NEOM</option>
-            <option value="Human Potential" data-en="Human Potential" data-ar="الإنسان أولًا / Human Potential">الإنسان أولًا / Human Potential</option>
-            <option value="Water Security" data-en="Water Security" data-ar="أمن المياه / Water Security">أمن المياه / Water Security</option>
-            <option value="Blue Economy" data-en="Blue Economy" data-ar="الاقتصاد الأزرق / Blue Economy">الاقتصاد الأزرق / Blue Economy</option>
-            <option value="Circular Cities" data-en="Circular Cities" data-ar="المدن الدائرية / Circular Cities">المدن الدائرية / Circular Cities</option>
-            <option value="Future Food & Agriculture" data-en="Future Food & Agriculture" data-ar="الغذاء والزراعة المستقبلية / Future Food & Agriculture">الغذاء والزراعة المستقبلية / Future Food &amp; Agriculture</option>
-            <option value="Health & Wellbeing" data-en="Health & Wellbeing" data-ar="الصحة وجودة الحياة / Health & Wellbeing">الصحة وجودة الحياة / Health &amp; Wellbeing</option>
-            <option value="Education & Skills" data-en="Education & Skills" data-ar="التعليم والمهارات / Education & Skills">التعليم والمهارات / Education &amp; Skills</option>
-            <option value="Tourism & Culture" data-en="Tourism & Culture" data-ar="السياحة والثقافة / Tourism & Culture">السياحة والثقافة / Tourism &amp; Culture</option>
-            <option value="Digital Society & Governance" data-en="Digital Society & Governance" data-ar="المجتمع الرقمي والحوكمة / Digital Society & Governance">المجتمع الرقمي والحوكمة / Digital Society &amp; Governance</option>
-            <option value="Advanced Energy & Industry" data-en="Advanced Energy & Industry" data-ar="الطاقة والصناعة المتقدمة / Advanced Energy & Industry">الطاقة والصناعة المتقدمة / Advanced Energy &amp; Industry</option>
+                    <select id="track-input" name="track">
+            <option value="Green Tech &amp; Energy" data-en="Green Tech & Energy" data-ar="التقنية الخضراء والطاقة / Green Tech & Energy">التقنية الخضراء والطاقة / Green Tech &amp; Energy</option>
+            <option value="Smart Mobility &amp; Future Cities" data-en="Smart Mobility & Future Cities" data-ar="التنقل الذكي ومدن المستقبل / Smart Mobility & Future Cities">التنقل الذكي ومدن المستقبل / Smart Mobility &amp; Future Cities</option>
+            <option value="Heritage, Culture &amp; Tourism" data-en="Heritage, Culture & Tourism" data-ar="التراث والثقافة والسياحة / Heritage, Culture & Tourism">التراث والثقافة والسياحة / Heritage, Culture &amp; Tourism</option>
+            <option value="Human Potential &amp; Wellbeing" data-en="Human Potential & Wellbeing" data-ar="القدرات البشرية وجودة الحياة / Human Potential & Wellbeing">القدرات البشرية وجودة الحياة / Human Potential &amp; Wellbeing</option>
+            <option value="Water &amp; Oceans" data-en="Water & Oceans" data-ar="المياه والمحيطات / Water & Oceans">المياه والمحيطات / Water &amp; Oceans</option>
+            <option value="Future Food &amp; Agriculture" data-en="Future Food & Agriculture" data-ar="الغذاء والزراعة المستقبلية / Future Food & Agriculture">الغذاء والزراعة المستقبلية / Future Food &amp; Agriculture</option>
+            <option value="Digital Society &amp; Governance" data-en="Digital Society & Governance" data-ar="المجتمع الرقمي والحوكمة / Digital Society & Governance">المجتمع الرقمي والحوكمة / Digital Society &amp; Governance</option>
             <option value="Other" data-en="Other" data-ar="أخرى / Other">أخرى / Other</option>
           </select>
           <small class="field-helper" data-en="Choose the strategic direction that best fits your vision." data-ar="اختاروا المسار الاستراتيجي الأقرب إلى رؤيتكم.">Choose the strategic direction that best fits your vision.</small>
@@ -1356,7 +1349,7 @@
     const sourceVisions = [
       {
         team: "Sahab Terra",
-        track: "Green Tech",
+        track: "Green Tech & Energy",
         prompt: "Regenerative desert farms that harvest water from the air and feed the edge of Riyadh.",
         image: "https://images.unsplash.com/photo-1509391366360-2e959784a276?auto=format&fit=crop&w=1200&q=88",
         color: "#2C7562",
@@ -1365,7 +1358,7 @@
       },
       {
         team: "Misk Vector",
-        track: "Smart Mobility",
+        track: "Smart Mobility & Future Cities",
         prompt: "A silent, autonomous transit ribbon connecting old Najdi towns to tomorrow's city.",
         image: "https://images.unsplash.com/photo-1544620347-c4fd4a3d5957?auto=format&fit=crop&w=1200&q=88",
         color: "#9B8AC4",
@@ -1374,7 +1367,7 @@
       },
       {
         team: "Oasis OS",
-        track: "Water Security",
+        track: "Water & Oceans",
         prompt: "Living infrastructure turns every public space into a cooling, restorative oasis.",
         image: "https://images.unsplash.com/photo-1518005020951-eccb494ad742?auto=format&fit=crop&w=1200&q=88",
         color: "#D8D0ED",
@@ -1383,7 +1376,7 @@
       },
       {
         team: "Najd Neural",
-        track: "Heritage AI",
+        track: "Heritage, Culture & Tourism",
         prompt: "Machine intelligence preserves the stories, patterns, and poetry held inside every mud-brick wall.",
         image: "https://images.unsplash.com/photo-1534274988757-a28bf1a57c17?auto=format&fit=crop&w=1200&q=88",
         color: "#9B8AC4",
@@ -1392,7 +1385,7 @@
       },
       {
         team: "Red Sea Relay",
-        track: "Blue Economy",
+        track: "Water & Oceans",
         prompt: "Ocean-positive coastal cities where coral restoration is part of the everyday commute.",
         image: "https://images.unsplash.com/photo-1544551763-46a013bb70d5?auto=format&fit=crop&w=1200&q=88",
         color: "#2C7562",
@@ -1401,7 +1394,7 @@
       },
       {
         team: "Himma Labs",
-        track: "Human Potential",
+        track: "Human Potential & Wellbeing",
         prompt: "An adaptive learning constellation that gives every learner a route to their highest potential.",
         image: "https://images.unsplash.com/photo-1497366754035-f200968a6e72?auto=format&fit=crop&w=1200&q=88",
         color: "#9B8AC4",
@@ -1410,7 +1403,7 @@
       },
       {
         team: "NEOM Bloom",
-        track: "NEOM",
+        track: "Smart Mobility & Future Cities",
         prompt: "Architecture that grows, breathes, and shifts with the rhythm of a zero-carbon community.",
         image: "https://images.unsplash.com/photo-1511818966892-d7d671e672a2?auto=format&fit=crop&w=1200&q=88",
         color: "#D8D0ED",
@@ -1419,7 +1412,7 @@
       },
       {
         team: "Palm Circuit",
-        track: "Circular Cities",
+        track: "Smart Mobility & Future Cities",
         prompt: "A circular materials exchange makes construction waste the raw material for beautiful new neighborhoods.",
         image: "https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?auto=format&fit=crop&w=1200&q=88",
         color: "#2C7562",
@@ -1572,21 +1565,14 @@
       .filter((vision) => vision && String(vision.status || "").toLowerCase() === "published");
     let voteInFlight = false;
     const TRACK_PROMPT_ENHANCERS = {
-      "Green Tech": { en: "Prioritize renewable energy, low-carbon materials, climate resilience, and visible harmony with Saudi landscapes.", ar: "ركّزوا على الطاقة المتجددة والمواد منخفضة الكربون والمرونة المناخية وانسجام واضح مع طبيعة السعودية." },
-      "Smart Mobility": { en: "Show clean, accessible movement between Saudi communities through intelligent transport, walkability, and connected infrastructure.", ar: "أظهروا تنقّلًا نظيفًا وسهل الوصول بين المجتمعات السعودية عبر النقل الذكي والمشي والبنية المترابطة." },
-      "Heritage AI": { en: "Blend Saudi heritage, crafts, language, and historic places with respectful, human-centered artificial intelligence.", ar: "اخلطوا التراث والحرف واللغة والمواقع التاريخية السعودية مع ذكاء اصطناعي يحترم الإنسان والهوية." },
-      "NEOM": { en: "Imagine a bold, credible next-generation Saudi destination with advanced architecture, nature protection, and human wellbeing.", ar: "تخيّلوا وجهة سعودية جريئة وواقعية من الجيل القادم تجمع العمارة المتقدمة وحماية الطبيعة وجودة حياة الإنسان." },
-      "Human Potential": { en: "Center people, inclusion, talent, creativity, and healthier everyday life in a future built around human potential.", ar: "اجعلوا الإنسان والشمول والموهبة والإبداع وجودة الحياة اليومية محور مستقبل يبني على القدرات البشرية." },
-      "Water Security": { en: "Visualize resilient Saudi water systems using conservation, desalination, reuse, smart distribution, and restored ecosystems.", ar: "صوّروا أنظمة مياه سعودية مرنة تجمع الترشيد والتحلية وإعادة الاستخدام والتوزيع الذكي واستعادة النظم البيئية." },
-      "Blue Economy": { en: "Highlight responsible coastal innovation, marine science, clean seas, fisheries, and sustainable economic life along the Red Sea and Gulf.", ar: "أبرزوا الابتكار الساحلي المسؤول وعلوم البحار ونظافة السواحل ومصائد الأسماك والاقتصاد المستدام على البحر الأحمر والخليج." },
-      "Circular Cities": { en: "Show cities that design out waste through repair, reuse, renewable materials, efficient buildings, and regenerative public spaces.", ar: "أظهروا مدنًا تقلل الهدر عبر الإصلاح وإعادة الاستخدام والمواد المتجددة والمباني الكفؤة والمساحات العامة المتجددة." },
+      "Green Tech & Energy": { en: "Blend renewable energy, low-carbon materials, climate resilience, advanced manufacturing, and skilled green work in harmony with Saudi landscapes.", ar: "اجمعوا بين الطاقة المتجددة والمواد منخفضة الكربون والمرونة المناخية والتصنيع المتقدم والعمل الأخضر الماهر بانسجام مع طبيعة السعودية." },
+      "Smart Mobility & Future Cities": { en: "Show clean, accessible movement, walkable connected neighborhoods, circular buildings, protected nature, and credible next-generation destinations.", ar: "أظهروا تنقّلًا نظيفًا وسهل الوصول وأحياء مترابطة قابلة للمشي ومباني دائرية وطبيعة محمية ووجهات واقعية من الجيل القادم." },
+      "Heritage, Culture & Tourism": { en: "Blend Saudi heritage, crafts, language, historic places, arts, and hospitality with respectful technology and low-impact tourism that benefits local communities.", ar: "اخلطوا التراث والحرف واللغة والمواقع التاريخية والفنون والضيافة السعودية مع تقنية تحترم الهوية وسياحة منخفضة الأثر تفيد المجتمعات المحلية." },
+      "Human Potential & Wellbeing": { en: "Center inclusion, talent, creativity, lifelong learning, future skills, preventive care, mental wellbeing, and compassionate everyday life for all ages.", ar: "اجعلوا الشمول والموهبة والإبداع والتعلّم المستمر ومهارات المستقبل والوقاية والصحة النفسية وجودة الحياة الرحيمة لكل الأعمار محور الفكرة." },
+      "Water & Oceans": { en: "Visualize resilient water and coastal systems through conservation, desalination, reuse, smart distribution, marine science, clean seas, fisheries, and restored ecosystems across the Red Sea and Gulf.", ar: "صوّروا أنظمة مياه وسواحل مرنة عبر الترشيد والتحلية وإعادة الاستخدام والتوزيع الذكي وعلوم البحار ونظافة السواحل ومصائد الأسماك واستعادة النظم البيئية في البحر الأحمر والخليج." },
       "Future Food & Agriculture": { en: "Show climate-smart Saudi food systems with local production, precision agriculture, vertical growing, and nourishing communities.", ar: "أظهروا أنظمة غذاء وزراعة سعودية ذكية مناخيًا تجمع الإنتاج المحلي والزراعة الدقيقة والزراعة الرأسية ومجتمعات صحية." },
-      "Health & Wellbeing": { en: "Depict preventive care, accessible health technology, active communities, mental wellbeing, and compassionate care for all ages.", ar: "صوّروا الوقاية والتقنيات الصحية الميسّرة والمجتمعات النشطة والصحة النفسية ورعاية رحيمة لكل الأعمار." },
-      "Education & Skills": { en: "Imagine joyful lifelong learning, practical future skills, creative classrooms, and equal access to knowledge across Saudi Arabia.", ar: "تخيّلوا تعلّمًا مستمرًا ممتعًا ومهارات مستقبلية عملية وفصولًا إبداعية ووصولًا عادلًا إلى المعرفة في السعودية." },
-      "Tourism & Culture": { en: "Celebrate authentic Saudi places, stories, arts, and hospitality through low-impact tourism that benefits local communities.", ar: "احتفوا بالأماكن والقصص والفنون والضيافة السعودية الأصيلة عبر سياحة منخفضة الأثر تفيد المجتمعات المحلية." },
       "Digital Society & Governance": { en: "Show trusted, inclusive digital public services that make communities safer, more transparent, and easier to participate in.", ar: "أظهروا خدمات عامة رقمية موثوقة وشاملة تجعل المجتمعات أكثر أمانًا وشفافية وسهولة في المشاركة." },
-      "Advanced Energy & Industry": { en: "Visualize clean industry, advanced manufacturing, robotics, and energy systems creating skilled work without losing human scale.", ar: "صوّروا صناعة نظيفة وتصنيعًا متقدمًا وروبوتات وأنظمة طاقة تخلق أعمالًا ماهرة وتحافظ على البعد الإنساني." },
-      "Other": { en: "Use the participant’s idea as the lead and build a broad, optimistic Saudi 2050 future scene without forcing it into another track.", ar: "اجعلوا فكرة المشارك هي الأساس وابنوا مشهدًا واسعًا ومتفائلًا لمستقبل السعودية 2050 دون فرضها على مسار آخر." }
+      "Other": { en: "Use the participant’s idea as the lead and build a broad, optimistic Saudi 2050 future scene without forcing it into another track.", ar: "اجعلوا فكرة المشارك هي الأساس وابنوا مشهدًا مستقبليًا سعوديًا متفائلًا لعام 2050 دون فرضها على مسار آخر." }
     };
     const copy = {
       en: {
@@ -2342,12 +2328,14 @@
        generateButton.textContent = t("imageGeneratingButton");
       formNote.textContent = t("imageGenerating");
       const colors = {
-        "Green Tech": "#2C7562",
-        "Smart Mobility": "#9B8AC4",
-        "Heritage AI": "#D8D0ED",
-        "NEOM": "#9B8AC4",
-        "Human Potential": "#2C7562"
-      };
+        "Green Tech & Energy": "#2C7562",
+        "Smart Mobility & Future Cities": "#9B8AC4",
+        "Heritage, Culture & Tourism": "#D8D0ED",
+        "Human Potential & Wellbeing": "#2C7562",
+        "Water & Oceans": "#9B8AC4",
+        "Future Food & Agriculture": "#D8D0ED",
+        "Digital Society & Governance": "#2C7562"
+      };;
       const newVision = {
         id: `local-${Date.now()}`,
         team,
