@@ -1244,10 +1244,8 @@
           const cleanUrl = window.location.pathname + (cleanQuery ? "?" + cleanQuery : "") + window.location.hash;
           window.history.replaceState({}, document.title, cleanUrl);
         }
-        const motionPreference = localStorage.getItem("imagineSaudiMotion");
-        if (motionPreference === "full" || motionPreference === "reduce") {
-          document.documentElement.dataset.motion = motionPreference;
-        }
+        const motionPreference = localStorage.getItem("imagineSaudiMotion") || "full";
+        document.documentElement.dataset.motion = motionPreference === "reduce" ? "reduce" : "full";
       } catch (error) {
         // Motion should never prevent the page from loading in privacy mode.
       }
