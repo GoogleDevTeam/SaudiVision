@@ -325,6 +325,15 @@ Before coding, inspect the latest `main` branch and the live deployment state. T
 - Frontend and Apps Script source syntax checks passed after the change.
 - Live smoke test passed after deployment: `/health` returned workbook format `2026-09-19-v7`, and an intentionally invalid organizer key was rejected with `Unauthorized: invalid organizer key.` The static frontend still needs its hosting deployment/cache to refresh before users see the new access flow.
 
+### Category prompts and participant round reset — 2026-09-19
+
+- Expanded the Strategic track selector from 8 to 15 practical categories, including Future Food & Agriculture, Health & Wellbeing, Education & Skills, Tourism & Culture, Digital Society & Governance, Advanced Energy & Industry, and Other.
+- Added a bilingual prompt enhancer for every category. The selected enhancer is shown to participants and applied server-side to Gemini image generation.
+- Hardened image generation instructions so every accepted submission requests exactly one single image, never a collage, variation set, or text response.
+- Added a server-owned submission round and anonymous browser participant identifier. Each participant can submit once per round; the organizer menu now has Reset participant submissions, which increments the round without deleting existing records.
+- Frontend commit: 7be0ae45b0d79c569fd8a5b0536dda8fbd9e2f30. Backend commit: 5def846b07a82a7e56b245aae26906771e781a3f.
+- Static source wiring checks passed. This environment does not include a JavaScript runtime, so Node syntax checks remain unavailable here.
+
 ### Next recommended step
 
-Deploy the updated google-apps-script.gs to the existing Apps Script /exec deployment, then test organizer unlock, refresh, approve/delete, settings, and public sync on the live site.
+Copy the updated google-apps-script.gs into the existing Apps Script deployment and publish a new version. Then test one submission, the duplicate rejection, organizer Reset, one new submission after Reset, approve/delete, and public sync.
