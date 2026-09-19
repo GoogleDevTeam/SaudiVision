@@ -1510,9 +1510,9 @@
         status: "Submissions {submissions} · Voting {voting}.",
         open: "open",
         closed: "closed",
-         imageDemo: "Demo preview only — no AI image service is connected yet.",
-         imageGenerating: "Creating a demo visual preview...",
-         imageGeneratingButton: "⟳ Creating preview...",
+         imageDemo: "Live AI preview generated with Gemini.",
+         imageGenerating: "Creating your live AI visual preview...",
+         imageGeneratingButton: "⟳ Creating AI visual...",
          imageAdded: "Your vision was published to the gallery.",
         imageQueued: "Your vision was received and is waiting for organizer approval.",
         submissionClosed: "Submissions are currently closed — the organizer can reopen them above.",
@@ -1522,7 +1522,8 @@
          organizerRequired: "Organizer authorization is required.",
          organizerInvalidKey: "The organizer key was rejected. Check the organizer setup and try again.",
          confirmDelete: "Delete this submission permanently? It will not be shown publicly.",
-         demoBadge: "DEMO PREVIEW",
+         demoBadge: "AI GENERATED",
+         aiUnavailable: "Live AI is not configured yet. Ask the organizer to add the Gemini key.",
          conceptArt: "concept art",
         voteError: "The vote could not be saved. Please try again.",
         reviewEmpty: "No pending submissions.",
@@ -1579,9 +1580,9 @@
         status: "المشاركات {submissions} · التصويت {voting}.",
         open: "مفتوحة",
         closed: "مغلقة",
-         imageDemo: "تصور تجريبي فقط — لم يتم ربط خدمة توليد صور بالذكاء الاصطناعي بعد.",
-         imageGenerating: "جارٍ إنشاء تصور بصري تجريبي...",
-         imageGeneratingButton: "⟳ جارٍ إنشاء التصور...",
+         imageDemo: "تصور مباشر مولّد باستخدام Gemini.",
+         imageGenerating: "جارٍ إنشاء تصور بصري مباشر بالذكاء الاصطناعي...",
+         imageGeneratingButton: "⟳ جارٍ إنشاء التصور بالذكاء الاصطناعي...",
          imageAdded: "تم نشر رؤيتكم في المعرض.",
         imageQueued: "تم استلام رؤيتكم وهي بانتظار موافقة المنظم.",
         submissionClosed: "التقديم مغلق حاليًا — يمكن للمنظم فتحه من لوحة التحكم.",
@@ -1591,7 +1592,8 @@
          organizerRequired: "يلزم إدخال رمز صلاحية المنظم.",
          organizerInvalidKey: "تم رفض رمز المنظم. تحقق من إعدادات المنظم وحاول مرة أخرى.",
          confirmDelete: "حذف هذه المشاركة نهائيًا؟ لن تظهر للجمهور.",
-         demoBadge: "تصور تجريبي",
+         demoBadge: "مولّد بالذكاء الاصطناعي",
+         aiUnavailable: "لم يتم إعداد الذكاء الاصطناعي المباشر بعد. اطلبوا من المنظم إضافة مفتاح Gemini.",
          conceptArt: "تصور بصري",
         voteError: "تعذر حفظ التصويت. حاول مرة أخرى.",
         reviewEmpty: "لا توجد مشاركات بانتظار المراجعة.",
@@ -1777,7 +1779,9 @@
       const anotherVisionVoted = Boolean(selectedVision && !isVoted);
       const votingClosed = !settings.votingOpen;
       const voteDisabled = votingClosed || anotherVisionVoted;
-      const isDemoPreview = String(vision.imageSource || "").toLowerCase() === "demo-preview";
+      const imageSource = String(vision.imageSource || "").toLowerCase();
+      const isDemoPreview = imageSource === "demo-preview";
+      const isGeneratedImage = imageSource === "generated";
       return `
         <article class="vision-card" style="animation-delay:${Math.min(index * 55, 500)}ms">
           <div class="vision-image-wrap">
@@ -1785,7 +1789,7 @@
               onerror="this.onerror=null;this.src='${placeholderImage}'" />
             <div class="image-glow"></div>
             <span class="card-index">VISION / ${String(index + 1).padStart(2, "0")}</span>
-            ${isDemoPreview ? `<span class="image-source-badge">${t("demoBadge")}</span>` : ""}
+            ${isDemoPreview || isGeneratedImage ? `<span class="image-source-badge">${isGeneratedImage ? t("demoBadge") : "DEMO PREVIEW"}</span>` : ""}
           </div>
           <div class="vision-content">
             <div class="card-meta">
@@ -2058,6 +2062,10 @@
       const track = String(data.get("track"));
       const prompt = String(data.get("prompt")).trim();
       if (!team || !prompt) return;
+      if (!GOOGLE_APPS_SCRIPT_URL) {
+        formNote.textContent = t("aiUnavailable");
+        return;
+      }
 
       form.classList.add("is-submitting");
       submissionPanel.classList.add("is-submitting");
@@ -2065,8 +2073,6 @@
        generateButton.classList.add("is-generating");
        generateButton.textContent = t("imageGeneratingButton");
       formNote.textContent = t("imageGenerating");
-      await new Promise((resolve) => setTimeout(resolve, 1000));
-
       const colors = {
         "Green Tech": "#2C7562",
         "Smart Mobility": "#9B8AC4",
@@ -2079,26 +2085,21 @@
         team,
         track,
         prompt,
-         image: createDemoPreviewImage(`${team}|${track}|${prompt}`),
+        image: "",
         color: colors[track] || "#D8D0ED",
          height: 280 + (((sourceVisions.length + localPublishedVisions.length) * 37) % 100),
          votes: 0,
          status: "pending",
-         imageSource: "demo-preview"
+        imageSource: "generated"
       };
-      if (GOOGLE_APPS_SCRIPT_URL) {
-        try {
-          await googleRequest("submit", newVision);
-        } catch (error) {
-          generateButton.disabled = false;
-           generateButton.classList.remove("is-generating");
-           formNote.textContent = t("submitError");
-          console.error("Submission request failed:", error);
-          return;
-        }
-      } else {
-         pendingVisions.push(newVision);
-         persistLocalCollections();
+      try {
+        await googleRequest("submit", newVision);
+      } catch (error) {
+        generateButton.disabled = false;
+        generateButton.classList.remove("is-generating");
+        formNote.textContent = error?.message || t("submitError");
+        console.error("Live AI submission failed:", error);
+        return;
       }
 
       form.reset();
