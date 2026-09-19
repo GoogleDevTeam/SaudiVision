@@ -818,10 +818,10 @@
     }
     @media (max-width: 800px) {
       .page-shell { --page-gutter: 24px; padding-top: 24px; }
-      .topline { align-items: flex-start; flex-wrap: wrap; }
-      .header-identity { width: 100%; justify-content: space-between; }
-      .institution-logo { width: min(250px, 68vw); max-height: 118px; }
-      .status-lockup { flex-wrap: wrap; justify-content: flex-end; }
+      .topline { align-items: center; flex-wrap: nowrap; gap: 10px; }
+      .header-identity { width: auto; flex: 0 1 auto; gap: 8px; padding: 4px 6px; }
+      .institution-logo { width: min(150px, 38vw); max-height: 70px; }
+      .status-lockup { flex-wrap: nowrap; justify-content: flex-end; gap: 6px; }
       .hero { display: block; padding: 64px 0 34px; }
       .counter { min-width: 0; margin-top: 28px; }
       .event-flow { grid-template-columns: 1fr; }
@@ -832,8 +832,10 @@
       .page-shell { --page-gutter: 18px; }
       .brand-copy::after, .brand-ar { display: none; }
       .brand-copy { gap: 0; }
-      .header-identity { width: 100%; gap: 12px; padding: 8px 10px; }
-      .institution-logo { width: min(230px, 64vw); max-height: 105px; }
+      .topline { gap: 6px; }
+      .header-identity { width: auto; gap: 5px; padding: 2px; border-color: transparent; background: transparent; }
+      .institution-logo { width: min(118px, 33vw); max-height: 58px; }
+      .language-toggle { min-width: 46px; padding: 5px 7px; }
       .brand-name { font-size: .82rem; }
       .institution-logo { width: min(136px, 33vw); max-height: 62px; }
       .status-text { font-size: .64rem; }
