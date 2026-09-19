@@ -349,6 +349,13 @@ Before coding, inspect the latest `main` branch and the live deployment state. T
 - The backend generates the image before appending the submission, so this failed before creating a spreadsheet row. No test submission was created.
 - Apps Script deployment is serving the current backend; add GEMINI_API_KEY in Apps Script Project Settings, then retry the same submission verification.
 
+### Consolidated strategic tracks — 2026-09-19
+
+- Reduced the public Strategic track selector from 15 overlapping suggestions to 8 clearer canonical choices: Green Tech & Energy; Smart Mobility & Future Cities; Heritage, Culture & Tourism; Human Potential & Wellbeing; Water & Oceans; Future Food & Agriculture; Digital Society & Governance; and Other.
+- Merged Water Security + Blue Economy into Water & Oceans, Heritage AI + Tourism & Culture into Heritage, Culture & Tourism, Human Potential + Health & Wellbeing + Education & Skills into Human Potential & Wellbeing, Green Tech + Advanced Energy & Industry into Green Tech & Energy, and Smart Mobility + NEOM + Circular Cities into Smart Mobility & Future Cities.
+- Kept a dedicated bilingual frontend and server-side prompt enhancer for every canonical choice. Legacy backend labels remain supported for existing records.
+- Updated demo gallery tracks, submission color mapping, and the AI handoff. Frontend and backend source changes are ready for deployment; GitHub Pages and the Apps Script web app still need their normal deployment/verification cycle.
+
 ### Next recommended step
 
-Copy the updated google-apps-script.gs into the existing Apps Script deployment and publish a new version. Then run the health/setup path so the new headers are added, and test one submission to confirm the readable device fields appear in the spreadsheet.
+Copy the updated google-apps-script.gs into the existing Apps Script deployment and publish a new version. Add GEMINI_API_KEY in Apps Script Project Settings before testing one submission, then run the health/setup path and confirm the new consolidated track and readable device metadata appear in the spreadsheet.
