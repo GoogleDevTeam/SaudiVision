@@ -163,6 +163,14 @@
 
     .brand-lockup, .status-lockup, .brand-copy { display: flex; align-items: center; }
     .brand-lockup { gap: 14px; }
+    .institution-logo {
+      display: block;
+      width: clamp(116px, 15vw, 180px);
+      height: auto;
+      max-height: 72px;
+      object-fit: contain;
+      flex: 0 1 auto;
+    }
     .google-dev-logo {
       display: grid;
       appearance: none;
@@ -815,6 +823,7 @@
       .brand-copy::after, .brand-ar { display: none; }
       .brand-copy { gap: 0; }
       .brand-name { font-size: .82rem; }
+      .institution-logo { width: min(136px, 33vw); max-height: 62px; }
       .status-text { font-size: .64rem; }
       .organizer-panel { grid-template-columns: 1fr; }
       .organizer-status { grid-column: auto; }
@@ -1044,6 +1053,7 @@
         </div>
       </div>
       <div class="status-lockup">
+        <img class="institution-logo" src="college-shaqra-logo-white.png" alt="كلية الحاسب الآلي وتقنية المعلومات — جامعة شقراء" width="728" height="342" decoding="async" />
         <p class="brand-ar" lang="ar" dir="rtl" aria-label="تخيّل السعودية">تخيّل السعودية</p>
         <button class="language-toggle" id="language-toggle" type="button" aria-label="Switch language">عربي</button>
       </div>
