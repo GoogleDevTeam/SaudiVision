@@ -176,6 +176,7 @@
       width: clamp(210px, 24vw, 300px);
       height: auto;
       max-height: 140px;
+      min-width: 0;
       object-fit: contain;
       flex: 0 1 auto;
     }
@@ -242,6 +243,8 @@
       font-family: "Cairo", sans-serif;
       font-size: .7rem;
       font-weight: 700;
+      white-space: nowrap;
+      flex: 0 0 auto;
       transition: background .2s ease, transform .2s ease;
     }
     .language-toggle:hover { background: rgba(155, 138, 196, .24); transform: translateY(-2px); }
@@ -833,11 +836,11 @@
       .brand-copy::after, .brand-ar { display: none; }
       .brand-copy { gap: 0; }
       .topline { gap: 6px; }
-      .header-identity { width: auto; gap: 5px; padding: 2px; border-color: transparent; background: transparent; }
-      .institution-logo { width: min(118px, 33vw); max-height: 58px; }
-      .language-toggle { min-width: 46px; padding: 5px 7px; }
+      .brand-lockup, .brand-copy { min-width: 0; }
+      .header-identity { width: auto; gap: 6px; padding: 2px; border-color: transparent; background: transparent; }
+      .institution-logo { width: min(136px, 33vw); max-height: 62px; min-width: 0; }
+      .language-toggle { min-width: 56px; padding: 7px 9px; }
       .brand-name { font-size: .82rem; }
-      .institution-logo { width: min(136px, 33vw); max-height: 62px; }
       .status-text { font-size: .64rem; }
       .organizer-panel { grid-template-columns: 1fr; }
       .organizer-status { grid-column: auto; }
