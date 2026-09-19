@@ -1246,9 +1246,6 @@
       }
       const fontSize = randomBetween(30, 56); return { width: fontSize * .72, height: fontSize * .72, fontSize };
     }
-    function boxesOverlap(first, second, gap) {
-      return !(first.right + gap <= second.left || second.right + gap <= first.left || first.bottom + gap <= second.top || second.bottom + gap <= first.top);
-    }
     function createDecorativeMark(kind, geometry) {
       const mark = document.createElement("div");
       mark.className = "decorative-mark decorative-" + kind;
@@ -1267,28 +1264,45 @@
       } else { mark.textContent = "96"; }
       return mark;
     }
+    function shuffledSlots(columns, rows) {
+      const slots = [];
+      for (let row = 0; row < rows; row += 1) {
+        for (let column = 0; column < columns; column += 1) slots.push({ row, column });
+      }
+      for (let index = slots.length - 1; index > 0; index -= 1) {
+        const swapIndex = Math.floor(Math.random() * (index + 1));
+        [slots[index], slots[swapIndex]] = [slots[swapIndex], slots[index]];
+      }
+      return slots;
+    }
     function spawnBackgroundDecorations() {
       if (!decorativeLayer) return;
       decorativeLayer.replaceChildren();
       const bounds = decorativeLayer.getBoundingClientRect();
-      const placed = [];
-      const placementGap = 34;
       const spawnCount = 20;
+      const columns = Math.max(2, Math.floor(bounds.width / 170));
+      const rows = Math.ceil(spawnCount / columns);
+      const cellWidth = bounds.width / columns;
+      const cellHeight = bounds.height / rows;
+      const padding = 12;
+      const slots = shuffledSlots(columns, rows);
       for (let index = 0; index < spawnCount; index += 1) {
         const roll = Math.random();
         const kind = roll < .50 ? "logo" : roll < .80 ? "silhouette" : "number";
+        const slot = slots[index];
         const geometry = decorationGeometry(kind);
-        let placement = null;
-        for (let attempt = 0; attempt < 160 && !placement; attempt += 1) {
-          const left = randomBetween(0, Math.max(0, bounds.width - geometry.width));
-          const top = randomBetween(0, Math.max(0, bounds.height - geometry.height));
-          const candidate = { left, top, right: left + geometry.width, bottom: top + geometry.height };
-          if (placed.every(existing => !boxesOverlap(candidate, existing, placementGap))) placement = candidate;
-        }
-        if (!placement) continue;
+        const maxWidth = Math.max(18, cellWidth - padding * 2);
+        const maxHeight = Math.max(18, cellHeight - padding * 2);
+        const scaleToFit = Math.min(1, maxWidth / geometry.width, maxHeight / geometry.height);
+        geometry.width *= scaleToFit; geometry.height *= scaleToFit;
+        if (geometry.fontSize) geometry.fontSize *= scaleToFit;
+        const slotLeft = slot.column * cellWidth;
+        const slotTop = slot.row * cellHeight;
+        const left = slotLeft + randomBetween(padding, Math.max(padding, cellWidth - geometry.width - padding));
+        const top = slotTop + randomBetween(padding, Math.max(padding, cellHeight - geometry.height - padding));
         const mark = createDecorativeMark(kind, geometry);
-        mark.style.left = placement.left.toFixed(1) + "px"; mark.style.top = placement.top.toFixed(1) + "px";
-        decorativeLayer.appendChild(mark); placed.push(placement);
+        mark.style.left = left.toFixed(1) + "px"; mark.style.top = top.toFixed(1) + "px";
+        decorativeLayer.appendChild(mark);
       }
     }
     spawnBackgroundDecorations();
