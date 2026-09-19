@@ -409,6 +409,12 @@ Before coding, inspect the latest `main` branch and the live deployment state. T
 - Frontend commit: `ec91f8d5648e002e461b8f74733f7f989e88ceb9`.
 - GitHub Pages should rebuild the frontend; Apps Script does not need redeployment for this copy/layout-only change.
 
+### Temporary footer removal — 2026-09-19
+
+- Removed the footer line **مجموعات مطوري Google في الجامعة — جامعة شقراء** at the user's request.
+- Kept the college affiliation line **كلية الحاسب الآلي وتقنية المعلومات - مجموعة مطوري قوقل شقراء**.
+- Frontend commit: `ca1530e8b319b14f470b616471db112c2f442fa1`.
+
 ### Next recommended step
 
 Deploy the updated google-apps-script.gs once, then test descriptions that intentionally combine two or three ideas. Confirm the generated image follows the participant's wording while using the selected track only as a broad lens.
