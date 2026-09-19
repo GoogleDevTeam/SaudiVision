@@ -1407,7 +1407,7 @@
       Google Apps Script setup:
       1. Create a Google Sheet and deploy the companion google-apps-script.gs as a web app.
       2. Paste the deployment URL below. Keep it empty for standalone demo mode.
-      3. Never put a Gemini/API secret in this file; keep secrets in Apps Script properties.
+      3. Never put Cloudflare credentials in this file; keep them in Apps Script properties.
       4. Optional Firebase upgrade: create a Firebase project, enable Google Sign-In,
          then add the public web config here only when you are ready to use Firebase
          Auth. Keep organizer credentials and vote-authorizing writes on a trusted
@@ -1766,7 +1766,7 @@
         status: "Submissions {submissions} · Voting {voting}.",
         open: "open",
         closed: "closed",
-         imageDemo: "One single AI image is generated with Gemini for each submission.",
+         imageDemo: "One single AI image is generated with Cloudflare Workers AI for each submission.",
          imageGenerating: "Creating your one-image AI visual...",
          trackEnhancerPrefix: "Image prompt enhancer: ",
          submissionAlreadyUsed: "You already submitted once in this round. The organizer can reset submissions for another round.",
@@ -1785,8 +1785,8 @@
          organizerInvalidKey: "The organizer key was rejected. Check the organizer setup and try again.",
          confirmDelete: "Delete this submission permanently? It will not be shown publicly.",
          demoBadge: "AI GENERATED",
-         aiUnavailable: "Live AI is not configured yet. Ask the organizer to add the Gemini key.",
-         aiKeyMissing: "Gemini image generation is not ready. Add GEMINI_API_KEY in Apps Script Project Settings, then try again.",
+         aiUnavailable: "Live AI is not configured yet. Ask the organizer to add the Cloudflare API token and account ID.",
+         aiKeyMissing: "Cloudflare image generation is not ready. Add CLOUDFLARE_API_TOKEN and CLOUDFLARE_ACCOUNT_ID in Apps Script Project Settings, then try again.",
          conceptArt: "concept art",
          visionLabel: "VISION",
         voteError: "The vote could not be saved. Please try again.",
@@ -1851,7 +1851,7 @@
         status: "المشاركات {submissions} · التصويت {voting}.",
         open: "مفتوحة",
         closed: "مغلقة",
-         imageDemo: "يتم إنشاء صورة واحدة فقط بالذكاء الاصطناعي لكل مشاركة باستخدام Gemini.",
+         imageDemo: "يتم إنشاء صورة واحدة فقط بالذكاء الاصطناعي لكل مشاركة باستخدام Cloudflare Workers AI.",
          imageGenerating: "يتم الآن إنشاء الصورة الوحيدة للمشاركة...",
          trackEnhancerPrefix: "مُحسّن مطالبة الصورة: ",
          submissionAlreadyUsed: "لقد أرسلتم مشاركة واحدة في هذه الجولة. يستطيع المنظم إعادة فتح المشاركات لبدء جولة جديدة.",
@@ -1870,8 +1870,8 @@
          organizerInvalidKey: "تم رفض رمز المنظم. تحقق من إعدادات المنظم وحاول مرة أخرى.",
          confirmDelete: "حذف هذه المشاركة نهائيًا؟ لن تظهر للجمهور.",
          demoBadge: "مولّد بالذكاء الاصطناعي",
-         aiUnavailable: "لم يتم إعداد الذكاء الاصطناعي المباشر بعد. اطلبوا من المنظم إضافة مفتاح Gemini.",
-         aiKeyMissing: "توليد الصور عبر Gemini غير جاهز بعد. أضيفوا GEMINI_API_KEY في إعدادات مشروع Apps Script ثم حاولوا مرة أخرى.",
+         aiUnavailable: "لم يتم إعداد الذكاء الاصطناعي المباشر بعد. اطلبوا من المنظم إضافة إعدادات Cloudflare.",
+         aiKeyMissing: "توليد الصور عبر Cloudflare غير جاهز بعد. أضيفوا CLOUDFLARE_API_TOKEN وCLOUDFLARE_ACCOUNT_ID في إعدادات مشروع Apps Script ثم حاولوا مرة أخرى.",
          conceptArt: "تصور بصري",
          visionLabel: "رؤية",
         voteError: "تعذر حفظ التصويت. حاول مرة أخرى.",
