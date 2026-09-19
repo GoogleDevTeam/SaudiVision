@@ -422,6 +422,13 @@ Before coding, inspect the latest `main` branch and the live deployment state. T
 - Asset commit: `48a507dac91130f5acf2dcf2739fb0bb7d1bd956`. Frontend commit: `4b0901c9ddc0731c11aed7350bd726b51dbd8513`.
 - Apps Script does not need redeployment; GitHub Pages should rebuild the frontend.
 
+### Header logo visibility refinement — 2026-09-19
+
+- Moved the white College + Shaqra University logo into a dedicated header identity block with enough visual space to be noticeable.
+- Increased its desktop size, gave it a subtle framed background, and made the block full-width on smaller screens; the language switch and organizer access remain functional.
+- Frontend commit: `7e830fd3038de6191b3a0f1e01c2fddf64a56424`.
+- Apps Script does not need redeployment; GitHub Pages should rebuild the frontend.
+
 ### Next recommended step
 
 Deploy the updated google-apps-script.gs once, then test descriptions that intentionally combine two or three ideas. Confirm the generated image follows the participant's wording while using the selected track only as a broad lens.
