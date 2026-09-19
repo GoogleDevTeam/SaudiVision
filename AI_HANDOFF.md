@@ -356,6 +356,14 @@ Before coding, inspect the latest `main` branch and the live deployment state. T
 - Kept a dedicated bilingual frontend and server-side prompt enhancer for every canonical choice. Legacy backend labels remain supported for existing records.
 - Updated demo gallery tracks, submission color mapping, and the AI handoff. Frontend and backend source changes are ready for deployment; GitHub Pages and the Apps Script web app still need their normal deployment/verification cycle.
 
+### Gemini readiness and visual prompt upgrade — 2026-09-19
+
+- Reworked every canonical track enhancer into a more specific visual brief with one focal scene, a clear human benefit, and stronger Saudi environmental, cultural, or civic context.
+- Added a live aiStatus endpoint and imageGeneration readiness details to health. The backend reads and trims GEMINI_API_KEY from Apps Script Project Settings on every request; adding the key takes effect immediately without redeploying code.
+- The frontend checks aiStatus immediately before submission and shows a direct setup message instead of waiting for a failed image request.
+- Added stronger image-generation constraints: one coherent 16:9 editorial scene, plausible near-future design, restrained local palette, one focal subject, and no text, logos, flags, collages, or variations.
+- Source files updated: index.html and google-apps-script.gs. Apps Script still needs the updated backend source deployed once; after that, future API-key changes only require updating the Script property.
+
 ### Next recommended step
 
-Copy the updated google-apps-script.gs into the existing Apps Script deployment and publish a new version. Add GEMINI_API_KEY in Apps Script Project Settings before testing one submission, then run the health/setup path and confirm the new consolidated track and readable device metadata appear in the spreadsheet.
+Copy the updated google-apps-script.gs into the existing Apps Script deployment and publish one new version. Add GEMINI_API_KEY in Apps Script Project Settings; then the live aiStatus check and image generation should become ready immediately. Run one submission to verify the image is created and the readable device metadata reaches the spreadsheet.
