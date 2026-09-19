@@ -334,6 +334,14 @@ Before coding, inspect the latest `main` branch and the live deployment state. T
 - Frontend commit: 7be0ae45b0d79c569fd8a5b0536dda8fbd9e2f30. Backend commit: 5def846b07a82a7e56b245aae26906771e781a3f.
 - Static source wiring checks passed. This environment does not include a JavaScript runtime, so Node syntax checks remain unavailable here.
 
+### Spreadsheet device metadata — 2026-09-19
+
+- Added readable device metadata to both Submissions and Visions: anonymous device ID, browser, browser version, operating system, device type, platform, screen size/pixel ratio, timezone, language, and truncated user-agent.
+- The anonymous device ID is derived from the existing browser participant token, so organizers can distinguish repeated activity from the same browser without exposing account credentials.
+- Device metadata is available in organizer review records but is not exposed in the public gallery.
+- Frontend commit: 750513eaf285a731bcea6a23be101c8e53b69657. Backend commit: 8b73b3ad269ec4af9f75a5b36b30684d564c33b3.
+- Existing spreadsheets will receive the additional headers when the updated Apps Script health/setup path runs.
+
 ### Next recommended step
 
-Copy the updated google-apps-script.gs into the existing Apps Script deployment and publish a new version. Then test one submission, the duplicate rejection, organizer Reset, one new submission after Reset, approve/delete, and public sync.
+Copy the updated google-apps-script.gs into the existing Apps Script deployment and publish a new version. Then run the health/setup path so the new headers are added, and test one submission to confirm the readable device fields appear in the spreadsheet.
