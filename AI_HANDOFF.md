@@ -441,6 +441,12 @@ Before coding, inspect the latest `main` branch and the live deployment state. T
 - Added a stable touch target, allowed only the logo to compress, and removed duplicate mobile logo sizing rules.
 - Frontend commit: `296582a2b3116013397dd4d1d5529e5f32680944`.
 
+### Language control layout refinement — 2026-09-19
+
+- Moved the language switch out of the institution-logo cluster into its own compact header utility control.
+- Added a narrow-phone fallback below 380px so the control wraps cleanly instead of being squeezed into the logo row.
+- Frontend commit: `d289aa593c86ffde77df8d8751347d1dcd7c4413`.
+
 ### Next recommended step
 
 Deploy the updated google-apps-script.gs once, then test descriptions that intentionally combine two or three ideas. Confirm the generated image follows the participant's wording while using the selected track only as a broad lens.
