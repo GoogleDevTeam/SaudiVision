@@ -91,7 +91,7 @@
       animation: decorative-drift var(--drift-duration) ease-in-out var(--drift-delay) infinite alternate;
     }
     .decorative-logo {
-      width: clamp(18px, 2vw, 36px);
+      width: clamp(26px, 2.9vw, 52px);
       height: auto;
       filter: grayscale(1) brightness(2.1) contrast(.72);
     }
@@ -1239,7 +1239,7 @@
     function randomBetween(min, max) { return min + Math.random() * (max - min); }
     function decorationGeometry(kind) {
       if (kind === "logo") {
-        const width = randomBetween(18, 34); return { width, height: width * .75 };
+        const width = randomBetween(26, 49); return { width, height: width * .75 };
       }
       if (kind === "silhouette") {
         const width = randomBetween(76, 144); return { width, height: width * (180 / 220) };
