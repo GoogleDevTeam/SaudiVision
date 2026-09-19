@@ -55,11 +55,11 @@
 const SHEETS = {
   visions: {
     name: "Visions",
-    headers: ["id", "createdAt", "publishedAt", "status", "team", "title", "track", "prompt", "problem", "impact", "beneficiaries", "tags", "image", "color", "height", "votes", "participantId", "submissionRound", "deviceId", "deviceLabel", "browser", "browserVersion", "operatingSystem", "deviceType", "platform", "screen", "timezone", "language", "userAgent", "imageSource"]
+    headers: ["id", "createdAt", "publishedAt", "status", "team", "title", "track", "prompt", "problem", "impact", "beneficiaries", "tags", "image", "color", "height", "votes", "participantId", "submissionRound", "deviceId", "deviceLabel", "browser", "browserVersion", "operatingSystem", "deviceType", "platform", "screen", "timezone", "language", "userAgent", "imageSource", "generationStatus", "generationStartedAt", "generationCompletedAt", "generationAttempts", "generationError", "promptVersion", "geminiModel", "imageMimeType", "driveFileId", "reviewedAt", "reviewedBy"]
   },
   submissions: {
     name: "Submissions",
-    headers: ["id", "createdAt", "updatedAt", "status", "team", "title", "track", "prompt", "problem", "impact", "beneficiaries", "tags", "image", "color", "height", "submittedBy", "participantId", "submissionRound", "deviceId", "deviceLabel", "browser", "browserVersion", "operatingSystem", "deviceType", "platform", "screen", "timezone", "language", "userAgent", "imageSource"]
+    headers: ["id", "createdAt", "updatedAt", "status", "team", "title", "track", "prompt", "problem", "impact", "beneficiaries", "tags", "image", "color", "height", "submittedBy", "participantId", "submissionRound", "deviceId", "deviceLabel", "browser", "browserVersion", "operatingSystem", "deviceType", "platform", "screen", "timezone", "language", "userAgent", "imageSource", "generationStatus", "generationStartedAt", "generationCompletedAt", "generationAttempts", "generationError", "promptVersion", "geminiModel", "imageMimeType", "driveFileId", "reviewedAt", "reviewedBy"]
   },
   settings: {
     name: "Settings",
@@ -72,11 +72,16 @@ const SHEETS = {
   unvotes: {
     name: "Unvotes",
     headers: ["voterId", "visionId", "unvotedAt"]
+  },
+  activityLog: {
+    name: "Activity Log",
+    headers: ["timestamp", "eventId", "action", "status", "submissionId", "participantId", "team", "track", "message", "details"]
   }
 };
 
 const GUIDE_SHEET_NAME = "START HERE";
-const WORKBOOK_FORMAT_VERSION = "2026-09-19-v7";
+const WORKBOOK_FORMAT_VERSION = "2026-09-19-v8";
+const IMAGE_PROMPT_VERSION = "2026-09-19-v4";
 const GEMINI_IMAGE_MODEL = "gemini-3.1-flash-image";
 const GEMINI_INTERACTIONS_URL = "https://generativelanguage.googleapis.com/v1beta/interactions";
 const THEME = {
@@ -104,6 +109,21 @@ const FIELD_NOTES = {
   prompt: "The group's Saudi 2050 vision description.",
   image: "Preview or generated image URL/data URI.",
   imageSource: "Image origin: demo-preview, generated, uploaded, or curated.",
+  generationStatus: "Image workflow state: queued, generating, generated, or failed.",
+  generationStartedAt: "When Gemini image generation started.",
+  generationCompletedAt: "When Gemini image generation finished or failed.",
+  generationAttempts: "Number of Gemini attempts used for this submission.",
+  generationError: "Last safe error message when image generation failed.",
+  promptVersion: "Version of the server-side image prompt used.",
+  geminiModel: "Gemini image model used for generation.",
+  imageMimeType: "Generated image MIME type, such as image/png.",
+  driveFileId: "Google Drive file ID for the generated image.",
+  reviewedAt: "When an organizer approved or deleted the submission.",
+  reviewedBy: "Organizer role that performed the moderation action.",
+  timestamp: "When an operational event was recorded.",
+  eventId: "Unique activity-log event ID.",
+  action: "Operational event name, such as submission_received or generation_failed.",
+  details: "Safe JSON details for diagnosing the event; never store secrets.",
   color: "Hex accent color used by the gallery.",
   height: "Gallery image height in pixels, constrained by the backend.",
   votes: "Current active vote count for a published vision.",
@@ -477,12 +497,15 @@ function formatDataSheet_(sheet, definition) {
     Submissions: THEME.lavender,
     Settings: THEME.lightLavender,
     Votes: THEME.green,
-    Unvotes: THEME.lavender
+    Unvotes: THEME.lavender,
+    "Activity Log": THEME.darkGreen
   };
   const widths = {
     id: 310, createdAt: 155, publishedAt: 155, updatedAt: 155, status: 115,
-    team: 170, track: 150, prompt: 380, image: 300, imageSource: 125,
+    team: 170, track: 180, prompt: 380, image: 300, imageSource: 125,
     color: 100, height: 85, votes: 80, submittedBy: 180,
+    generationStatus: 125, generationStartedAt: 155, generationCompletedAt: 155, generationAttempts: 105, generationError: 320, promptVersion: 135, geminiModel: 180, imageMimeType: 125, driveFileId: 250, reviewedAt: 155, reviewedBy: 125,
+    timestamp: 155, eventId: 280, action: 180, status: 115, participantId: 230, message: 300, details: 420,
     key: 170, value: 125, votedAt: 155, active: 85, unvotedAt: 155
   };
 
@@ -511,15 +534,15 @@ function formatDataSheet_(sheet, definition) {
         .setFontSize(9);
     }
   });
-  ["createdAt", "publishedAt", "updatedAt", "votedAt", "unvotedAt"].forEach(function(header) {
+  ["createdAt", "publishedAt", "updatedAt", "votedAt", "unvotedAt", "generationStartedAt", "generationCompletedAt", "reviewedAt", "timestamp"].forEach(function(header) {
     const index = definition.headers.indexOf(header);
     if (index !== -1 && lastRow > 1) sheet.getRange(2, index + 1, lastRow - 1, 1).setNumberFormat("yyyy-mm-dd hh:mm");
   });
-  ["height", "votes"].forEach(function(header) {
+  ["height", "votes", "generationAttempts"].forEach(function(header) {
     const index = definition.headers.indexOf(header);
     if (index !== -1 && lastRow > 1) sheet.getRange(2, index + 1, lastRow - 1, 1).setNumberFormat("0");
   });
-  ["prompt", "image"].forEach(function(header) {
+  ["prompt", "image", "generationError", "message", "details"].forEach(function(header) {
     const index = definition.headers.indexOf(header);
     if (index !== -1) sheet.getRange(1, index + 1, lastRow, 1).setWrap(true);
   });
@@ -644,7 +667,7 @@ function now_() {
 
 function withLock_(callback) {
   const lock = LockService.getScriptLock();
-  lock.waitLock(15000);
+  lock.waitLock(30000);
   try {
     return callback();
   } finally {
@@ -771,68 +794,163 @@ function submitVision_(payload) {
   const timezone = cleanOptionalText_(payload.timezone || "", 100);
   const language = cleanOptionalText_(payload.language || "", 40);
   const userAgent = cleanOptionalText_(payload.userAgent || "", 500);
-  if (participantHasSubmitted_(participantId, submissionRound)) {
-    throw new Error("This participant has already submitted in the current round.");
-  }
   const problem = cleanOptionalText_(payload.problem, 800);
   const impact = cleanOptionalText_(payload.impact, 800);
   const beneficiaries = cleanOptionalText_(payload.beneficiaries, 200);
   const tags = cleanOptionalText_(payload.tags, 200);
   const submissionId = newId_();
-  const generatedImage = generateVisionImage_(submissionId, team, track, prompt, {
+  const timestamp = now_();
+  const record = {
+    id: submissionId,
+    createdAt: timestamp,
+    updatedAt: timestamp,
+    status: "processing",
+    team: team,
     title: title,
+    track: track,
+    prompt: prompt,
     problem: problem,
     impact: impact,
-    beneficiaries: beneficiaries
-  });
-  return withLock_(function() {
+    beneficiaries: beneficiaries,
+    tags: tags,
+    image: "",
+    imageSource: "generated",
+    color: /^#[0-9a-f]{6}$/i.test(String(payload.color || "")) ? String(payload.color) : "#D8D0ED",
+    height: cleanNumber_(payload.height, 280, 180, 520),
+    submittedBy: cleanOptionalText_(payload.submittedBy || "", 120),
+    participantId: participantId,
+    submissionRound: submissionRound,
+    deviceId: deviceId,
+    deviceLabel: deviceLabel,
+    browser: browser,
+    browserVersion: browserVersion,
+    operatingSystem: operatingSystem,
+    deviceType: deviceType,
+    platform: platform,
+    screen: screen,
+    timezone: timezone,
+    language: language,
+    userAgent: userAgent,
+    generationStatus: "queued",
+    generationStartedAt: "",
+    generationCompletedAt: "",
+    generationAttempts: 0,
+    generationError: "",
+    promptVersion: IMAGE_PROMPT_VERSION,
+    geminiModel: GEMINI_IMAGE_MODEL,
+    imageMimeType: "",
+    driveFileId: "",
+    reviewedAt: "",
+    reviewedBy: ""
+  };
+
+  withLock_(function() {
     if (participantHasSubmitted_(participantId, submissionRound)) {
       throw new Error("This participant has already submitted in the current round.");
     }
-    const timestamp = now_();
-    const submission = {
-      id: submissionId,
-      createdAt: timestamp,
-      updatedAt: timestamp,
-      status: "pending",
-      team: team,
+    appendRecord_(SHEETS.submissions, record);
+    logActivity_("submission_received", "queued", record, "Submission reserved before image generation.", { promptVersion: IMAGE_PROMPT_VERSION });
+  });
+
+  const generationStartedAt = now_();
+  withLock_(function() {
+    const reserved = findRecord_(SHEETS.submissions, "id", submissionId);
+    if (reserved) updateRecord_(reserved, { generationStatus: "generating", generationStartedAt: generationStartedAt, updatedAt: generationStartedAt });
+  });
+
+  try {
+    const generated = generateVisionImageWithRetry_(submissionId, team, track, prompt, {
       title: title,
-      track: track,
-      prompt: prompt,
       problem: problem,
       impact: impact,
-      beneficiaries: beneficiaries,
-      tags: tags,
-      image: generatedImage.url,
-      imageSource: "generated",
-      color: /^#[0-9a-f]{6}$/i.test(String(payload.color || "")) ? String(payload.color) : "#D8D0ED",
-      height: cleanNumber_(payload.height, 280, 180, 520),
-      submittedBy: cleanOptionalText_(payload.submittedBy || "", 120),
-      participantId: participantId,
-      submissionRound: submissionRound,
-      deviceId: deviceId,
-      deviceLabel: deviceLabel,
-      browser: browser,
-      browserVersion: browserVersion,
-      operatingSystem: operatingSystem,
-      deviceType: deviceType,
-      platform: platform,
-      screen: screen,
-      timezone: timezone,
-      language: language,
-      userAgent: userAgent
-    };
-    appendRecord_(SHEETS.submissions, submission);
-    return { ok: true, status: "pending", submissionId: submission.id, imageSource: submission.imageSource };
-  });
+      beneficiaries: beneficiaries
+    });
+    const completedAt = now_();
+    withLock_(function() {
+      const saved = findRecord_(SHEETS.submissions, "id", submissionId);
+      if (!saved) throw new Error("Reserved submission record disappeared.");
+      updateRecord_(saved, {
+        status: "pending",
+        updatedAt: completedAt,
+        image: generated.image.url,
+        imageSource: "generated",
+        generationStatus: "generated",
+        generationCompletedAt: completedAt,
+        generationAttempts: generated.attempts,
+        generationError: "",
+        imageMimeType: generated.image.mimeType,
+        driveFileId: generated.image.fileId || ""
+      });
+      logActivity_("generation_succeeded", "pending", saved, "Image generated and submission queued for organizer review.", { attempts: generated.attempts, mimeType: generated.image.mimeType });
+    });
+    return { ok: true, status: "pending", submissionId: submissionId, imageSource: "generated", generationAttempts: generated.attempts };
+  } catch (error) {
+    const completedAt = now_();
+    const message = safeErrorMessage_(error);
+    withLock_(function() {
+      const failed = findRecord_(SHEETS.submissions, "id", submissionId);
+      if (failed) {
+        updateRecord_(failed, {
+          status: "failed",
+          updatedAt: completedAt,
+          generationStatus: "failed",
+          generationCompletedAt: completedAt,
+          generationAttempts: failed.generationAttempts || 1,
+          generationError: message
+        });
+        logActivity_("generation_failed", "failed", failed, message, { retryable: isRetryableGenerationError_(error) });
+      }
+    });
+    return { ok: false, status: "failed", submissionId: submissionId, error: message };
+  }
 }
 
 function participantHasSubmitted_(participantId, submissionRound) {
   return objectRows_(SHEETS.submissions).some(function(record) {
+    const status = String(record.status || "").toLowerCase();
     return String(record.participantId || "") === String(participantId || "") &&
       String(record.submissionRound || "1") === String(submissionRound || "1") &&
-      String(record.status || "").toLowerCase() !== "deleted";
+      ["processing", "pending", "published"].indexOf(status) !== -1;
   });
+}
+
+function logActivity_(action, status, record, message, details) {
+  try {
+    appendRecord_(SHEETS.activityLog, {
+      timestamp: now_(),
+      eventId: newId_(),
+      action: cleanOptionalText_(action, 100),
+      status: cleanOptionalText_(status, 40),
+      submissionId: cleanOptionalText_(record && record.id, 200),
+      participantId: cleanOptionalText_(record && record.participantId, 200),
+      team: cleanOptionalText_(record && record.team, 100),
+      track: cleanOptionalText_(record && record.track, 100),
+      message: cleanOptionalText_(message, 500),
+      details: cleanOptionalText_(JSON.stringify(details || {}), 2000)
+    });
+  } catch (error) {
+    Logger.log("Activity log write failed: " + safeErrorMessage_(error));
+  }
+}
+
+function isRetryableGenerationError_(error) {
+  const message = safeErrorMessage_(error).toLowerCase();
+  return /429|500|502|503|504|rate limit|temporarily|timeout|overloaded|try again/.test(message);
+}
+
+function generateVisionImageWithRetry_(submissionId, team, track, prompt, details) {
+  let lastError = null;
+  for (let attempt = 1; attempt <= 3; attempt += 1) {
+    try {
+      const image = generateVisionImage_(submissionId, team, track, prompt, details);
+      return { image: image, attempts: attempt };
+    } catch (error) {
+      lastError = error;
+      if (!isRetryableGenerationError_(error) || attempt === 3) throw error;
+      Utilities.sleep(1000 * Math.pow(2, attempt - 1));
+    }
+  }
+  throw lastError || new Error("Image generation failed.");
 }
 
 function generateVisionImage_(submissionId, team, track, prompt, details) {
@@ -890,7 +1008,7 @@ function generateVisionImage_(submissionId, team, track, prompt, details) {
   const blob = Utilities.newBlob(Utilities.base64Decode(imageBlock.data), mimeType, "saudi-vision-" + submissionId + ".png");
   const file = DriveApp.createFile(blob);
   file.setSharing(DriveApp.Access.ANYONE_WITH_LINK, DriveApp.Permission.VIEW);
-  return { url: "https://drive.google.com/uc?export=view&id=" + file.getId(), mimeType: mimeType };
+  return { url: "https://drive.google.com/uc?export=view&id=" + file.getId(), mimeType: mimeType, fileId: file.getId() };
 }
 
 function getOrganizerSnapshot_() {
@@ -940,11 +1058,24 @@ function getPendingSubmissions_() {
         userAgent: String(record.userAgent || ""),
         image: String(record.image || ""),
         imageSource: imageSource_(record.imageSource),
+        generationStatus: String(record.generationStatus || ""),
+        generationAttempts: Number(record.generationAttempts) || 0,
+        generationError: String(record.generationError || ""),
+        promptVersion: String(record.promptVersion || ""),
+        geminiModel: String(record.geminiModel || ""),
         color: String(record.color || "#D8D0ED"),
         height: cleanNumber_(record.height, 280, 180, 520),
         votes: 0
       };
     });
+}
+
+function copyRecordFields_(record, headers) {
+  const copy = {};
+  headers.forEach(function(header) {
+    if (record && record[header] !== undefined) copy[header] = record[header];
+  });
+  return copy;
 }
 
 function moderateSubmission_(submissionId, nextStatus) {
@@ -957,49 +1088,24 @@ function moderateSubmission_(submissionId, nextStatus) {
     if (String(submission.status).toLowerCase() !== "pending") {
       throw new Error("Only pending submissions can be moderated.");
     }
+    if (nextStatus === "published" && !String(submission.image || "")) {
+      throw new Error("This submission has no generated image yet.");
+    }
 
+    const timestamp = now_();
+    updateRecord_(submission, { status: nextStatus, updatedAt: timestamp, reviewedAt: timestamp, reviewedBy: "organizer" });
     if (nextStatus === "published") {
       const existingVision = findRecord_(SHEETS.visions, "id", submission.id);
-      if (existingVision) {
-        throw new Error("This submission already has a vision record.");
-      }
+      if (existingVision) throw new Error("This submission already has a vision record.");
+      const vision = copyRecordFields_(submission, SHEETS.visions.headers);
+      vision.publishedAt = timestamp;
+      vision.status = "published";
+      vision.votes = 0;
+      vision.reviewedAt = timestamp;
+      vision.reviewedBy = "organizer";
+      appendRecord_(SHEETS.visions, vision);
     }
-    const timestamp = now_();
-    updateRecord_(submission, { status: nextStatus, updatedAt: timestamp });
-    if (nextStatus === "published") {
-      appendRecord_(SHEETS.visions, {
-        id: submission.id,
-        createdAt: submission.createdAt,
-        publishedAt: timestamp,
-        status: "published",
-        team: submission.team,
-        title: submission.title,
-        track: submission.track,
-        prompt: submission.prompt,
-        problem: submission.problem,
-        impact: submission.impact,
-        beneficiaries: submission.beneficiaries,
-        tags: submission.tags,
-        image: submission.image,
-        imageSource: submission.imageSource,
-        color: submission.color,
-        height: submission.height,
-        votes: 0,
-        participantId: submission.participantId,
-        submissionRound: submission.submissionRound,
-        deviceId: submission.deviceId,
-        deviceLabel: submission.deviceLabel,
-        browser: submission.browser,
-        browserVersion: submission.browserVersion,
-        operatingSystem: submission.operatingSystem,
-        deviceType: submission.deviceType,
-        platform: submission.platform,
-        screen: submission.screen,
-        timezone: submission.timezone,
-        language: submission.language,
-        userAgent: submission.userAgent
-      });
-    }
+    logActivity_("moderation", nextStatus, submission, "Organizer changed submission status.", { nextStatus: nextStatus });
     return { ok: true, status: nextStatus, submissionId: String(submission.id) };
   });
 }
