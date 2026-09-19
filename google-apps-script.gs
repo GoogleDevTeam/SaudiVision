@@ -992,8 +992,8 @@ function constantTimeEquals_(left, right) {
 }
 
 function requireAdmin_(payload) {
-  const expected = PropertiesService.getScriptProperties().getProperty("ADMIN_KEY");
-  const provided = String(payload.adminKey || "");
+  const expected = String(PropertiesService.getScriptProperties().getProperty("ADMIN_KEY") || "").trim();
+  const provided = String(payload.adminKey || "").trim();
   if (!expected) throw new Error("ADMIN_KEY is not configured in Script Properties.");
   if (!constantTimeEquals_(provided, expected)) throw new Error("Unauthorized: invalid organizer key.");
 }
