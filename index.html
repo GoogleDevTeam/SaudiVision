@@ -432,30 +432,28 @@
       line-height: 1;
     }
 
-    .hero h1 .gradient-word {
+    .hero h1 .topic-white,
+    .hero h1 .topic-purple {
       display: block;
       margin-top: .14em;
-      color: transparent;
-      background: linear-gradient(105deg, var(--green) 0%, var(--lavender, #9B8AC4) 38%, var(--light-lavender, #D8D0ED) 60%, var(--green) 100%);
-      background-size: 220% 100%;
-      -webkit-background-clip: text;
-      background-clip: text;
-      text-shadow: 0 0 36px rgba(155, 138, 196, .14);
-      will-change: background-position;
-      animation: hero-word-shimmer 9s ease-in-out infinite alternate;
+    }
+    .hero h1 .topic-white {
+      color: var(--off-white);
+      text-shadow: 0 0 36px rgba(247, 244, 236, .12);
+    }
+    .hero h1 .topic-purple {
+      color: var(--lavender);
+      text-shadow: 0 0 36px rgba(155, 138, 196, .22);
     }
     html[lang="ar"] .hero h1 {
       line-height: 1.1;
     }
-    html[lang="ar"] .hero h1 .gradient-word {
+    html[lang="ar"] .hero h1 .topic-white,
+    html[lang="ar"] .hero h1 .topic-purple {
       margin-top: .2em;
       padding-bottom: .08em;
       font-size: .9em;
       line-height: 1.18;
-      background: linear-gradient(105deg, #8D79C2 0%, var(--lavender, #9B8AC4) 32%, #F0EBFA 52%, var(--light-lavender, #D8D0ED) 64%, #7C68B0 100%);
-      background-size: 250% 100%;
-      text-shadow: 0 0 42px rgba(155, 138, 196, .22);
-      animation: arabic-hero-shimmer 12s ease-in-out infinite alternate;
     }
 
     .hero-subtitle {
@@ -1079,11 +1077,11 @@
       letter-spacing: -.075em;
       line-height: .9;
     }
-    html[dir="rtl"] .hero h1 .gradient-word {
-      margin-top: .08em;
+    html[dir="rtl"] .hero h1 .topic-white {
+      color: var(--off-white);
+    }
+    html[dir="rtl"] .hero h1 .topic-purple {
       color: var(--lavender);
-      background: none;
-      -webkit-text-fill-color: currentColor;
     }
     html[dir="rtl"] .hero-subtitle { max-width: 640px; margin-inline-start: auto; }
     @media (max-width: 520px) {
@@ -1270,7 +1268,7 @@
     <section class="hero" aria-labelledby="page-title">
       <button class="language-toggle hero-language-toggle" id="language-toggle" type="button" aria-label="التبديل إلى الإنجليزية">عربي</button>
       <div class="hero-copy">
-        <h1 id="page-title" class="hero-lockup"><span data-en="The future" data-ar="المستقبل">المستقبل</span><br /><span class="gradient-word" data-en="Today’s imagination, tomorrow’s reality." data-ar="خيال اليوم، واقع الغد">خيال اليوم، واقع الغد</span></h1>
+        <h1 id="page-title" class="hero-lockup"><span class="topic-white" data-en="Today’s imagination" data-ar="خيال اليوم">خيال اليوم</span><br /><span class="topic-purple" data-en="Tomorrow’s reality" data-ar="واقع الغد">واقع الغد</span></h1>
         <p class="hero-subtitle" data-en="Imagine Saudi Arabia in 2050 — write your idea, preview its visual concept, then vote for the best vision." data-ar="تخيّل السعودية في عام 2050 — اكتبوا فكرتكم، شاهدوا تصورها البصري، ثم صوّتوا لأفضل رؤية.">
           تخيّل السعودية في عام 2050 — اكتبوا فكرتكم، شاهدوا تصورها البصري، ثم صوّتوا لأفضل رؤية.
         </p>
@@ -1458,7 +1456,7 @@
       if (!decorativeLayer) return;
       decorativeLayer.replaceChildren();
       const bounds = decorativeLayer.getBoundingClientRect();
-      const spawnCount = 14;
+      const spawnCount = 18;
       const columns = Math.max(2, Math.floor(bounds.width / 170));
       const rows = Math.ceil(spawnCount / columns);
       const cellWidth = bounds.width / columns;
