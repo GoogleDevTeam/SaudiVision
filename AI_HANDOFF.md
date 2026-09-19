@@ -368,7 +368,7 @@ Before coding, inspect the latest `main` branch and the live deployment state. T
 
 - Added useful generation and moderation fields to Visions and Submissions: generation status, start/completion timestamps, attempts, safe error text, prompt version, Gemini model, image MIME type, Drive file ID, reviewed time, and reviewer role.
 - Added an Activity Log sheet for submission received, generation succeeded/failed, and moderation events. It stores safe operational details without secrets.
-- Submission handling now reserves a row under a short script lock before calling Gemini, so simultaneous requests cannot duplicate the same participant or race spreadsheet writes. Image generation happens outside the sheet lock, with up to three retries for transient Gemini/API failures.
+- Submission handling now reserves a row under a short script lock before calling Gemini, so simultaneous requests cannot duplicate the same participant or race spreadsheet writes. Image generation happens outside the sheet lock but through a server-side generation slot, so ten simultaneous requests do not burst Gemini calls at once. Each request gets up to three retries for transient Gemini/API failures.
 - Failed generations remain recorded with a retryable failed status instead of disappearing or crashing the workflow. The frontend submit request now allows normal image-generation latency.
 - Workbook format version is now v8. The health/setup path adds all new headers and formats the operational columns automatically.
 
