@@ -415,6 +415,13 @@ Before coding, inspect the latest `main` branch and the live deployment state. T
 - Kept the college affiliation line **كلية الحاسب الآلي وتقنية المعلومات - مجموعة مطوري قوقل شقراء**.
 - Frontend commit: `ca1530e8b319b14f470b616471db112c2f442fa1`.
 
+### White institution logo in header — 2026-09-19
+
+- Added the supplied transparent white College of Computer and Information Technology + Shaqra University logo as `college-shaqra-logo-white.png`.
+- Placed it in the RTL header beside the existing Imagine Saudi branding, with responsive sizing for mobile; the Google Developers organizer-access button remains separate.
+- Asset commit: `48a507dac91130f5acf2dcf2739fb0bb7d1bd956`. Frontend commit: `4b0901c9ddc0731c11aed7350bd726b51dbd8513`.
+- Apps Script does not need redeployment; GitHub Pages should rebuild the frontend.
+
 ### Next recommended step
 
 Deploy the updated google-apps-script.gs once, then test descriptions that intentionally combine two or three ideas. Confirm the generated image follows the participant's wording while using the selected track only as a broad lens.
