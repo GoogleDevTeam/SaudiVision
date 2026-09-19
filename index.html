@@ -1500,6 +1500,53 @@
         ? window.crypto.randomUUID()
         : "participant-" + Date.now() + "-" + Math.random().toString(36).slice(2));
     localStorage.setItem("imagineSaudiParticipantId", participantId);
+    function getDeviceMetadata() {
+      const userAgent = String(navigator.userAgent || "");
+      const platform = String((navigator.userAgentData && navigator.userAgentData.platform) || navigator.platform || "Unknown");
+      const browserPatterns = [
+        ["Edge", /Edg\/([\d.]+)/i],
+        ["Opera", /OPR\/([\d.]+)/i],
+        ["Chrome", /(?:Chrome|CriOS)\/([\d.]+)/i],
+        ["Firefox", /(?:Firefox|FxiOS)\/([\d.]+)/i],
+        ["Safari", /Version\/([\d.]+).*Safari/i],
+        ["Internet Explorer", /(?:MSIE |Trident\/.*rv:)([\d.]+)/i]
+      ];
+      let browser = "Unknown";
+      let browserVersion = "";
+      for (const [name, pattern] of browserPatterns) {
+        const match = userAgent.match(pattern);
+        if (match) { browser = name; browserVersion = match[1]; break; }
+      }
+      let operatingSystem = "Unknown";
+      if (/Windows NT 10\.0/i.test(userAgent)) operatingSystem = "Windows 10/11";
+      else if (/Windows NT 6\.1/i.test(userAgent)) operatingSystem = "Windows 7";
+      else if (/Android/i.test(userAgent)) operatingSystem = "Android";
+      else if (/(iPhone|iPad|iPod)/i.test(userAgent)) operatingSystem = "iOS/iPadOS";
+      else if (/Mac OS X/i.test(userAgent)) operatingSystem = "macOS";
+      else if (/Linux/i.test(userAgent)) operatingSystem = "Linux";
+      const isTablet = /(Tablet|iPad)/i.test(userAgent) || (navigator.maxTouchPoints > 1 && /Macintosh/i.test(userAgent));
+      const isMobile = Boolean(navigator.userAgentData && navigator.userAgentData.mobile) || /Mobile|Android|iPhone|iPod/i.test(userAgent);
+      const deviceType = isTablet ? "Tablet" : isMobile ? "Mobile" : "Desktop";
+      const screenInfo = window.screen
+        ? String(window.screen.width || "?") + "x" + String(window.screen.height || "?") + " @" + String(window.devicePixelRatio || 1) + "x"
+        : "Unknown";
+      const timezone = (() => { try { return Intl.DateTimeFormat().resolvedOptions().timeZone || "Unknown"; } catch (error) { return "Unknown"; } })();
+      const cleanId = participantId.replace(/[^a-z0-9]/gi, "").slice(0, 10).toUpperCase();
+      return {
+        deviceId: "device-" + (cleanId || "unknown"),
+        deviceLabel: [browser, browserVersion, operatingSystem, deviceType].filter(Boolean).join(" · "),
+        browser,
+        browserVersion,
+        operatingSystem,
+        deviceType,
+        platform,
+        screen: screenInfo,
+        timezone,
+        language: String(navigator.language || "Unknown"),
+        userAgent: userAgent.slice(0, 500)
+      };
+    }
+    const deviceMetadata = getDeviceMetadata();
     let currentLanguage = localStorage.getItem("imagineSaudiLanguage") || "ar";
     let organizerKey = sessionStorage.getItem("imagineSaudiOrganizerKey") || "";
     let organizerUnlocked = false;
@@ -2309,6 +2356,7 @@
         prompt,
         participantId,
         submissionRound: settings.submissionRound,
+        ...deviceMetadata,
         image: "",
         color: colors[track] || "#D8D0ED",
          height: 280 + (((sourceVisions.length + localPublishedVisions.length) * 37) % 100),
