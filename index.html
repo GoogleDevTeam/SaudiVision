@@ -2362,7 +2362,7 @@
       };
       try {
         await ensureImageGenerationReady();
-        await googleRequest("submit", newVision);
+        await googleRequest("submit", newVision, { timeout: 90000 });
       } catch (error) {
         generateButton.disabled = false;
         generateButton.classList.remove("is-generating");
