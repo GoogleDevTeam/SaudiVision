@@ -1076,6 +1076,14 @@
     /* Arabic hero lockup inspired by the supplied visual */
     .hero-copy { position: relative; z-index: 1; }
     .hero h1 { text-wrap: balance; }
+    html[dir="ltr"] .hero h1 {
+      max-width: none;
+      font-size: clamp(2rem, 6.2vw, 6.2rem);
+    }
+    html[dir="ltr"] .hero h1 .topic-white,
+    html[dir="ltr"] .hero h1 .topic-purple {
+      white-space: nowrap;
+    }
     html[dir="rtl"] .hero-copy { text-align: right; }
     html[dir="rtl"] .hero h1 {
       font-family: "Cairo", sans-serif;
