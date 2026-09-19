@@ -1520,9 +1520,7 @@
       if (!decorativeLayer) return;
       decorativeLayer.replaceChildren();
       const bounds = decorativeLayer.getBoundingClientRect();
-      const isSmallScreen = window.matchMedia && window.matchMedia("(max-width: 700px)").matches;
-      const prefersReducedMotion = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-      const spawnCount = prefersReducedMotion ? 0 : 20;
+      const spawnCount = 20;
       const columns = Math.max(2, Math.floor(bounds.width / 170));
       const rows = Math.max(8, Math.ceil(spawnCount / columns));
       const cellWidth = bounds.width / columns;
