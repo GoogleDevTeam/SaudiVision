@@ -476,6 +476,8 @@
     .vision-form { display: grid; grid-template-columns: 1fr 1fr; gap: 13px; }
     .field { display: flex; flex-direction: column; gap: 7px; }
     .field.full { grid-column: 1 / -1; }
+    .track-field select { min-height: 50px; padding-block: 8px; border-color: rgba(155, 138, 196, .48); box-shadow: inset 0 0 18px rgba(155, 138, 196, .07); font-size: .84rem; font-weight: 600; }
+    .track-field label { color: var(--light-lavender); font-size: .78rem; font-weight: 700; }
     .field label { color: var(--muted); font-family: "Cairo", sans-serif; font-size: .73rem; }
     .field-helper { margin: -2px 0 0; color: var(--dim); font-family: "Cairo", sans-serif; font-size: .62rem; line-height: 1.45; }
     .field input, .field select, .field textarea {
@@ -1157,8 +1159,8 @@
           <label for="team-input" data-en="Group name" data-ar="اسم المجموعة">اسم المجموعة</label>
           <input id="team-input" name="team" placeholder="مثال: فريق أُفُق" data-placeholder-en="Example: Horizon team" data-placeholder-ar="مثال: فريق أُفُق" maxlength="100" required />
         </div>
-        <div class="field">
-          <label for="track-input" data-en="Strategic track" data-ar="المسار الاستراتيجي">المسار الاستراتيجي</label>
+        <div class="field full track-field">
+          <label for="track-input" data-en="Strategic track" data-ar="المسار الاستراتيجي">Strategic track</label>
           <select id="track-input" name="track">
             <option value="Green Tech" data-en="Green Tech" data-ar="التقنية الخضراء / Green Tech">التقنية الخضراء / Green Tech</option>
             <option value="Smart Mobility" data-en="Smart Mobility" data-ar="التنقل الذكي / Smart Mobility">التنقل الذكي / Smart Mobility</option>
@@ -1169,30 +1171,15 @@
             <option value="Blue Economy" data-en="Blue Economy" data-ar="الاقتصاد الأزرق / Blue Economy">الاقتصاد الأزرق / Blue Economy</option>
             <option value="Circular Cities" data-en="Circular Cities" data-ar="المدن الدائرية / Circular Cities">المدن الدائرية / Circular Cities</option>
           </select>
+          <small class="field-helper" data-en="Choose the strategic direction that best fits your vision." data-ar="اختاروا المسار الاستراتيجي الأقرب إلى رؤيتكم.">Choose the strategic direction that best fits your vision.</small>
         </div>
         <div class="field full">
-          <label for="title-input" data-en="Vision title" data-ar="عنوان الرؤية">عنوان الرؤية</label>
+          <label for="title-input" data-en="Vision title" data-ar="عنوان الرؤية">Vision title</label>
           <input id="title-input" name="title" placeholder="Example: Riyadh Breathes" data-placeholder-en="Example: Riyadh Breathes" data-placeholder-ar="مثال: الرياض تتنفس" maxlength="120" required />
           <small class="field-helper" data-en="Give your idea a memorable name for the gallery." data-ar="امنحوا فكرتكم اسمًا مميزًا يظهر في المعرض.">Give your idea a memorable name for the gallery.</small>
         </div>
-        <div class="field">
-          <label for="problem-input" data-en="Problem or opportunity" data-ar="التحدي أو الفرصة">Problem or opportunity</label>
-          <textarea id="problem-input" name="problem" maxlength="800" placeholder="What should change by 2050?" data-placeholder-en="What should change by 2050?" data-placeholder-ar="ما الذي يجب أن يتغير بحلول 2050؟"></textarea>
-        </div>
-        <div class="field">
-          <label for="impact-input" data-en="Expected impact" data-ar="الأثر المتوقع">Expected impact</label>
-          <textarea id="impact-input" name="impact" maxlength="800" placeholder="How will this improve life?" data-placeholder-en="How will this improve life?" data-placeholder-ar="كيف ستُحسّن الفكرة الحياة؟"></textarea>
-        </div>
-        <div class="field">
-          <label for="beneficiaries-input" data-en="Who benefits?" data-ar="من المستفيد؟">Who benefits?</label>
-          <input id="beneficiaries-input" name="beneficiaries" maxlength="200" placeholder="Example: families, visitors, farmers" data-placeholder-en="Example: families, visitors, farmers" data-placeholder-ar="مثال: العائلات، الزوار، المزارعون" />
-        </div>
-        <div class="field">
-          <label for="tags-input" data-en="Keywords" data-ar="الكلمات المفتاحية">Keywords</label>
-          <input id="tags-input" name="tags" maxlength="200" placeholder="Example: water, AI, culture" data-placeholder-en="Example: water, AI, culture" data-placeholder-ar="مثال: المياه، الذكاء الاصطناعي، الثقافة" />
-        </div>
         <div class="field full">
-          <label for="prompt-input" data-en="Describe your Saudi 2050 vision" data-ar="وصف رؤيتكم للسعودية 2050">وصف رؤيتكم للسعودية 2050</label>
+          <label for="prompt-input" data-en="Describe your Saudi 2050 vision" data-ar="وصف رؤيتكم للسعودية 2050">Describe your Saudi 2050 vision</label>
           <textarea id="prompt-input" name="prompt" maxlength="2000" placeholder="مثال: مدن صحراوية خضراء تنتج طاقتها وتجمع مياهها من الهواء..." data-placeholder-en="Example: Green desert cities that produce their own energy and collect water from the air..." data-placeholder-ar="مثال: مدن صحراوية خضراء تنتج طاقتها وتجمع مياهها من الهواء..." required></textarea>
           <small class="field-helper" data-en="The clearer the story, the stronger the generated visual and organizer review." data-ar="كلما كانت القصة أوضح، كان التصور البصري والمراجعة أقوى.">The clearer the story, the stronger the generated visual and organizer review.</small>
         </div>
@@ -1500,6 +1487,9 @@
     let pendingOrganizerRecords = [];
     let publishedOrganizerRecords = [];
     let organizerAnalytics = null;
+    let organizerUnlockInFlight = null;
+    let organizerUnlockKey = "";
+    let organizerLoadInFlight = null;
     function readLocalArray(key) {
       try {
         const value = JSON.parse(localStorage.getItem(key) || "[]");
@@ -1907,7 +1897,13 @@
           if ([404, 502, 503, 504].includes(response.status)) throw new Error("Backend unavailable.");
           throw new Error("Google backend returned " + response.status);
         }
-        const result = await response.json();
+        const raw = await response.text();
+        let result;
+        try {
+          result = JSON.parse(raw);
+        } catch (parseError) {
+          throw new Error("Backend returned an invalid response.");
+        }
         if (result.ok === false) throw new Error(result.error || "Google backend error");
         return result;
       } catch (error) {
@@ -1918,19 +1914,20 @@
       }
     }
 
-    async function requestOrganizerSnapshot() {
+    async function requestOrganizerSnapshot(keyOverride = "") {
       try {
-        return await adminRequest("organizerSnapshot");
+        return await adminRequest("organizerSnapshot", {}, keyOverride);
       } catch (error) {
         if (!/unknown action/i.test(error?.message || "")) throw error;
         const [pendingResult, publishedResult] = await Promise.all([
-          adminRequest("pending"),
+          adminRequest("pending", {}, keyOverride),
           googleRequest("visions", {}, { method: "GET" })
         ]);
         return {
           settings: publishedResult?.settings || settings,
           pending: pendingResult?.visions || [],
-          published: publishedResult?.visions || []
+          published: publishedResult?.visions || [],
+          analytics: null
         };
       }
     }
@@ -2024,8 +2021,9 @@
 
     function showOrganizerLogin() {
       organizerLogin.hidden = false;
-      organizerKeyInput.value = "";
+      organizerAccess.classList.remove("is-rejected");
       organizerKeyInput.focus();
+      organizerKeyInput.select();
     }
 
     function hideOrganizerLogin() {
@@ -2033,62 +2031,87 @@
       organizerKeyInput.value = "";
     }
 
-    function ensureOrganizerKey() {
-      if (!organizerKey) throw new Error(t("organizerRequired"));
-      return organizerKey;
+    function ensureOrganizerKey(keyOverride = "") {
+      const key = String(keyOverride || organizerKey || "").trim();
+      if (!key) throw new Error(t("organizerRequired"));
+      return key;
     }
 
-    async function adminRequest(action, payload = {}) {
+    async function adminRequest(action, payload = {}, keyOverride = "") {
+      const key = ensureOrganizerKey(keyOverride);
       try {
-        return await googleRequest(action, { ...payload, adminKey: ensureOrganizerKey() });
+        return await googleRequest(action, { ...payload, adminKey: key });
       } catch (error) {
-        if (/unauthorized|admin key|organizer/i.test(error.message || "")) {
-          organizerKey = "";
+        if (/unauthorized|invalid organizer key|admin key|organizer/i.test(error.message || "")) {
+          if (!keyOverride || key === organizerKey) organizerKey = "";
           sessionStorage.removeItem("imagineSaudiOrganizerKey");
         }
         throw error;
       }
     }
 
-    async function unlockOrganizerControls() {
-      if (!organizerKey) {
-        showOrganizerLogin();
-        return;
+    async function unlockOrganizerControls(candidateKey = organizerKey, options = {}) {
+      const key = String(candidateKey || "").trim();
+      if (!key) {
+        if (!options.silent) showOrganizerLogin();
+        return false;
       }
+      if (organizerUnlockInFlight) {
+        if (organizerUnlockKey === key) return organizerUnlockInFlight;
+        await organizerUnlockInFlight;
+        if (organizerUnlocked && organizerKey === key) return true;
+      }
+      organizerUnlockKey = key;
       organizerAccess.disabled = true;
+      organizerAccess.setAttribute("aria-busy", "true");
       organizerAccess.classList.add("is-processing");
+      organizerUnlockInFlight = (async () => {
+        try {
+          const snapshot = await requestOrganizerSnapshot(key);
+          organizerKey = key;
+          sessionStorage.setItem("imagineSaudiOrganizerKey", organizerKey);
+          organizerUnlocked = true;
+          organizerDetails.hidden = false;
+          organizerDetails.open = true;
+          organizerAccess.classList.remove("is-rejected");
+          organizerAccess.classList.add("is-unlocked");
+          hideOrganizerLogin();
+          await loadReviewQueue(snapshot);
+          return true;
+        } catch (error) {
+          organizerKey = "";
+          organizerUnlocked = false;
+          organizerDetails.open = false;
+          organizerDetails.hidden = true;
+          organizerAccess.classList.remove("is-unlocked");
+          organizerAccess.classList.add("is-rejected");
+          sessionStorage.removeItem("imagineSaudiOrganizerKey");
+          showOrganizerError(error);
+          if (!options.silent) {
+            organizerLogin.hidden = false;
+            organizerKeyInput.value = "";
+            organizerKeyInput.focus();
+          }
+          console.error("Organizer unlock failed:", error);
+          return false;
+        } finally {
+          organizerAccess.disabled = false;
+          organizerAccess.removeAttribute("aria-busy");
+          organizerAccess.classList.remove("is-processing");
+          organizerUnlockKey = "";
+        }
+      })();
       try {
-        const snapshot = await requestOrganizerSnapshot();
-        organizerUnlocked = true;
-        organizerDetails.hidden = false;
-        organizerDetails.open = true;
-        organizerAccess.classList.add("is-unlocked");
-        hideOrganizerLogin();
-        await loadReviewQueue(snapshot);
-      } catch (error) {
-        organizerAccess.classList.add("is-rejected");
-        showOrganizerError(error);
-        console.error("Organizer unlock failed:", error);
+        return await organizerUnlockInFlight;
       } finally {
-        organizerAccess.disabled = false;
-        organizerAccess.classList.remove("is-processing");
+        organizerUnlockInFlight = null;
       }
     }
 
     async function restoreOrganizerSession() {
-      if (!organizerKey) return;
-      try {
-        const snapshot = await requestOrganizerSnapshot();
-        organizerUnlocked = true;
-        organizerDetails.hidden = false;
-        organizerAccess.classList.add("is-unlocked");
-        hideOrganizerLogin();
-        await loadReviewQueue(snapshot);
-      } catch (error) {
-        organizerUnlocked = false;
-        organizerDetails.hidden = true;
-        organizerAccess.hidden = false;
-      }
+      const savedKey = String(organizerKey || "").trim();
+      if (!savedKey) return;
+      await unlockOrganizerControls(savedKey, { silent: true });
     }
 
     // Uses the Google Apps Script backend when configured, otherwise local demo data.
@@ -2197,10 +2220,6 @@
       const title = String(data.get("title") || "").trim();
       const track = String(data.get("track") || "");
       const prompt = String(data.get("prompt") || "").trim();
-      const problem = String(data.get("problem") || "").trim();
-      const impact = String(data.get("impact") || "").trim();
-      const beneficiaries = String(data.get("beneficiaries") || "").trim();
-      const tags = String(data.get("tags") || "").trim();
       if (!team || !title || !prompt) return;
       if (!GOOGLE_APPS_SCRIPT_URL) {
         formNote.textContent = t("aiUnavailable");
@@ -2226,10 +2245,6 @@
         title,
         track,
         prompt,
-        problem,
-        impact,
-        beneficiaries,
-        tags,
         image: "",
         color: colors[track] || "#D8D0ED",
          height: 280 + (((sourceVisions.length + localPublishedVisions.length) * 37) % 100),
@@ -2376,25 +2391,37 @@
     }
 
     async function loadReviewQueue(snapshot = null) {
-      reviewQueue.innerHTML = `<p class="review-empty">${t("reviewLoading")}</p>`;
+      if (!snapshot && organizerLoadInFlight) return organizerLoadInFlight;
+      const work = (async () => {
+        reviewQueue.innerHTML = `<p class="review-empty">${t("reviewLoading")}</p>`;
+        try {
+          const data = snapshot || (GOOGLE_APPS_SCRIPT_URL
+            ? await requestOrganizerSnapshot()
+            : { settings, pending: pendingVisions, published: [...sourceVisions, ...localPublishedVisions], analytics: null });
+          applyPublicSettings(data.settings);
+          pendingOrganizerRecords = data.pending || [];
+          publishedOrganizerRecords = data.published || [];
+          organizerAnalytics = data.analytics || null;
+          updateReviewFilters();
+          updateOrganizerSummary();
+          rerenderReviewQueues();
+          return true;
+        } catch (error) {
+          reviewQueue.innerHTML = `<p class="review-empty">${t("reviewError")}</p>`;
+          publishedQueue.innerHTML = `<p class="review-empty">${t("reviewError")}</p>`;
+          showOrganizerError(error);
+          console.error("Review queue failed:", error);
+          return false;
+        }
+      })();
+      if (snapshot) return work;
+      organizerLoadInFlight = work;
       try {
-        const data = snapshot || (GOOGLE_APPS_SCRIPT_URL
-          ? await requestOrganizerSnapshot()
-          : { settings, pending: pendingVisions, published: [...sourceVisions, ...localPublishedVisions] });
-        applyPublicSettings(data.settings);
-        pendingOrganizerRecords = data.pending || [];
-        publishedOrganizerRecords = data.published || [];
-        organizerAnalytics = data.analytics || null;
-        updateReviewFilters();
-        updateOrganizerSummary();
-        rerenderReviewQueues();
-      } catch (error) {
-        reviewQueue.innerHTML = `<p class="review-empty">${t("reviewError")}</p>`;
-        publishedQueue.innerHTML = `<p class="review-empty">${t("reviewError")}</p>`;
-        console.error("Review queue failed:", error);
+        return await work;
+      } finally {
+        if (organizerLoadInFlight === work) organizerLoadInFlight = null;
       }
     }
-
     async function moderateSubmission(id, action) {
       if (["delete", "deletePublished"].includes(action) && !confirm(t("confirmDelete"))) return;
       try {
@@ -2464,11 +2491,17 @@
     function lockOrganizerPanel() {
       organizerKey = "";
       organizerUnlocked = false;
+      organizerUnlockInFlight = null;
+      organizerLoadInFlight = null;
       sessionStorage.removeItem("imagineSaudiOrganizerKey");
       organizerDetails.open = false;
-       organizerDetails.hidden = true;
-       organizerAccess.classList.remove("is-unlocked");
-       organizerStatus.textContent = t("organizerLocked");
+      organizerDetails.hidden = true;
+      organizerLogin.hidden = true;
+      organizerKeyInput.value = "";
+      organizerAccess.classList.remove("is-unlocked", "is-rejected", "is-processing");
+      organizerAccess.disabled = false;
+      organizerAccess.removeAttribute("aria-busy");
+      organizerStatus.textContent = t("organizerLocked");
       animateInteraction(organizerAccess, "is-confirmed");
     }
 
@@ -2547,25 +2580,24 @@
     submissionDeadlineInput.addEventListener("change", () => saveDeadlineSetting("submissionDeadline", submissionDeadlineInput, "imagineSaudiSubmissionDeadline"));
     votingDeadlineInput.addEventListener("change", () => saveDeadlineSetting("votingDeadline", votingDeadlineInput, "imagineSaudiVotingDeadline"));
 
-    organizerAccess.addEventListener("click", () => {
+    organizerAccess.addEventListener("click", async () => {
       if (organizerUnlocked) {
         organizerDetails.hidden = false;
         organizerDetails.open = true;
-        loadReviewQueue();
+        await loadReviewQueue();
       } else {
-        unlockOrganizerControls();
+        showOrganizerLogin();
       }
     });
-    organizerLogin.addEventListener("submit", (event) => {
+    organizerLogin.addEventListener("submit", async (event) => {
       event.preventDefault();
+      if (organizerUnlockInFlight) return;
       const key = organizerKeyInput.value.trim();
       if (!key) {
         organizerKeyInput.focus();
         return;
       }
-      organizerKey = key;
-      sessionStorage.setItem("imagineSaudiOrganizerKey", organizerKey);
-      unlockOrganizerControls();
+      await unlockOrganizerControls(key);
     });
     organizerLoginCancel.addEventListener("click", hideOrganizerLogin);
     organizerRefresh.addEventListener("click", loadReviewQueue);
@@ -2578,9 +2610,6 @@
     gallerySearch.addEventListener("input", renderGallery);
     galleryTrackFilter.addEventListener("change", renderGallery);
     gallerySort.addEventListener("change", renderGallery);
-    organizerDetails.addEventListener("toggle", () => {
-      if (organizerDetails.open) loadReviewQueue();
-    });
     languageToggle.addEventListener("click", () => applyLanguage(currentLanguage === "ar" ? "en" : "ar"));
     restorePublicCache();
     applyLanguage(currentLanguage);
