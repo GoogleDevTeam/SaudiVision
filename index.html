@@ -161,13 +161,21 @@
       border-bottom: 1px solid var(--line);
     }
 
-    .brand-lockup, .status-lockup, .brand-copy { display: flex; align-items: center; }
+    .brand-lockup, .status-lockup, .brand-copy, .header-identity { display: flex; align-items: center; }
     .brand-lockup { gap: 14px; }
+    .header-identity {
+      gap: 18px;
+      min-width: 0;
+      padding: 9px 13px;
+      border: 1px solid rgba(216, 208, 237, .2);
+      border-radius: 18px;
+      background: rgba(4, 43, 37, .44);
+    }
     .institution-logo {
       display: block;
-      width: clamp(116px, 15vw, 180px);
+      width: clamp(210px, 24vw, 300px);
       height: auto;
-      max-height: 72px;
+      max-height: 140px;
       object-fit: contain;
       flex: 0 1 auto;
     }
@@ -215,7 +223,7 @@
     .brand-name span { color: var(--blue); }
     .brand-ar { margin: 0; color: var(--muted); font-family: "Cairo", sans-serif; font-size: .92rem; }
 
-    .status-lockup { gap: 12px; }
+    .status-lockup { gap: 12px; flex: 0 0 auto; }
     .status-lockup .brand-ar {
       padding-inline-end: 12px;
       border-inline-end: 1px solid var(--line);
@@ -810,7 +818,9 @@
     }
     @media (max-width: 800px) {
       .page-shell { --page-gutter: 24px; padding-top: 24px; }
-      .topline { align-items: flex-start; }
+      .topline { align-items: flex-start; flex-wrap: wrap; }
+      .header-identity { width: 100%; justify-content: space-between; }
+      .institution-logo { width: min(250px, 68vw); max-height: 118px; }
       .status-lockup { flex-wrap: wrap; justify-content: flex-end; }
       .hero { display: block; padding: 64px 0 34px; }
       .counter { min-width: 0; margin-top: 28px; }
@@ -822,6 +832,8 @@
       .page-shell { --page-gutter: 18px; }
       .brand-copy::after, .brand-ar { display: none; }
       .brand-copy { gap: 0; }
+      .header-identity { width: 100%; gap: 12px; padding: 8px 10px; }
+      .institution-logo { width: min(230px, 64vw); max-height: 105px; }
       .brand-name { font-size: .82rem; }
       .institution-logo { width: min(136px, 33vw); max-height: 62px; }
       .status-text { font-size: .64rem; }
@@ -1052,10 +1064,12 @@
           </div>
         </div>
       </div>
-      <div class="status-lockup">
+      <div class="header-identity">
         <img class="institution-logo" src="college-shaqra-logo-white.png" alt="كلية الحاسب الآلي وتقنية المعلومات — جامعة شقراء" width="728" height="342" decoding="async" />
-        <p class="brand-ar" lang="ar" dir="rtl" aria-label="تخيّل السعودية">تخيّل السعودية</p>
-        <button class="language-toggle" id="language-toggle" type="button" aria-label="Switch language">عربي</button>
+        <div class="status-lockup">
+          <p class="brand-ar" lang="ar" dir="rtl" aria-label="تخيّل السعودية">تخيّل السعودية</p>
+          <button class="language-toggle" id="language-toggle" type="button" aria-label="Switch language">عربي</button>
+        </div>
       </div>
     </header>
 
