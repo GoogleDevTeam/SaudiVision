@@ -447,6 +447,12 @@ Before coding, inspect the latest `main` branch and the live deployment state. T
 - Added a narrow-phone fallback below 380px so the control wraps cleanly instead of being squeezed into the logo row.
 - Frontend commit: `d289aa593c86ffde77df8d8751347d1dcd7c4413`.
 
+### Hero language control placement — 2026-09-19
+
+- Moved the language switch out of the header row and into a dedicated floating utility pill at the upper edge of the hero, opposite the Arabic headline.
+- It now has independent space and a larger readable touch target without changing header height or competing with the institution logo.
+- Frontend commit: `6809bd787e3f05888f76b964ef48b54a0675a5d3`.
+
 ### Next recommended step
 
 Deploy the updated google-apps-script.gs once, then test descriptions that intentionally combine two or three ideas. Confirm the generated image follows the participant's wording while using the selected track only as a broad lens.
