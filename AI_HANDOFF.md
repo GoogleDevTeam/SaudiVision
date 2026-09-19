@@ -402,6 +402,13 @@ Before coding, inspect the latest `main` branch and the live deployment state. T
 - Frontend commit: `3aebf142998bba271c03475f42c5c543939a7150`.
 - This remains a copy-only frontend change; Apps Script does not need redeployment.
 
+### Shaqra affiliation footer — 2026-09-19
+
+- Kept the exact existing footer line **مجموعات مطوري Google في الجامعة — جامعة شقراء** and added the supplied affiliation line directly beneath it: **كلية الحاسب الآلي وتقنية المعلومات - مجموعة مطوري قوقل شقراء**.
+- Added an aligned English translation and a small stacked-footer style without changing application behavior.
+- Frontend commit: `ec91f8d5648e002e461b8f74733f7f989e88ceb9`.
+- GitHub Pages should rebuild the frontend; Apps Script does not need redeployment for this copy/layout-only change.
+
 ### Next recommended step
 
 Deploy the updated google-apps-script.gs once, then test descriptions that intentionally combine two or three ideas. Confirm the generated image follows the participant's wording while using the selected track only as a broad lens.
