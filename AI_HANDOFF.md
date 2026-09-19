@@ -315,6 +315,16 @@ Before coding, inspect the latest `main` branch and the live deployment state. T
 - Direct syntax validation passed for both the Apps Script source and the inline frontend JavaScript; static field/DOM wiring checks passed.
 - GitHub source is updated. The Apps Script web app still needs the latest backend copied into Apps Script and redeployed before the new columns, analytics, and deadline enforcement are live.
 
+### Organizer access and form stabilization — 2026-09-19
+
+- Replaced organizer unlock with single-flight verification so rapid clicks and duplicate submissions cannot race each other.
+- The typed organizer key is now verified before it is stored in sessionStorage; invalid attempts clear stale sessions and reset the organizer panel.
+- Removed the duplicate details-toggle refresh path, deduplicated organizer queue loads, added invalid-response handling, and made backend key comparison trim harmless surrounding whitespace.
+- Enlarged the Strategic track control and removed Problem or opportunity, Expected impact, Who benefits, and Keywords from the public submission form.
+- Frontend commit: `727374a6a21d202e3549844783dadbae5b2312ab`. Backend commit: `a0d04c1651803979c0900fb19cc0db4a4e68299e`.
+- Frontend and Apps Script source syntax checks passed after the change.
+- Apps Script still requires redeployment, and the static frontend may need the hosting deployment/cache to refresh before users see this version.
+
 ### Next recommended step
 
 Deploy the updated google-apps-script.gs to the existing Apps Script /exec deployment, then test organizer unlock, refresh, approve/delete, settings, and public sync on the live site.
