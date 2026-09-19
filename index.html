@@ -735,6 +735,8 @@
       font-size: .7rem;
     }
     .footer strong { color: var(--muted); font-weight: 500; }
+    .footer-branding { display: flex; flex-direction: column; gap: 4px; }
+    .footer-affiliation { color: var(--muted); font-family: "Cairo", sans-serif; font-size: .92em; }
     .color-dashes { display: flex; gap: 4px; }
     .color-dashes i { display: block; width: 19px; height: 3px; border-radius: 4px; }
     .color-dashes i:nth-child(1) { background: var(--blue); }
@@ -1265,7 +1267,10 @@
     </section>
 
     <footer class="footer">
-      <span data-en="Google Developer Groups on Campus — Shaqra University" data-ar="مجموعات مطوري Google في الجامعة — جامعة شقراء"><strong>Google Developer Groups</strong> on Campus — Shaqra University</span>
+      <div class="footer-branding">
+        <span data-en="Google Developer Groups on Campus — Shaqra University" data-ar="مجموعات مطوري Google في الجامعة — جامعة شقراء"><strong>Google Developer Groups</strong> on Campus — Shaqra University</span>
+        <span class="footer-affiliation" data-en="College of Computer and Information Technology - Google Developers Group Shaqra" data-ar="كلية الحاسب الآلي وتقنية المعلومات - مجموعة مطوري قوقل شقراء">كلية الحاسب الآلي وتقنية المعلومات - مجموعة مطوري قوقل شقراء</span>
+      </div>
       <div class="color-dashes" aria-label="Google colors"><i></i><i></i><i></i><i></i></div>
       <span data-en="Saudi Arabia / 2026" data-ar="السعودية / 2026">Saudi Arabia / 2026</span>
     </footer>
