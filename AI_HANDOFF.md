@@ -323,7 +323,7 @@ Before coding, inspect the latest `main` branch and the live deployment state. T
 - Enlarged the Strategic track control and removed Problem or opportunity, Expected impact, Who benefits, and Keywords from the public submission form.
 - Frontend commit: `727374a6a21d202e3549844783dadbae5b2312ab`. Backend commit: `a0d04c1651803979c0900fb19cc0db4a4e68299e`.
 - Frontend and Apps Script source syntax checks passed after the change.
-- Apps Script still requires redeployment, and the static frontend may need the hosting deployment/cache to refresh before users see this version.
+- Live smoke test passed after deployment: `/health` returned workbook format `2026-09-19-v7`, and an intentionally invalid organizer key was rejected with `Unauthorized: invalid organizer key.` The static frontend still needs its hosting deployment/cache to refresh before users see the new access flow.
 
 ### Next recommended step
 
