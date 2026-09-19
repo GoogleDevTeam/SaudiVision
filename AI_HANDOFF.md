@@ -300,6 +300,20 @@ Before coding, inspect the latest `main` branch and the live deployment state. T
 - Added a 12-second request timeout, AbortController cleanup, and clearer bilingual timeout messaging so organizer unlock cannot wait indefinitely.
 - Frontend fix commit: 824ba9f7ab16c023bb8f0bffa05ad550b9492e04.
 
+### Structured submission upgrade — 2026-09-19
+
+- Expanded the `Visions` and `Submissions` schemas with `title`, `problem`, `impact`, `beneficiaries`, and `tags`; existing sheets migrate by appending missing headers during health/setup.
+- Added server-side validation and deadline enforcement for submissions and voting.
+- Added organizer analytics: total submissions, pending count, published count, active votes, and per-track breakdown.
+- Improved Gemini image prompts with the new structured context so generated concepts reflect the team’s title, challenge, impact, and beneficiaries.
+- Upgraded the participant form and gallery/review cards to surface the richer details in English and Arabic.
+- Moved **تخيّل السعودية** beside the language switch on the opposite side of the header.
+- Added a five-metric organizer summary including all submissions and active votes.
+- Backend commit: `f83dbfb67c6dbd43d43c012a0ac78d39f03e2e9a`.
+- Frontend commit: `9443e4bd2115a69c0c0d0fd9ab86b6f75703c15f`.
+- Direct syntax validation passed for both the Apps Script source and the inline frontend JavaScript; static field/DOM wiring checks passed.
+- GitHub source is updated. The Apps Script web app still needs the latest backend copied into Apps Script and redeployed before the new columns, analytics, and deadline enforcement are live.
+
 ### Next recommended step
 
 Deploy the updated google-apps-script.gs to the existing Apps Script /exec deployment, then test organizer unlock, refresh, approve/delete, settings, and public sync on the live site.
