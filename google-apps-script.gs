@@ -8,11 +8,14 @@
      contents with this file. A bound script can use the active Sheet
      automatically. If this is a standalone Apps Script project instead,
      add a Script Property named SPREADSHEET_ID with the Sheet ID.
-  3. In Apps Script, open Project Settings → Script properties and add:
-        ADMIN_KEY = a long private organizer password
-      Do not put ADMIN_KEY or GEMINI_API_KEY in index.html. The browser asks for
-      the organizer key only when needed; Gemini is called server-side by this script.
-      Add GEMINI_API_KEY in Project Settings → Script properties.
+   3. In Apps Script, open Project Settings → Script properties and add:
+         ADMIN_KEY = a long private organizer password
+         CLOUDFLARE_API_TOKEN = a private Cloudflare API token with Workers AI run permission
+         CLOUDFLARE_ACCOUNT_ID = your Cloudflare account ID
+         CLOUDFLARE_IMAGE_MODEL = optional model path; defaults to @cf/black-forest-labs/flux-1-schnell
+         CLOUDFLARE_AI_ENDPOINT = optional full endpoint; otherwise it is built from the account ID and model.
+       Do not put ADMIN_KEY or Cloudflare credentials in index.html. The browser asks for
+       the organizer key only when needed; Cloudflare Workers AI is called server-side by this script.
   4. Deploy → New deployment → Web app:
         Execute as: Me
         Who has access: Anyone
@@ -25,9 +28,9 @@
      status, setting, deployment step, and test procedure without requiring
      this source file to be understood first.
 
-  This backend calls Gemini image generation server-side for every submission.
+  This backend calls Cloudflare Workers AI image generation server-side for every submission.
   The generated PNG is stored in Google Drive with link viewing enabled, and
-  only the public image URL is written to Sheets. Never expose GEMINI_API_KEY
+  only the public image URL is written to Sheets. Never expose CLOUDFLARE_API_TOKEN
   in the static frontend.
 
   Optional Firebase path
@@ -39,7 +42,7 @@
     3. Send the signed-in user's ID token to a trusted backend/Cloud Function.
     4. Keep moderation and vote writes server-side, protected by Firestore
        Security Rules, App Check, and organizer authorization.
-  Do not put ADMIN_KEY, Gemini keys, or service-account credentials in the
+  Do not put ADMIN_KEY, Cloudflare Workers AI keys, or service-account credentials in the
   frontend. Firebase Auth improves identity, but does not by itself authorize
   organizer actions.
 
@@ -55,11 +58,11 @@
 const SHEETS = {
   visions: {
     name: "Visions",
-    headers: ["id", "createdAt", "publishedAt", "status", "team", "title", "track", "prompt", "problem", "impact", "beneficiaries", "tags", "image", "color", "height", "votes", "participantId", "submissionRound", "deviceId", "deviceLabel", "browser", "browserVersion", "operatingSystem", "deviceType", "platform", "screen", "timezone", "language", "userAgent", "imageSource", "generationStatus", "generationStartedAt", "generationCompletedAt", "generationAttempts", "generationError", "promptVersion", "geminiModel", "imageMimeType", "driveFileId", "reviewedAt", "reviewedBy"]
+    headers: ["id", "createdAt", "publishedAt", "status", "team", "title", "track", "prompt", "problem", "impact", "beneficiaries", "tags", "image", "color", "height", "votes", "participantId", "submissionRound", "deviceId", "deviceLabel", "browser", "browserVersion", "operatingSystem", "deviceType", "platform", "screen", "timezone", "language", "userAgent", "imageSource", "generationStatus", "generationStartedAt", "generationCompletedAt", "generationAttempts", "generationError", "promptVersion", "imageModel", "imageMimeType", "driveFileId", "reviewedAt", "reviewedBy"]
   },
   submissions: {
     name: "Submissions",
-    headers: ["id", "createdAt", "updatedAt", "status", "team", "title", "track", "prompt", "problem", "impact", "beneficiaries", "tags", "image", "color", "height", "submittedBy", "participantId", "submissionRound", "deviceId", "deviceLabel", "browser", "browserVersion", "operatingSystem", "deviceType", "platform", "screen", "timezone", "language", "userAgent", "imageSource", "generationStatus", "generationStartedAt", "generationCompletedAt", "generationAttempts", "generationError", "promptVersion", "geminiModel", "imageMimeType", "driveFileId", "reviewedAt", "reviewedBy"]
+    headers: ["id", "createdAt", "updatedAt", "status", "team", "title", "track", "prompt", "problem", "impact", "beneficiaries", "tags", "image", "color", "height", "submittedBy", "participantId", "submissionRound", "deviceId", "deviceLabel", "browser", "browserVersion", "operatingSystem", "deviceType", "platform", "screen", "timezone", "language", "userAgent", "imageSource", "generationStatus", "generationStartedAt", "generationCompletedAt", "generationAttempts", "generationError", "promptVersion", "imageModel", "imageMimeType", "driveFileId", "reviewedAt", "reviewedBy"]
   },
   settings: {
     name: "Settings",
@@ -80,11 +83,11 @@ const SHEETS = {
 };
 
 const GUIDE_SHEET_NAME = "START HERE";
-const WORKBOOK_FORMAT_VERSION = "2026-09-19-v8";
-const IMAGE_PROMPT_VERSION = "2026-09-19-v5";
-const GENERATION_SLOT_KEY = "IMAGINE_SAUDI_GEMINI_GENERATION_SLOT";
-const GEMINI_IMAGE_MODEL = "gemini-3.1-flash-image";
-const GEMINI_INTERACTIONS_URL = "https://generativelanguage.googleapis.com/v1beta/interactions";
+const WORKBOOK_FORMAT_VERSION = "2026-09-20-v9";
+const IMAGE_PROMPT_VERSION = "2026-09-20-v6";
+const GENERATION_SLOT_KEY = "IMAGINE_SAUDI_CLOUDFLARE_GENERATION_SLOT";
+const CLOUDFLARE_IMAGE_MODEL = "@cf/black-forest-labs/flux-1-schnell";
+const CLOUDFLARE_API_BASE_URL = "https://api.cloudflare.com/client/v4";
 const THEME = {
   darkGreen: "#073B35",
   green: "#2C7562",
@@ -111,12 +114,12 @@ const FIELD_NOTES = {
   image: "Preview or generated image URL/data URI.",
   imageSource: "Image origin: demo-preview, generated, uploaded, or curated.",
   generationStatus: "Image workflow state: queued, generating, generated, or failed.",
-  generationStartedAt: "When Gemini image generation started.",
-  generationCompletedAt: "When Gemini image generation finished or failed.",
-  generationAttempts: "Number of Gemini attempts used for this submission.",
+  generationStartedAt: "When Cloudflare Workers AI image generation started.",
+  generationCompletedAt: "When Cloudflare Workers AI image generation finished or failed.",
+  generationAttempts: "Number of Cloudflare Workers AI attempts used for this submission.",
   generationError: "Last safe error message when image generation failed.",
   promptVersion: "Version of the server-side image prompt used.",
-  geminiModel: "Gemini image model used for generation.",
+  imageModel: "Cloudflare Workers AI image model used for generation.",
   imageMimeType: "Generated image MIME type, such as image/png.",
   driveFileId: "Google Drive file ID for the generated image.",
   reviewedAt: "When an organizer approved or deleted the submission.",
@@ -217,16 +220,26 @@ function doPost(event) {
   }
 }
 
-function geminiApiKey_() {
-  return String(PropertiesService.getScriptProperties().getProperty("GEMINI_API_KEY") || "").trim();
+function cloudflareConfig_() {
+  const properties = PropertiesService.getScriptProperties();
+  const apiToken = String(properties.getProperty("CLOUDFLARE_API_TOKEN") || "").trim();
+  const accountId = String(properties.getProperty("CLOUDFLARE_ACCOUNT_ID") || "").trim();
+  const model = String(properties.getProperty("CLOUDFLARE_IMAGE_MODEL") || CLOUDFLARE_IMAGE_MODEL).trim();
+  const customEndpoint = String(properties.getProperty("CLOUDFLARE_AI_ENDPOINT") || "").trim();
+  const endpoint = customEndpoint || (accountId
+    ? CLOUDFLARE_API_BASE_URL + "/accounts/" + accountId + "/ai/run/" + model
+    : "");
+  return { apiToken: apiToken, accountId: accountId, model: model, endpoint: endpoint };
 }
 
-function geminiStatus_() {
-  const configured = Boolean(geminiApiKey_());
+function cloudflareStatus_() {
+  const config = cloudflareConfig_();
+  const configured = Boolean(config.apiToken && config.endpoint);
   return {
     configured: configured,
-    status: configured ? "ready" : "needs_api_key",
-    model: GEMINI_IMAGE_MODEL
+    status: configured ? "ready" : "needs_cloudflare_settings",
+    provider: "Cloudflare Workers AI",
+    model: config.model
   };
 }
 
@@ -240,10 +253,10 @@ function route_(action, payload) {
         status: "ready",
         workbookFormatVersion: WORKBOOK_FORMAT_VERSION,
         sheets: Object.keys(SHEETS).map(function(key) { return SHEETS[key].name; }).concat([GUIDE_SHEET_NAME]),
-        imageGeneration: geminiStatus_()
+        imageGeneration: cloudflareStatus_()
       };
     case "aiStatus":
-      return { ok: true, service: "Imagine Saudi 2050", imageGeneration: geminiStatus_() };
+      return { ok: true, service: "Imagine Saudi 2050", imageGeneration: cloudflareStatus_() };
     case "visions":
       return getPublicVisions_();
     case "submit":
@@ -377,7 +390,7 @@ function buildGuideSheet_(sheet) {
     ["votingOpen", "Settings tab", "true allows vote/unvote; false closes voting.", "Close voting before announcing results."],
     ["submissionDeadline", "Settings tab", "Optional ISO timestamp for the public submission countdown.", "Leave blank to hide the countdown."],
     ["votingDeadline", "Settings tab", "Optional ISO timestamp for the public voting countdown.", "Leave blank to hide the countdown."],
-    ["imageSource", "Visions / Submissions", "demo-preview, generated, uploaded, or curated.", "New submissions are generated by Gemini and remain pending until approved."],
+    ["imageSource", "Visions / Submissions", "demo-preview, generated, uploaded, or curated.", "New submissions are generated by Cloudflare Workers AI and remain pending until approved."],
     ["", "", "", ""],
     ["SHEET MAP", "", "", ""],
     ["Sheet", "What it stores", "Important fields", "Organizer guidance"],
@@ -505,7 +518,7 @@ function formatDataSheet_(sheet, definition) {
     id: 310, createdAt: 155, publishedAt: 155, updatedAt: 155, status: 115,
     team: 170, track: 180, prompt: 380, image: 300, imageSource: 125,
     color: 100, height: 85, votes: 80, submittedBy: 180,
-    generationStatus: 125, generationStartedAt: 155, generationCompletedAt: 155, generationAttempts: 105, generationError: 320, promptVersion: 135, geminiModel: 180, imageMimeType: 125, driveFileId: 250, reviewedAt: 155, reviewedBy: 125,
+    generationStatus: 125, generationStartedAt: 155, generationCompletedAt: 155, generationAttempts: 105, generationError: 320, promptVersion: 135, imageModel: 180, imageMimeType: 125, driveFileId: 250, reviewedAt: 155, reviewedBy: 125,
     timestamp: 155, eventId: 280, action: 180, status: 115, participantId: 230, message: 300, details: 420,
     key: 170, value: 125, votedAt: 155, active: 85, unvotedAt: 155
   };
@@ -838,7 +851,7 @@ function submitVision_(payload) {
     generationAttempts: 0,
     generationError: "",
     promptVersion: IMAGE_PROMPT_VERSION,
-    geminiModel: GEMINI_IMAGE_MODEL,
+    imageModel: cloudflareConfig_().model,
     imageMimeType: "",
     driveFileId: "",
     reviewedAt: "",
@@ -995,8 +1008,10 @@ function generateVisionImageWithRetry_(submissionId, team, track, prompt, detail
 
 function generateVisionImage_(submissionId, team, track, prompt, details) {
   details = details || {};
-  const apiKey = geminiApiKey_();
-  if (!apiKey) throw new Error("Live AI is not configured. Add GEMINI_API_KEY in Apps Script Project Settings.");
+  const config = cloudflareConfig_();
+  if (!config.apiToken || !config.endpoint) {
+    throw new Error("Live AI is not configured. Add CLOUDFLARE_API_TOKEN and CLOUDFLARE_ACCOUNT_ID in Apps Script Project Settings.");
+  }
   const imagePrompt = [
     "Create one polished editorial concept image for a Saudi Arabia 2050 future vision competition.",
     "Show an optimistic, plausible, human-centered future with strong Saudi environmental and cultural context.",
@@ -1017,43 +1032,49 @@ function generateVisionImage_(submissionId, team, track, prompt, details) {
     "Beneficiaries: " + String(details.beneficiaries || ""),
     "Participant description: " + prompt
   ].join("\n");
-  const response = UrlFetchApp.fetch(GEMINI_INTERACTIONS_URL, {
+  const response = UrlFetchApp.fetch(config.endpoint, {
     method: "post",
     contentType: "application/json",
-    headers: { "x-goog-api-key": apiKey, "Api-Revision": "2026-05-20" },
-    payload: JSON.stringify({
-      model: GEMINI_IMAGE_MODEL,
-      input: [{ type: "text", text: imagePrompt }]
-    }),
+    headers: { Authorization: "Bearer " + config.apiToken, Accept: "image/png" },
+    payload: JSON.stringify({ prompt: imagePrompt }),
     muteHttpExceptions: true
   });
   const status = response.getResponseCode();
-  const raw = response.getContentText();
+  const headers = response.getHeaders();
+  const contentType = String(headers["Content-Type"] || headers["content-type"] || "").split(";")[0].toLowerCase();
   if (status < 200 || status >= 300) {
-    let detail = "Gemini image generation failed.";
-    try { detail = JSON.parse(raw).error.message || detail; } catch (ignored) {}
-    throw new Error(detail.slice(0, 240));
+    let detail = "Cloudflare Workers AI image generation failed.";
+    try {
+      const errorBody = JSON.parse(response.getContentText());
+      const firstError = Array.isArray(errorBody.errors) ? errorBody.errors[0] : null;
+      detail = (firstError && (firstError.message || firstError.code)) ||
+        (errorBody.error && (errorBody.error.message || errorBody.error)) || detail;
+    } catch (ignored) {}
+    throw new Error(String(detail).slice(0, 240));
   }
-  let result;
-  try { result = JSON.parse(raw); } catch (error) { throw new Error("Gemini returned an invalid image response."); }
-  let imageBlock = result.output_image || result.outputImage || null;
-  const blocks = Array.isArray(result.output) ? result.output : (Array.isArray(result.outputs) ? result.outputs : []);
-  if (!imageBlock) {
-    for (let index = 0; index < blocks.length; index += 1) {
-      const block = blocks[index];
-      if (block && block.output_image) imageBlock = block.output_image;
-      else if (block && block.data && (!block.type || String(block.type).toLowerCase().indexOf("image") !== -1)) imageBlock = block;
-      if (imageBlock) break;
-    }
+
+  let blob;
+  let mimeType = contentType || "image/png";
+  if (contentType.indexOf("json") !== -1) {
+    let result;
+    try { result = JSON.parse(response.getContentText()); }
+    catch (error) { throw new Error("Cloudflare returned an invalid image response."); }
+    const resultBody = result.result || result;
+    const encodedImage = resultBody.image || resultBody.data || resultBody.base64 ||
+      (Array.isArray(resultBody.images) ? resultBody.images[0] : "");
+    if (!encodedImage) throw new Error("Cloudflare did not return an image. Try a shorter vision description.");
+    const encoded = String(encodedImage).replace(/^data:[^;]+;base64,/, "");
+    mimeType = String(resultBody.mime_type || resultBody.mimeType || "image/png");
+    blob = Utilities.newBlob(Utilities.base64Decode(encoded), mimeType, "saudi-vision-" + submissionId + ".png");
+  } else {
+    blob = response.getBlob();
+    mimeType = blob.getContentType() || mimeType || "image/png";
+    blob.setName("saudi-vision-" + submissionId + (mimeType === "image/jpeg" ? ".jpg" : ".png"));
   }
-  if (!imageBlock || !imageBlock.data) throw new Error("Gemini did not return an image. Try a shorter vision description.");
-  const mimeType = imageBlock.mime_type || imageBlock.mimeType || "image/png";
-  const blob = Utilities.newBlob(Utilities.base64Decode(imageBlock.data), mimeType, "saudi-vision-" + submissionId + ".png");
   const file = DriveApp.createFile(blob);
   file.setSharing(DriveApp.Access.ANYONE_WITH_LINK, DriveApp.Permission.VIEW);
   return { url: "https://drive.google.com/uc?export=view&id=" + file.getId(), mimeType: mimeType, fileId: file.getId() };
 }
-
 function getOrganizerSnapshot_() {
   const settings = getSettings_();
   const pending = getPendingSubmissions_();
@@ -1105,7 +1126,7 @@ function getPendingSubmissions_() {
         generationAttempts: Number(record.generationAttempts) || 0,
         generationError: String(record.generationError || ""),
         promptVersion: String(record.promptVersion || ""),
-        geminiModel: String(record.geminiModel || ""),
+        imageModel: String(record.imageModel || ""),
         color: String(record.color || "#D8D0ED"),
         height: cleanNumber_(record.height, 280, 180, 520),
         votes: 0
