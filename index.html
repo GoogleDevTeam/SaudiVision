@@ -5,8 +5,8 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <meta name="theme-color" content="#073B35" />
   <title>Imagine Saudi 2050 — Future Vision Competition</title>
-  <link rel="icon" type="image/png" sizes="64x64" href="shaqra-university-favicon.png" />
-  <link rel="apple-touch-icon" href="shaqra-university-logo.png" />
+  <link rel="icon" type="image/png" sizes="64x64" href="google-developers-favicon.png" />
+  <link rel="apple-touch-icon" href="google-developers-favicon.png" />
   <link rel="preload" as="image" href="google-developers-logo.png" fetchpriority="high" />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
@@ -1520,6 +1520,7 @@
          settingsError: "Competition settings could not be saved. Please try again.",
          backendUnavailable: "The backend is unavailable. Settings were not changed. Redeploy the Apps Script web app.",
          organizerRequired: "Organizer authorization is required.",
+         organizerSlow: "The organizer service is taking too long. Try again after the Apps Script deployment finishes.",
          organizerInvalidKey: "The organizer key was rejected. Check the organizer setup and try again.",
          confirmDelete: "Delete this submission permanently? It will not be shown publicly.",
          demoBadge: "AI GENERATED",
@@ -1590,6 +1591,7 @@
          settingsError: "تعذر حفظ إعدادات المسابقة. حاول مرة أخرى.",
          backendUnavailable: "الخادم غير متاح. لم يتم تغيير الإعدادات. أعد نشر تطبيق Apps Script.",
          organizerRequired: "يلزم إدخال رمز صلاحية المنظم.",
+         organizerSlow: "تستغرق خدمة المنظم وقتًا أطول من المتوقع. حاولوا مرة أخرى بعد اكتمال نشر Apps Script.",
          organizerInvalidKey: "تم رفض رمز المنظم. تحقق من إعدادات المنظم وحاول مرة أخرى.",
          confirmDelete: "حذف هذه المشاركة نهائيًا؟ لن تظهر للجمهور.",
          demoBadge: "مولّد بالذكاء الاصطناعي",
@@ -1847,19 +1849,46 @@
       if (!GOOGLE_APPS_SCRIPT_URL) return null;
       const method = options.method || "POST";
       const url = GOOGLE_APPS_SCRIPT_URL + (action ? "?action=" + encodeURIComponent(action) : "");
-      const response = await fetch(url, {
-        method,
-        headers: method === "GET" ? undefined : { "Content-Type": "text/plain;charset=utf-8" },
-        body: method === "GET" ? undefined : JSON.stringify({ action, ...payload }),
-        cache: "no-store"
-      });
-      if (!response.ok) {
-        if ([404, 502, 503, 504].includes(response.status)) throw new Error("Backend unavailable.");
-        throw new Error("Google backend returned " + response.status);
+      const controller = new AbortController();
+      const timeoutId = window.setTimeout(() => controller.abort(), options.timeout || 12000);
+      try {
+        const response = await fetch(url, {
+          method,
+          headers: method === "GET" ? undefined : { "Content-Type": "text/plain;charset=utf-8" },
+          body: method === "GET" ? undefined : JSON.stringify({ action, ...payload }),
+          cache: "no-store",
+          signal: controller.signal
+        });
+        if (!response.ok) {
+          if ([404, 502, 503, 504].includes(response.status)) throw new Error("Backend unavailable.");
+          throw new Error("Google backend returned " + response.status);
+        }
+        const result = await response.json();
+        if (result.ok === false) throw new Error(result.error || "Google backend error");
+        return result;
+      } catch (error) {
+        if (error && error.name === "AbortError") throw new Error("Backend timeout.");
+        throw error;
+      } finally {
+        window.clearTimeout(timeoutId);
       }
-      const result = await response.json();
-      if (result.ok === false) throw new Error(result.error || "Google backend error");
-      return result;
+    }
+
+    async function requestOrganizerSnapshot() {
+      try {
+        return await adminRequest("organizerSnapshot");
+      } catch (error) {
+        if (!/unknown action/i.test(error?.message || "")) throw error;
+        const [pendingResult, publishedResult] = await Promise.all([
+          adminRequest("pending"),
+          googleRequest("visions", {}, { method: "GET" })
+        ]);
+        return {
+          settings: publishedResult?.settings || settings,
+          pending: pendingResult?.visions || [],
+          published: publishedResult?.visions || []
+        };
+      }
     }
 
     function applyPublicSettings(nextSettings) {
@@ -1923,7 +1952,9 @@
 
     function showOrganizerError(error) {
       const errorMessage = error?.message || "";
-      const message = /unauthorized|invalid organizer key/i.test(errorMessage)
+      const message = /timeout|unknown action|backend unavailable/i.test(errorMessage)
+        ? t("organizerSlow")
+        : /unauthorized|invalid organizer key/i.test(errorMessage)
         ? t("organizerInvalidKey")
         : /backend unavailable|404|502|503|504/i.test(errorMessage)
           ? t("backendUnavailable")
@@ -1982,7 +2013,7 @@
       organizerAccess.disabled = true;
       organizerAccess.classList.add("is-processing");
       try {
-        const snapshot = await adminRequest("organizerSnapshot");
+        const snapshot = await requestOrganizerSnapshot();
         organizerUnlocked = true;
         organizerDetails.hidden = false;
         organizerDetails.open = true;
@@ -2002,7 +2033,7 @@
     async function restoreOrganizerSession() {
       if (!organizerKey) return;
       try {
-        const snapshot = await adminRequest("organizerSnapshot");
+        const snapshot = await requestOrganizerSnapshot();
         organizerUnlocked = true;
         organizerDetails.hidden = false;
         organizerAccess.classList.add("is-unlocked");
@@ -2289,7 +2320,7 @@
       reviewQueue.innerHTML = `<p class="review-empty">${t("reviewLoading")}</p>`;
       try {
         const data = snapshot || (GOOGLE_APPS_SCRIPT_URL
-          ? await adminRequest("organizerSnapshot")
+          ? await requestOrganizerSnapshot()
           : { settings, pending: pendingVisions, published: [...sourceVisions, ...localPublishedVisions] });
         applyPublicSettings(data.settings);
         pendingOrganizerRecords = data.pending || [];
