@@ -342,6 +342,13 @@ Before coding, inspect the latest `main` branch and the live deployment state. T
 - Frontend commit: 750513eaf285a731bcea6a23be101c8e53b69657. Backend commit: 8b73b3ad269ec4af9f75a5b36b30684d564c33b3.
 - Existing spreadsheets will receive the additional headers when the updated Apps Script health/setup path runs.
 
+### Live verification — 2026-09-19
+
+- Confirmed the live Apps Script health endpoint responds with workbook format version \"2026-09-19-v7\" and all expected sheets: Visions, Submissions, Settings, Votes, Unvotes, and START HERE.
+- Attempted one clearly labeled live verification submission after user approval. The request reached the backend but returned \"Live AI is not configured. Add GEMINI_API_KEY in Apps Script Project Settings.\"
+- The backend generates the image before appending the submission, so this failed before creating a spreadsheet row. No test submission was created.
+- Apps Script deployment is serving the current backend; add GEMINI_API_KEY in Apps Script Project Settings, then retry the same submission verification.
+
 ### Next recommended step
 
 Copy the updated google-apps-script.gs into the existing Apps Script deployment and publish a new version. Then run the health/setup path so the new headers are added, and test one submission to confirm the readable device fields appear in the spreadsheet.
