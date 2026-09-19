@@ -225,6 +225,7 @@
     .brand-ar { margin: 0; color: var(--muted); font-family: "Cairo", sans-serif; font-size: .92rem; }
 
     .status-lockup { gap: 12px; flex: 0 0 auto; }
+    .header-language-toggle { flex: 0 0 auto; }
     .status-lockup .brand-ar {
       padding-inline-end: 12px;
       border-inline-end: 1px solid var(--line);
@@ -839,7 +840,7 @@
       .brand-lockup, .brand-copy { min-width: 0; }
       .header-identity { width: auto; gap: 6px; padding: 2px; border-color: transparent; background: transparent; }
       .institution-logo { width: min(136px, 33vw); max-height: 62px; min-width: 0; }
-      .language-toggle { min-width: 56px; padding: 7px 9px; }
+      .language-toggle { min-width: 52px; padding: 6px 8px; }
       .brand-name { font-size: .82rem; }
       .status-text { font-size: .64rem; }
       .organizer-panel { grid-template-columns: 1fr; }
@@ -856,6 +857,10 @@
       .public-countdown { min-width: 0; text-align: start; }
       .submit-actions .generate-button { width: 100%; }
       .footer { align-items: flex-start; flex-direction: column; }
+    }
+    @media (max-width: 380px) {
+      .topline { flex-wrap: wrap; row-gap: 7px; }
+      .language-toggle { order: 3; }
     }
 
     /* Interaction motion layer */
@@ -1073,9 +1078,9 @@
         <img class="institution-logo" src="college-shaqra-logo-white.png" alt="كلية الحاسب الآلي وتقنية المعلومات — جامعة شقراء" width="728" height="342" decoding="async" />
         <div class="status-lockup">
           <p class="brand-ar" lang="ar" dir="rtl" aria-label="تخيّل السعودية">تخيّل السعودية</p>
-          <button class="language-toggle" id="language-toggle" type="button" aria-label="Switch language">عربي</button>
         </div>
       </div>
+      <button class="language-toggle header-language-toggle" id="language-toggle" type="button" aria-label="Switch language">عربي</button>
     </header>
 
     <form class="organizer-login" id="organizer-login" hidden>
