@@ -459,6 +459,19 @@ Before coding, inspect the latest `main` branch and the live deployment state. T
 - Kept the main hero title, institution logo, language switch, and organizer controls unchanged.
 - Frontend commit: `59e370648365361b60fb5e2a538307ca25b3a54f`.
 
+### Performance and background decoration update — 2026-09-20
+
+- Removed motion only from the 20 background decorative marks; all other site animations remain unchanged.
+- Reworked the decorative placement into shuffled, unique grid cells with a rotation safety margin, so marks do not share a cell or drift over one another.
+- Added resize-safe regeneration for the 20 marks without continuous animation work.
+- Changed public polling from every 5 seconds to every 15 seconds, paused it while the tab is hidden, and avoided rebuilding public results every countdown tick.
+- Added a 5-second Apps Script public-response cache with cache invalidation after settings, moderation, delete, vote, and unvote writes. This collapses simultaneous public reads before they reach Google Sheets.
+- Files changed: `index.html`, `google-apps-script.gs`.
+- Frontend commit: `b43fb6f3707b3859655938ccf90a39ceea92972f`.
+- Backend commit: `e24a48ed5298fc2fbfb030c47df85fbeee743449`.
+- Direct Node syntax checks passed for the inline frontend JavaScript and Apps Script source.
+- GitHub Pages will rebuild the frontend from the new source. The Apps Script source must be copied into Apps Script and redeployed for the public-response cache to become active.
+
 ### Next recommended step
 
 Deploy the updated google-apps-script.gs once, then test descriptions that intentionally combine two or three ideas. Confirm the generated image follows the participant's wording while using the selected track only as a broad lens.
