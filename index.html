@@ -2075,6 +2075,36 @@
       }[character]));
     }
 
+    function safeImageUrl(value) {
+      const raw = String(value || "").trim();
+      if (!raw || raw === placeholderImage) return placeholderImage;
+      try {
+        const url = new URL(raw, window.location.href);
+        return url.protocol === "https:" ? url.href : placeholderImage;
+      } catch (error) {
+        return placeholderImage;
+      }
+    }
+
+    function bindGalleryInteractions(root) {
+      root.querySelectorAll("[data-vote-index]").forEach((button) => {
+        button.addEventListener("click", () => voteForVision(Number(button.dataset.voteIndex)));
+      });
+      root.querySelectorAll("img[data-fallback-src]").forEach((image) => {
+        let fallbackAttempted = false;
+        image.addEventListener("error", () => {
+          const fallback = safeImageUrl(image.dataset.fallbackSrc);
+          if (!fallbackAttempted && fallback !== placeholderImage && image.src !== fallback) {
+            fallbackAttempted = true;
+            image.src = fallback;
+            return;
+          }
+          image.removeAttribute("data-fallback-src");
+          image.src = placeholderImage;
+        });
+      });
+    }
+
     function t(key) {
       return copy[currentLanguage][key] || copy.en[key] || key;
     }
@@ -2200,7 +2230,7 @@
           '<span class="public-winner-team">' + escapeHTML(winner.team || "—") + ' · ' + escapeHTML(trackLabel(winner.track)) + '</span>' +
           '<p class="public-winner-prompt">' + escapeHTML(winner.prompt || "") + '</p>' +
           '<span class="public-winner-votes">' + t("winnerVoteLabel").replace("{votes}", Number(winner.votes) || 0) + '</span></div>' +
-          '<div class="public-winner-image"><img src="' + safeImage + '" alt="' + escapeHTML(winner.team || "") + '" loading="eager" fetchpriority="high" decoding="async" data-fallback-src="' + safeFallback + '" onerror="if (this.dataset.fallbackSrc) { const fallback = this.dataset.fallbackSrc; this.dataset.fallbackSrc = String(); this.src = fallback; } else { this.onerror = null; this.src = placeholderImage; }" /></div>' +
+          '<div class="public-winner-image"><img src="' + safeImage + '" alt="' + escapeHTML(winner.team || "") + '" loading="eager" fetchpriority="high" decoding="async" data-fallback-src="' + safeFallback + '" /></div>' +
           '</article>';
       } else if (publicWinner && publicWinner.status === "tie") {
         winnerMarkup = '<div class="public-winner-pending"><strong>' + t("winnerTiePublic") + '</strong></div>';
@@ -2209,6 +2239,7 @@
         '<div class="public-result-item"><span class="public-result-rank">' + (index + 1) + '</span><div class="public-result-copy"><strong>' + escapeHTML(vision.title || vision.team || "—") + '</strong><span>' + escapeHTML((vision.team || "—") + " · " + trackLabel(vision.track)) + '</span></div><span class="public-result-score">' + t("resultsVoteLabel").replace("{votes}", Number(vision.votes) || 0) + '</span></div>'
       ).join("");
       publicResultsList.innerHTML = winnerMarkup + rankingMarkup;
+      bindGalleryInteractions(publicResultsList);
     }
 
     function updatePublicCompetitionState(forceResultsRender = false) {
@@ -2265,8 +2296,7 @@
       return `
         <article class="vision-card" style="animation-delay:${Math.min(index * 55, 500)}ms">
           <div class="vision-image-wrap">
-            <img class="vision-image" style="height:${safeImageHeight(vision.height)}px" src="${safeImage}" alt="${escapeHTML(vision.team)} ${t("conceptArt")}" loading="${index < 2 ? "eager" : "lazy"}" fetchpriority="${index < 2 ? "high" : "low"}" decoding="async" data-fallback-src="${safeImageFallback}"
-              onerror="if (this.dataset.fallbackSrc) { const fallback = this.dataset.fallbackSrc; this.dataset.fallbackSrc = String(); this.src = fallback; } else { this.onerror = null; this.src = '${placeholderImage}'; }" />
+            <img class="vision-image" style="height:${safeImageHeight(vision.height)}px" src="${safeImage}" alt="${escapeHTML(vision.team)} ${t("conceptArt")}" loading="${index < 2 ? "eager" : "lazy"}" fetchpriority="${index < 2 ? "high" : "low"}" decoding="async" data-fallback-src="${safeImageFallback}" />
             <div class="image-glow"></div>
             <span class="card-index">${t("visionLabel")} / ${String(index + 1).padStart(2, "0")}</span>
             ${isDemoPreview || isGeneratedImage ? `<span class="image-source-badge">${isGeneratedImage ? t("demoBadge") : t("demoPreview")}</span>` : ""}
@@ -2283,7 +2313,7 @@
             ${vision.impact ? `<p class="impact-note"><strong>${t("impactLabel")}:</strong> ${escapeHTML(vision.impact)}</p>` : ""}
             <div class="vote-row">
               <span class="vote-count" id="vote-count-${index}">${vision.votes || 0} ${t("votes")}</span>
-              <button class="vote-button${isVoted ? " voted" : ""}" id="vote-${index}" type="button" onclick="voteForVision(${index})" ${voteDisabled ? "disabled" : ""}>
+              <button class="vote-button${isVoted ? " voted" : ""}" id="vote-${index}" type="button" data-vote-index="${index}" ${voteDisabled ? "disabled" : ""}>
                 ${votingClosed ? t("votingClosed") : isVoted ? t("unvote") : anotherVisionVoted ? t("alreadyVoted") : t("vote")}
               </button>
             </div>
@@ -2628,6 +2658,7 @@
       gallery.innerHTML = visibleVisions.length
         ? visibleVisions.map(({ vision, index }) => visionCard(vision, index)).join("")
         : `<p class="gallery-empty">${t("galleryEmpty")}</p>`;
+      bindGalleryInteractions(gallery);
       galleryResults.textContent = t("galleryCount")
         .replace("{shown}", visibleVisions.length)
         .replace("{total}", activeVisions.length);
