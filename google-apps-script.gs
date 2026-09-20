@@ -84,7 +84,7 @@ const SHEETS = {
 
 const GUIDE_SHEET_NAME = "START HERE";
 const WORKBOOK_FORMAT_VERSION = "2026-09-20-v9";
-const IMAGE_PROMPT_VERSION = "2026-09-21-v7";
+const IMAGE_PROMPT_VERSION = "2026-09-21-v8-no-track-enhancer";
 const GENERATION_SLOT_KEY = "IMAGINE_SAUDI_CLOUDFLARE_GENERATION_SLOT";
 const PUBLIC_RESPONSE_CACHE_KEY_ = "IMAGINE_SAUDI_PUBLIC_RESPONSE_V1";
 const PUBLIC_RESPONSE_CACHE_TTL_SECONDS_ = 5;
@@ -1225,7 +1225,6 @@ function generateVisionImage_(submissionId, team, track, prompt, details) {
     "PRIMARY RULE: depict the participant idea literally and specifically. The participant idea is the source of truth.",
     "Do not replace the participant idea with a generic Saudi skyline, desert, solar panels, futuristic city, or another common AI image.",
     "Identify the main subject, action or mechanism, setting, and people from the participant description. Show those concrete elements in one coherent scene.",
-    "Use the strategic track only if it supports the participant idea. If the track conflicts with the description, ignore the track.",
     "Do not invent a different product, technology, location, or storyline. If a detail is unclear, keep the scene simple rather than guessing.",
     "Show an optimistic, plausible Saudi 2050 future with clear human benefit, cinematic 16:9 composition, natural depth, premium editorial lighting, and a restrained palette.",
     "Generate exactly ONE image with one scene and one clear focal subject. Do not create a collage, multiple variations, or a generic mood image.",
@@ -1237,8 +1236,6 @@ function generateVisionImage_(submissionId, team, track, prompt, details) {
     "Expected impact: " + String(details.impact || ""),
     "Beneficiaries: " + String(details.beneficiaries || ""),
     "=== END PARTICIPANT IDEA ===",
-    "Optional context only — strategic track: " + String(track || ""),
-    "Optional context only — group name: " + String(team || "")
   ].join("\n");
   const response = UrlFetchApp.fetch(config.endpoint, {
     method: "post",
