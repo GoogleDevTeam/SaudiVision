@@ -214,6 +214,14 @@ Before coding, inspect the latest `main` branch and the live deployment state. T
 
 ### Current state
 
+### Continuous demo refresh — 2026-09-20
+
+- Removed the demo toggle from the live display; the organizer panel remains the single start/stop control.
+- Increased demo activity speed to one tick every 1.8 seconds, increased vote gains, and reduced vote decreases to one point roughly every 9 ticks.
+- Added recurring incoming submissions to the local review queue with a bounded queue, stock-image-backed concepts, and a live activity message when a new submission arrives.
+- Published demo visions now use stock imagery from the existing curated Unsplash set and are labeled as stock images.
+- Frontend JavaScript syntax and static demo checks pass.
+
 ### End-to-end client demo — 2026-09-20
 
 - Expanded the organizer's client demo from a vote-race animation into a contained workflow simulation.
