@@ -480,6 +480,7 @@ Before coding, inspect the latest `main` branch and the live deployment state. T
 - Public reads remain unrestricted so a large audience can browse the gallery without friction.
 - This is abuse reduction, not strict human identity enforcement: clearing storage, changing browsers, or rotating IDs can bypass anonymous limits. Stronger protection would require an optional CAPTCHA/Turnstile challenge or authenticated identity.
 - Files changed: `index.html`, `google-apps-script.gs`.
+- Commit: `ae39e7d21f68616542188fd6a05e5654b97c4fdf`.
 - Apps Script must be redeployed before the server-side limits become active; no login or organizer-key change is required.
 
 ### Next recommended step
