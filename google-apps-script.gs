@@ -84,7 +84,7 @@ const SHEETS = {
 
 const GUIDE_SHEET_NAME = "START HERE";
 const WORKBOOK_FORMAT_VERSION = "2026-09-20-v9";
-const IMAGE_PROMPT_VERSION = "2026-09-20-v6";
+const IMAGE_PROMPT_VERSION = "2026-09-21-v7";
 const GENERATION_SLOT_KEY = "IMAGINE_SAUDI_CLOUDFLARE_GENERATION_SLOT";
 const PUBLIC_RESPONSE_CACHE_KEY_ = "IMAGINE_SAUDI_PUBLIC_RESPONSE_V1";
 const PUBLIC_RESPONSE_CACHE_TTL_SECONDS_ = 5;
@@ -1221,24 +1221,24 @@ function generateVisionImage_(submissionId, team, track, prompt, details) {
     throw new Error("Live AI is not configured. Add CLOUDFLARE_API_TOKEN and CLOUDFLARE_ACCOUNT_ID in Apps Script Project Settings.");
   }
   const imagePrompt = [
-    "Create one polished editorial concept image for a Saudi Arabia 2050 future vision competition.",
-    "Show an optimistic, plausible, human-centered future with strong Saudi environmental and cultural context.",
-    "Make one coherent wide editorial scene with one clear focal subject and only a small number of supporting details.",
-    "Prefer plausible near-future Saudi design over generic science fiction; make the climate, materials, local setting, and human benefit visually legible.",
-    "Use a cinematic 16:9 composition, natural depth, premium magazine-quality lighting, and a restrained palette inspired by Saudi landscapes.",
-    "Generate exactly ONE single image only. Do not return multiple images, a collage, variations, or any text response beyond the image.",
-    "Do not include readable words, letters, logos, flags, interface elements, borders, collages, or labels.",
-    "The participant's description is the primary creative brief. Preserve its meaning, concrete details, named people or places, proposed mechanism, and desired impact.",
-    "If the description combines several related ideas, integrate them into one coherent concept instead of choosing one and discarding the others.",
-    "Use the selected strategic track only as a broad contextual lens. Never replace, narrow, contradict, or add an unrelated storyline to the participant's description.",
-    "Strategic track: " + track,
-    "Broad track lens: " + trackPromptEnhancer_(track),
-    "Group name: " + team,
-    "Vision title: " + String(details.title || ""),
+    "Create ONE polished wide editorial concept image for the participant's idea below.",
+    "PRIMARY RULE: depict the participant idea literally and specifically. The participant idea is the source of truth.",
+    "Do not replace the participant idea with a generic Saudi skyline, desert, solar panels, futuristic city, or another common AI image.",
+    "Identify the main subject, action or mechanism, setting, and people from the participant description. Show those concrete elements in one coherent scene.",
+    "Use the strategic track only if it supports the participant idea. If the track conflicts with the description, ignore the track.",
+    "Do not invent a different product, technology, location, or storyline. If a detail is unclear, keep the scene simple rather than guessing.",
+    "Show an optimistic, plausible Saudi 2050 future with clear human benefit, cinematic 16:9 composition, natural depth, premium editorial lighting, and a restrained palette.",
+    "Generate exactly ONE image with one scene and one clear focal subject. Do not create a collage, multiple variations, or a generic mood image.",
+    "Do not include readable words, letters, logos, flags, interface elements, borders, labels, or text in the image.",
+    "=== PARTICIPANT IDEA — MANDATORY SOURCE OF TRUTH ===",
+    "Title: " + String(details.title || ""),
+    "Description: " + String(prompt || ""),
     "Problem or opportunity: " + String(details.problem || ""),
     "Expected impact: " + String(details.impact || ""),
     "Beneficiaries: " + String(details.beneficiaries || ""),
-    "Participant description: " + prompt
+    "=== END PARTICIPANT IDEA ===",
+    "Optional context only — strategic track: " + String(track || ""),
+    "Optional context only — group name: " + String(team || "")
   ].join("\n");
   const response = UrlFetchApp.fetch(config.endpoint, {
     method: "post",
