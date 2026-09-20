@@ -2198,7 +2198,7 @@
           '<span class="public-winner-team">' + escapeHTML(winner.team || "—") + ' · ' + escapeHTML(trackLabel(winner.track)) + '</span>' +
           '<p class="public-winner-prompt">' + escapeHTML(winner.prompt || "") + '</p>' +
           '<span class="public-winner-votes">' + t("winnerVoteLabel").replace("{votes}", Number(winner.votes) || 0) + '</span></div>' +
-          '<div class="public-winner-image"><img src="' + safeImage + '" alt="' + escapeHTML(winner.team || "") + '" loading="eager" fetchpriority="high" decoding="async" data-fallback-src="' + safeFallback + '" onerror="if (this.dataset.fallbackSrc) { const fallback = this.dataset.fallbackSrc; this.dataset.fallbackSrc = ''; this.src = fallback; } else { this.onerror = null; this.src = '' + placeholderImage + ''; }" /></div>' +
+          '<div class="public-winner-image"><img src="' + safeImage + '" alt="' + escapeHTML(winner.team || "") + '" loading="eager" fetchpriority="high" decoding="async" data-fallback-src="' + safeFallback + '" onerror="if (this.dataset.fallbackSrc) { const fallback = this.dataset.fallbackSrc; this.dataset.fallbackSrc = ''; this.src = fallback; } else { this.onerror = null; this.src = placeholderImage; }" /></div>' +
           '</article>';
       } else if (publicWinner && publicWinner.status === "tie") {
         winnerMarkup = '<div class="public-winner-pending"><strong>' + t("winnerTiePublic") + '</strong></div>';
