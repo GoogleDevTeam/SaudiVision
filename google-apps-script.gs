@@ -96,6 +96,7 @@ const ABUSE_RATE_LIMITS_ = {
 };
 const CLOUDFLARE_IMAGE_MODEL = "@cf/black-forest-labs/flux-1-schnell";
 const CLOUDFLARE_API_BASE_URL = "https://api.cloudflare.com/client/v4";
+const DRIVE_IMAGE_THUMBNAIL_SIZE = "w1600";
 const THEME = {
   darkGreen: "#073B35",
   green: "#2C7562",
@@ -673,6 +674,32 @@ function imageSource_(value) {
     : "demo-preview";
 }
 
+function driveFileIdFromImage_(image, driveFileId) {
+  const explicitId = String(driveFileId == null ? "" : driveFileId).trim();
+  if (explicitId) return explicitId;
+  const text = String(image == null ? "" : image).trim();
+  const match = text.match(/(?:[?&]id=|\/d\/)([A-Za-z0-9_-]+)/);
+  return match ? match[1] : "";
+}
+
+function driveThumbnailUrl_(fileId) {
+  return "https://drive.google.com/thumbnail?id=" + encodeURIComponent(fileId) + "&sz=" + DRIVE_IMAGE_THUMBNAIL_SIZE;
+}
+
+function driveViewUrl_(fileId) {
+  return "https://drive.google.com/uc?export=view&id=" + encodeURIComponent(fileId);
+}
+
+function imageDeliveryUrl_(image, driveFileId) {
+  const fileId = driveFileIdFromImage_(image, driveFileId);
+  return fileId ? driveThumbnailUrl_(fileId) : String(image == null ? "" : image).trim();
+}
+
+function imageFallbackUrl_(image, driveFileId) {
+  const fileId = driveFileIdFromImage_(image, driveFileId);
+  return fileId ? driveViewUrl_(fileId) : "";
+}
+
 function cleanNumber_(value, fallback, min, max) {
   const number = Number(value);
   if (!isFinite(number)) return fallback;
@@ -867,7 +894,8 @@ function publicVision_(record) {
     impact: String(record.impact || ""),
     beneficiaries: String(record.beneficiaries || ""),
     tags: String(record.tags || ""),
-    image: String(record.image || ""),
+    image: imageDeliveryUrl_(record.image, record.driveFileId),
+    imageFallback: imageFallbackUrl_(record.image, record.driveFileId),
     imageSource: imageSource_(record.imageSource),
     color: String(record.color || "#D8D0ED"),
     height: cleanNumber_(record.height, 280, 180, 520),
@@ -1163,7 +1191,13 @@ function generateVisionImage_(submissionId, team, track, prompt, details) {
   }
   const file = DriveApp.createFile(blob);
   file.setSharing(DriveApp.Access.ANYONE_WITH_LINK, DriveApp.Permission.VIEW);
-  return { url: "https://drive.google.com/uc?export=view&id=" + file.getId(), mimeType: mimeType, fileId: file.getId() };
+  const fileId = file.getId();
+  return {
+    url: driveThumbnailUrl_(fileId),
+    fallbackUrl: driveViewUrl_(fileId),
+    mimeType: mimeType,
+    fileId: fileId
+  };
 }
 function getOrganizerSnapshot_() {
   const settings = getSettings_();
@@ -1210,7 +1244,8 @@ function getPendingSubmissions_() {
         timezone: String(record.timezone || ""),
         language: String(record.language || ""),
         userAgent: String(record.userAgent || ""),
-        image: String(record.image || ""),
+        image: imageDeliveryUrl_(record.image, record.driveFileId),
+        imageFallback: imageFallbackUrl_(record.image, record.driveFileId),
         imageSource: imageSource_(record.imageSource),
         generationStatus: String(record.generationStatus || ""),
         generationAttempts: Number(record.generationAttempts) || 0,
