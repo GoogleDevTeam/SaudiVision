@@ -643,11 +643,18 @@ function objectRows_(definition) {
   });
 }
 
+function sheetSafeValue_(value) {
+  if (typeof value !== "string") return value;
+  // Google Sheets can interpret leading formula characters in user input.
+  // Prefix those values so they remain visible text, never executable formulas.
+  return /^[=+\-@]/.test(value) ? "'" + value : value;
+}
+
 function appendRecord_(definition, record) {
   const sheet = getSheet_(definition);
   const headers = sheetHeaders_(sheet);
   const values = headers.map(function(header) {
-    return record[header] === undefined ? "" : record[header];
+    return record[header] === undefined ? "" : sheetSafeValue_(record[header]);
   });
   sheet.appendRow(values);
 }
@@ -656,7 +663,7 @@ function updateRecord_(record, fields) {
   const headers = record._sheet.getRange(1, 1, 1, record._sheet.getLastColumn()).getValues()[0];
   Object.keys(fields).forEach(function(field) {
     const column = headers.indexOf(field);
-    if (column !== -1) record._sheet.getRange(record._row, column + 1).setValue(fields[field]);
+    if (column !== -1) record._sheet.getRange(record._row, column + 1).setValue(sheetSafeValue_(fields[field]));
   });
 }
 
