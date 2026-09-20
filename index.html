@@ -2308,8 +2308,9 @@
     }
 
     function updateTrackEnhancer() {
-      const enhancer = TRACK_PROMPT_ENHANCERS[trackInput.value] || TRACK_PROMPT_ENHANCERS.Other;
-      trackEnhancer.textContent = t("trackEnhancerPrefix") + enhancer[currentLanguage];
+      // Disabled for now: the participant's description is the only creative input.
+      trackEnhancer.textContent = "";
+      trackEnhancer.hidden = true;
     }
 
     function isSubmissionLocked() {
