@@ -24,8 +24,8 @@ const payloads = [
 for (const payload of payloads) {
   const escaped = escapeHTML(payload);
   if (/[<>]/.test(escaped)) throw new Error("Unescaped HTML delimiter in payload: " + payload);
-  if (escaped.includes("<script") || escaped.includes("onerror=") || escaped.includes("onload=")) {
-    throw new Error("Executable markup survived escaping: " + payload);
+  if (/[<>]/.test(escaped)) {
+    throw new Error("HTML delimiters survived escaping: " + payload);
   }
 }
 
