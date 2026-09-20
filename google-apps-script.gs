@@ -1550,7 +1550,7 @@ function requireAdmin_(payload) {
  * Run this once from the Apps Script editor to grant external-request permission.
  * It does not access competition data or call Cloudflare. Delete it afterward if desired.
  */
-function authorizeExternalRequest_() {
+function authorizeExternalRequest() {
   UrlFetchApp.fetch("https://www.google.com/generate_204", {
     method: "get",
     muteHttpExceptions: true
