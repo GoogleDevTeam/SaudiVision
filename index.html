@@ -375,7 +375,7 @@
     .live-stage-close, .live-stage-fullscreen { min-height: 38px; padding: 9px 12px; border: 1px solid var(--line); border-radius: 9px; cursor: pointer; background: rgba(4, 43, 37, .78); color: var(--ink); font: inherit; font-size: .68rem; }
     .live-stage-close { font-size: 1.1rem; line-height: 1; }
     .live-stage-close:hover, .live-stage-fullscreen:hover { border-color: rgba(216, 208, 237, .64); transform: translateY(-1px); }
-    .live-stage-grid { display: grid; grid-template-columns: 1fr; gap: 18px; flex: 1; margin-top: clamp(22px, 4vw, 54px); }
+    .live-stage-grid { display: grid; grid-template-columns: minmax(0, 1.18fr) minmax(360px, .82fr); gap: 18px; flex: 1; margin-top: clamp(22px, 4vw, 54px); }
     .live-stage-stream, .live-stage-board { min-width: 0; border: 1px solid rgba(216, 208, 237, .2); border-radius: 22px; background: linear-gradient(145deg, rgba(7, 59, 53, .86), rgba(3, 35, 31, .91)); box-shadow: 0 25px 80px rgba(0, 0, 0, .22); }
     .live-stage-stream { display: flex; flex-direction: column; padding: clamp(15px, 2.2vw, 30px); }
     .live-stage-stream-header, .live-stage-board-header, .live-stage-stream-footer, .live-stage-footer { display: flex; align-items: center; justify-content: space-between; gap: 14px; }
@@ -1436,7 +1436,7 @@
           <div>
             <span class="live-stage-kicker" data-en="Organizer live display" data-ar="شاشة المنظم المباشرة">Organizer live display</span>
             <h2 class="live-stage-title" id="live-stage-title" data-en="The vote is moving" data-ar="التصويت يتحرك">The vote is moving</h2>
-            <p class="live-stage-subtitle" data-en="A clean, projector-ready leader spotlight: the connected laptop feed, the current leader, and vote movement — without prompts or control clutter." data-ar="عرض واضح وجاهز للبث في القاعة يركز على المتصدر: شاشة الحاسوب المتصل، والمتصدر الحالي، وحركة التصويت — بلا نصوص طويلة أو ازدحام تحكم.">A clean, projector-ready leader spotlight: the connected laptop feed, the current leader, and vote movement — without prompts or control clutter.</p>
+            <p class="live-stage-subtitle" data-en="A clean, projector-ready view for the room: the connected laptop feed, the current leader, and every passing moment — without prompts or control clutter." data-ar="عرض واضح وجاهز للبث في القاعة: شاشة الحاسوب المتصل، والمتصدر الحالي، وكل لحظة تجاوز — بلا نصوص طويلة أو ازدحام تحكم.">A clean, projector-ready view for the room: the connected laptop feed, the current leader, and every passing moment — without prompts or control clutter.</p>
           </div>
           <div class="live-stage-actions">
             <span class="live-stage-live-dot" data-en="Live" data-ar="مباشر">Live</span>
@@ -1460,7 +1460,10 @@
             </div>
             <div class="live-stage-stream-footer"><div><span data-en="Audience total" data-ar="إجمالي أصوات الجمهور">Audience total</span><strong id="live-stage-total-votes">0</strong></div><div><span data-en="Last event" data-ar="آخر حدث">Last event</span><strong id="live-stage-event" data-en="Waiting for the next vote" data-ar="بانتظار التصويت التالي">Waiting for the next vote</strong></div></div>
           </section>
-          <div id="live-stage-leaderboard" hidden aria-hidden="true"></div>
+          <section class="live-stage-board" aria-label="Live vote race" data-aria-en="Live vote race" data-aria-ar="سباق التصويت المباشر">
+            <div class="live-stage-board-header"><div><span class="live-stage-kicker" data-en="Vote race" data-ar="سباق التصويت">Vote race</span><h3 data-en="Passing board" data-ar="لوحة التجاوز">Passing board</h3></div><span class="live-stage-refresh-state" id="live-stage-refresh-state" data-en="Live · refreshing every 15 seconds" data-ar="مباشر · تحديث كل 15 ثانية">Live · refreshing every 15 seconds</span></div>
+            <div class="live-stage-leaderboard" id="live-stage-leaderboard" aria-live="polite"></div>
+          </section>
         </main>
         <footer class="live-stage-footer"><span id="live-stage-updated" data-en="Waiting for first refresh" data-ar="بانتظار أول تحديث">Waiting for first refresh</span><span data-en="Keep this view on the room display while the audience votes." data-ar="اتركوا هذه الشاشة على شاشة القاعة أثناء تصويت الجمهور.">Keep this view on the room display while the audience votes.</span></footer>
       </div>
@@ -3053,7 +3056,7 @@
       if (document.fullscreenElement === liveStage && document.exitFullscreen) document.exitFullscreen().catch(() => {});
     }
     function openLiveStage() {
-      if (!organizerUnlocked) { showOrganizerLogin(); return; }
+      if (!organizerUnlocked || !organizerKey) { showOrganizerLogin(); return; }
       liveStageOpen = true;
       liveStage.hidden = false;
       liveStage.setAttribute("aria-hidden", "false");
