@@ -86,6 +86,9 @@ const GUIDE_SHEET_NAME = "START HERE";
 const WORKBOOK_FORMAT_VERSION = "2026-09-20-v9";
 const IMAGE_PROMPT_VERSION = "2026-09-20-v6";
 const GENERATION_SLOT_KEY = "IMAGINE_SAUDI_CLOUDFLARE_GENERATION_SLOT";
+const PUBLIC_RESPONSE_CACHE_KEY_ = "IMAGINE_SAUDI_PUBLIC_RESPONSE_V1";
+const PUBLIC_RESPONSE_CACHE_TTL_SECONDS_ = 5;
+const PUBLIC_RESPONSE_CACHE_MAX_BYTES_ = 45000;
 const CLOUDFLARE_IMAGE_MODEL = "@cf/black-forest-labs/flux-1-schnell";
 const CLOUDFLARE_API_BASE_URL = "https://api.cloudflare.com/client/v4";
 const THEME = {
@@ -738,6 +741,7 @@ function saveSettings_(payload) {
         appendRecord_(definition, { key: key, value: String(settings[key]), updatedAt: timestamp });
       }
     });
+    invalidatePublicResponseCache_();
     return { ok: true, settings: settings };
   });
 }
@@ -752,16 +756,61 @@ function resetSubmissionRound_() {
     if (record) updateRecord_(record, { value: nextRound, updatedAt: timestamp });
     else appendRecord_(definition, { key: "submissionRound", value: nextRound, updatedAt: timestamp });
     settings.submissionRound = nextRound;
+    invalidatePublicResponseCache_();
     return { ok: true, submissionRound: nextRound, settings: settings };
   });
 }
 
 function getPublicVisions_() {
+  const cache = CacheService.getScriptCache();
+  const cached = cache.get(PUBLIC_RESPONSE_CACHE_KEY_);
+  if (cached) {
+    try {
+      return JSON.parse(cached);
+    } catch (error) {
+      cache.remove(PUBLIC_RESPONSE_CACHE_KEY_);
+    }
+  }
+
+  // Collapse a burst of public reads into one Sheets read. The second cache
+  // check matters when several visitors arrive at the same time.
+  const lock = LockService.getScriptLock();
+  if (lock.tryLock(1500)) {
+    try {
+      const lockedCache = cache.get(PUBLIC_RESPONSE_CACHE_KEY_);
+      if (lockedCache) {
+        try {
+          return JSON.parse(lockedCache);
+        } catch (error) {
+          cache.remove(PUBLIC_RESPONSE_CACHE_KEY_);
+        }
+      }
+      const result = buildPublicVisionsResponse_();
+      const serialized = JSON.stringify(result);
+      if (serialized.length <= PUBLIC_RESPONSE_CACHE_MAX_BYTES_) {
+        cache.put(PUBLIC_RESPONSE_CACHE_KEY_, serialized, PUBLIC_RESPONSE_CACHE_TTL_SECONDS_);
+      }
+      return result;
+    } finally {
+      lock.releaseLock();
+    }
+  }
+
+  // A cache miss should never make the public page fail just because a
+  // concurrent request is holding the short read lock.
+  return buildPublicVisionsResponse_();
+}
+
+function buildPublicVisionsResponse_() {
   const settings = getSettings_();
   const visions = objectRows_(SHEETS.visions)
     .filter(function(record) { return String(record.status).toLowerCase() === "published"; })
     .map(publicVision_);
   return { ok: true, settings: settings, visions: visions };
+}
+
+function invalidatePublicResponseCache_() {
+  CacheService.getScriptCache().remove(PUBLIC_RESPONSE_CACHE_KEY_);
 }
 
 function publicVision_(record) {
@@ -1170,6 +1219,7 @@ function moderateSubmission_(submissionId, nextStatus) {
       appendRecord_(SHEETS.visions, vision);
     }
     logActivity_("moderation", nextStatus, submission, "Organizer changed submission status.", { nextStatus: nextStatus });
+    invalidatePublicResponseCache_();
     return { ok: true, status: nextStatus, submissionId: String(submission.id) };
   });
 }
@@ -1200,6 +1250,7 @@ function deletePublishedVision_(visionId) {
     if (submission && String(submission.status).toLowerCase() === "published") {
       updateRecord_(submission, { status: "deleted", updatedAt: timestamp });
     }
+    invalidatePublicResponseCache_();
     return { ok: true, status: "deleted", visionId: String(visionId) };
   });
 }
@@ -1267,6 +1318,7 @@ function voteForVision_(payload) {
       active: true
     });
     updateRecord_(vision, { votes: (Number(vision.votes) || 0) + 1 });
+    invalidatePublicResponseCache_();
     return { ok: true, action: "vote", visionId: visionId };
   });
 }
@@ -1297,6 +1349,7 @@ function unvoteVision_(payload) {
 
     const vision = findRecord_(SHEETS.visions, "id", visionId);
     if (vision) updateRecord_(vision, { votes: Math.max(0, (Number(vision.votes) || 0) - 1) });
+    invalidatePublicResponseCache_();
     return { ok: true, action: "unvote", changed: true, visionId: visionId };
   });
 }
