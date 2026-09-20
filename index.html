@@ -199,7 +199,7 @@
       filter: drop-shadow(0 4px 12px rgba(0, 0, 0, .16));
       animation: logo-mark-breathe 9s ease-in-out infinite;
     }
-    .google-dev-logo { animation: icon-breathe 8s ease-in-out infinite; }
+    .google-dev-logo { animation: icon-breathe 2.4s ease-in-out infinite; }
     .google-dev-logo {
       display: grid;
       appearance: none;
@@ -969,8 +969,8 @@
       50% { transform: translateY(-1px); }
     }
     @keyframes icon-breathe {
-      0%, 100% { transform: translateY(0); }
-      50% { transform: translateY(-2px); }
+      0%, 100% { transform: translateY(0) scale(1); box-shadow: inset 0 0 18px rgba(155, 138, 196, .14), 0 0 22px rgba(155, 138, 196, .12); }
+      50% { transform: translateY(-2px) scale(1.06); box-shadow: inset 0 0 20px rgba(155, 138, 196, .22), 0 0 32px rgba(155, 138, 196, .3); }
     }
     @keyframes review-in { from { opacity: 0; transform: translateX(12px); } to { opacity: 1; transform: translateX(0); } }
     @keyframes edge-sweep { from { transform: translateX(-115%) skewX(-18deg); } to { transform: translateX(115%) skewX(-18deg); } }
@@ -1319,9 +1319,9 @@
 
     <header class="topline">
       <div class="brand-lockup">
-        <button class="google-dev-logo organizer-access" id="organizer-access" type="button" hidden aria-hidden="true" tabindex="-1">
+        <div class="google-dev-logo organizer-access" id="organizer-access" aria-hidden="true">
           <img src="google-developers-logo.png" alt="" width="32" height="24" decoding="async" />
-        </button>
+        </div>
         <div class="brand-copy">
           <div>
             <p class="brand-name" data-en="Imagine Saudi 2050" data-ar="تخيّل السعودية 2050">تخيّل السعودية 2050</p>
