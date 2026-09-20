@@ -371,10 +371,10 @@
     .live-stage-subtitle { max-width: 660px; margin: 13px 0 0; color: var(--dim); font-family: "Cairo", sans-serif; font-size: clamp(.72rem, 1.2vw, .94rem); line-height: 1.7; }
     .live-stage-actions { display: flex; align-items: center; gap: 9px; flex: 0 0 auto; }
     .live-stage-live-dot { display: inline-flex; align-items: center; gap: 7px; padding: 8px 11px; border: 1px solid rgba(216, 208, 237, .28); border-radius: 999px; color: var(--light-lavender); font-size: .67rem; font-weight: 700; letter-spacing: .12em; }
-    .live-stage-live-dot::before { width: 7px; height: 7px; border-radius: 50%; background: #F0B7C8; box-shadow: 0 0 0 5px rgba(240, 183, 200, .12); content: ""; animation: live-stage-pulse 1.7s ease-in-out infinite; }
+    .live-stage-live-dot::before { width: 7px; height: 7px; border-radius: 50%; background: #F0B7C8; box-shadow: 0 0 0 5px rgba(240, 183, 200, .12); content: ""; }
     .live-stage-mode-badge, .live-stage-demo { display: inline-flex; align-items: center; min-height: 38px; padding: 9px 11px; border: 1px solid rgba(216, 208, 237, .28); border-radius: 9px; background: rgba(4, 43, 37, .78); color: var(--light-lavender); font: inherit; font-size: .66rem; font-weight: 700; letter-spacing: .06em; }
     .live-stage-mode-badge { min-height: 0; padding: 8px 10px; border-radius: 999px; color: var(--dim); text-transform: uppercase; }
-    .live-stage-mode-badge.is-demo { border-color: rgba(216, 208, 237, .7); background: rgba(155, 138, 196, .2); color: var(--light-lavender); animation: live-stage-pulse 1.7s ease-in-out infinite; }
+    .live-stage-mode-badge.is-demo { border-color: rgba(216, 208, 237, .7); background: rgba(155, 138, 196, .2); color: var(--light-lavender); }
     .live-stage-demo { cursor: pointer; }
     .live-stage-demo:hover { border-color: rgba(216, 208, 237, .64); transform: translateY(-1px); }
     .live-stage-close, .live-stage-fullscreen { min-height: 38px; padding: 9px 12px; border: 1px solid var(--line); border-radius: 9px; cursor: pointer; background: rgba(4, 43, 37, .78); color: var(--ink); font: inherit; font-size: .68rem; }
@@ -409,7 +409,7 @@
     .live-stage-board-header h3 { margin: 6px 0 0; font-size: clamp(1.25rem, 2vw, 2rem); letter-spacing: -.035em; }
     .live-stage-refresh-state { max-width: 145px; color: var(--dim); font-family: "Cairo", sans-serif; font-size: .65rem; line-height: 1.5; text-align: right; }
     .live-stage-leaderboard { display: flex; flex-direction: column; gap: 9px; margin-top: 17px; }
-    .live-stage-row { display: grid; grid-template-columns: 34px minmax(0, 1fr) auto; align-items: center; gap: 11px; padding: 12px 10px; border: 1px solid transparent; border-radius: 13px; background: rgba(4, 43, 37, .45); animation: live-stage-row-in .42s ease both; transition: background .25s ease, border-color .25s ease, transform .25s ease; }
+    .live-stage-row { display: grid; grid-template-columns: 34px minmax(0, 1fr) auto; align-items: center; gap: 11px; padding: 12px 10px; border: 1px solid transparent; border-radius: 13px; background: rgba(4, 43, 37, .45); transition: background .25s ease, border-color .25s ease, transform .25s ease; }
     .live-stage-row.is-up, .live-stage-row.is-down { border-color: transparent; background: rgba(4, 43, 37, .45); }
     .live-stage-row.is-up { animation: live-stage-overtake-up .95s cubic-bezier(.22,.8,.25,1) both; }
     .live-stage-row.is-down { animation: live-stage-overtake-down .95s cubic-bezier(.22,.8,.25,1) both; }
@@ -430,8 +430,8 @@
     .live-stage-delta.is-up, .live-stage-delta.is-down { color: var(--dim); }
     .live-stage-empty { margin: auto; color: var(--dim); font-family: "Cairo", sans-serif; font-size: .8rem; text-align: center; }
     .live-stage-footer { margin-top: 15px; color: var(--dim); font-family: "Cairo", sans-serif; font-size: .64rem; }
-    .live-stage-screen.is-switching { animation: live-stage-screen-switch .85s ease both; }
-    .live-stage-screen.is-leader-pulse { animation: live-stage-leader-pulse 1.1s cubic-bezier(.2,.8,.2,1) both; }
+    .live-stage-screen.is-switching { animation: live-stage-screen-arrive .85s cubic-bezier(.18,.8,.25,1) both; }
+    .live-stage-screen.is-leader-pulse { animation: live-stage-leader-arrive 1.1s cubic-bezier(.18,.8,.25,1) both; }
     @keyframes live-stage-in { from { opacity: 0; transform: scale(.985); } to { opacity: 1; transform: scale(1); } }
     @keyframes live-stage-pulse { 0%, 100% { opacity: .55; transform: scale(.8); } 50% { opacity: 1; transform: scale(1.18); } }
     @keyframes live-stage-row-in { from { opacity: 0; transform: translateY(7px); } to { opacity: 1; transform: translateY(0); } }
@@ -440,8 +440,8 @@
     @keyframes live-stage-top-arrive { 0% { transform: scale(.97); } 45% { transform: scale(1.018); } 100% { transform: scale(1); } }
     @keyframes live-stage-rank-pop { 0% { transform: scale(.78) rotate(-7deg); } 55% { transform: scale(1.12) rotate(2deg); } 100% { transform: scale(1) rotate(0); } }
     @keyframes live-stage-bar-in { from { transform: scaleX(0); } to { transform: scaleX(1); } }
-    @keyframes live-stage-screen-switch { 0% { opacity: .52; filter: saturate(.5); } 55% { opacity: 1; filter: saturate(1.35); } 100% { opacity: 1; filter: saturate(1); } }
-    @keyframes live-stage-leader-pulse { 0% { transform: scale(.992); filter: brightness(.92); } 42% { transform: scale(1.012); filter: brightness(1.16); } 100% { transform: scale(1); filter: brightness(1); } }
+    @keyframes live-stage-screen-arrive { 0% { opacity: .72; transform: translateX(24px); } 58% { opacity: 1; transform: translateX(-3px); } 100% { opacity: 1; transform: translateX(0); } }
+    @keyframes live-stage-leader-arrive { 0% { opacity: .82; transform: translateY(10px) scale(.985); } 55% { opacity: 1; transform: translateY(-2px) scale(1.012); } 100% { opacity: 1; transform: translateY(0) scale(1); } }
     @media (max-width: 960px) { .live-stage-grid { grid-template-columns: 1fr; } .live-stage-screen { min-height: 360px; } .live-stage-board { min-height: 420px; } }
     @media (max-width: 560px) { .live-stage { padding: 13px; } .live-stage-header { flex-direction: column; } .live-stage-actions { width: 100%; justify-content: flex-end; } .live-stage-title { font-size: 2.25rem; } .live-stage-screen { min-height: 330px; padding: 19px; } .live-stage-feature-title { font-size: 2rem; } .live-stage-footer { align-items: flex-start; flex-direction: column; } }
     .review-panel {
@@ -1479,7 +1479,7 @@
             <div class="live-stage-leaderboard" id="live-stage-leaderboard" aria-live="polite"></div>
           </section>
         </main>
-        <footer class="live-stage-footer"><span id="live-stage-updated" data-en="Waiting for first refresh" data-ar="بانتظار أول تحديث">Waiting for first refresh</span><span data-en="Keep this view on the room display while the audience votes." data-ar="اتركوا هذه الشاشة على شاشة القاعة أثناء تصويت الجمهور.">Keep this view on the room display while the audience votes.</span></footer>
+        <footer class="live-stage-footer"><span id="live-stage-updated" data-en="Movement feed active" data-ar="حركة السباق نشطة">Movement feed active</span><span data-en="Keep this view on the room display while the audience votes." data-ar="اتركوا هذه الشاشة على شاشة القاعة أثناء تصويت الجمهور.">Keep this view on the room display while the audience votes.</span></footer>
       </div>
     </div>
 
@@ -3012,7 +3012,7 @@
       liveStageModeBadge.textContent = liveStageDemoMode ? liveStageCopy("DEMO ONLY", "تجريبي فقط") : liveStageCopy("LIVE DATA", "بيانات مباشرة");
       liveStageModeBadge.classList.toggle("is-demo", liveStageDemoMode);
       liveStageDemoButton.textContent = liveStageDemoMode ? liveStageCopy("■ Exit demo", "■ إنهاء التجربة") : liveStageCopy("▶ Demo mode", "▶ الوضع التجريبي");
-      liveStageUpdated.textContent = liveStageCopy("Updated ", "آخر تحديث ") + now.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
+      liveStageUpdated.textContent = liveStageCopy("Movement feed active", "حركة السباق نشطة");
       if (!ranked.length) {
         liveStageFeatureRank.textContent = "—";
         liveStageFeatureTitle.textContent = "—";
@@ -3050,12 +3050,7 @@
         liveStageEvent.textContent = liveStageCopy("Leader changed to " + (feature.title || feature.team || "—"), "تغير المتصدر إلى " + (feature.title || feature.team || "—"));
       } else {
         const leaderDelta = (Number(feature.votes) || 0) - (liveStageScoreSnapshot.get(featureKey) ?? (Number(feature.votes) || 0));
-        if (leaderDelta > 0) {
-          liveStageScreen.classList.remove("is-leader-pulse");
-          void liveStageScreen.offsetWidth;
-          liveStageScreen.classList.add("is-leader-pulse");
-        }
-        liveStageEvent.textContent = leaderDelta > 0 ? liveStageCopy("Leader gaining +" + leaderDelta + " votes", "المتصدر يكسب +" + leaderDelta + " أصوات") : liveStageCopy("Waiting for the next vote", "بانتظار التصويت التالي");
+        liveStageEvent.textContent = leaderDelta > 0 ? liveStageCopy("Leader gaining +" + leaderDelta + " votes", "المتصدر يكسب +" + leaderDelta + " أصوات") : liveStageCopy("Waiting for the next movement", "بانتظار الحركة التالية");
       }
       liveStageLeaderKey = featureKey;
       liveStageLeaderboard.innerHTML = ranked.slice(0, 8).map((vision, index) => {
@@ -3067,7 +3062,8 @@
         const rank = index + 1;
         const rankDelta = previousRank == null ? 0 : previousRank - rank;
         const movementClass = delta > 0 ? " is-up" : delta < 0 ? " is-down" : "";
-        const passingClass = (rankDelta ? " is-passing" : "") + (index === 0 ? " is-top" : "");
+        const enteringTop = index === 0 && (previousRank == null || previousRank !== 1);
+        const passingClass = (rankDelta ? " is-passing" : "") + (enteringTop ? " is-top" : "");
         const deltaClass = delta > 0 ? " is-up" : delta < 0 ? " is-down" : "";
         const deltaLabel = delta > 0 ? "+" + delta + " ↑" : delta < 0 ? String(delta) + " ↓" : rankDelta > 0 ? "↑ " + rankDelta : rankDelta < 0 ? "↓ " + Math.abs(rankDelta) : "";
         const percent = totalVotes ? Math.round((votes / totalVotes) * 100) : 0;
