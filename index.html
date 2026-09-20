@@ -2169,8 +2169,21 @@
       localStorage.setItem("imagineSaudiPublished", JSON.stringify(localPublishedVisions));
     }
 
+    function driveImageFallbackUrl(vision) {
+      const explicit = String(vision.imageFallback || "").trim();
+      if (explicit) return explicit;
+      const image = String(vision.image || "").trim();
+      const match = image.match(/(?:[?&]id=|\/d\/)([A-Za-z0-9_-]+)/);
+      if (!match) return "";
+      const fileId = encodeURIComponent(match[1]);
+      return image.includes("/thumbnail")
+        ? "https://drive.google.com/uc?export=view&id=" + fileId
+        : "https://drive.google.com/thumbnail?id=" + fileId + "&sz=w1600";
+    }
+
     function visionCard(vision, index) {
       const safeImage = escapeHTML(vision.image || placeholderImage);
+      const safeImageFallback = escapeHTML(driveImageFallbackUrl(vision));
       const selectedVision = localStorage.getItem("imagineSaudiVote");
       const isVoted = selectedVision === visionKey(vision) || selectedVision === vision.team;
       const anotherVisionVoted = Boolean(selectedVision && !isVoted);
@@ -2182,8 +2195,8 @@
       return `
         <article class="vision-card" style="animation-delay:${Math.min(index * 55, 500)}ms">
           <div class="vision-image-wrap">
-            <img class="vision-image" style="height:${safeImageHeight(vision.height)}px" src="${safeImage}" alt="${escapeHTML(vision.team)} ${t("conceptArt")}" loading="lazy" decoding="async"
-              onerror="this.onerror=null;this.src='${placeholderImage}'" />
+            <img class="vision-image" style="height:${safeImageHeight(vision.height)}px" src="${safeImage}" alt="${escapeHTML(vision.team)} ${t("conceptArt")}" loading="${index < 2 ? "eager" : "lazy"}" fetchpriority="${index < 2 ? "high" : "low"}" decoding="async" data-fallback-src="${safeImageFallback}"
+              onerror="if (this.dataset.fallbackSrc) { const fallback = this.dataset.fallbackSrc; this.dataset.fallbackSrc = ''; this.src = fallback; } else { this.onerror = null; this.src = '${placeholderImage}'; }" />
             <div class="image-glow"></div>
             <span class="card-index">${t("visionLabel")} / ${String(index + 1).padStart(2, "0")}</span>
             ${isDemoPreview || isGeneratedImage ? `<span class="image-source-badge">${isGeneratedImage ? t("demoBadge") : t("demoPreview")}</span>` : ""}
