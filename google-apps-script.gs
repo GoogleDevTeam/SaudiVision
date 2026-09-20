@@ -279,6 +279,9 @@ function route_(action, payload) {
     case "pending":
       requireAdmin_(payload);
       return { ok: true, visions: getPendingSubmissions_() };
+    case "organizerAuth":
+      requireAdmin_(payload);
+      return { ok: true, authenticated: true };
     case "organizerSnapshot":
       requireAdmin_(payload);
       return getOrganizerSnapshot_();
