@@ -261,10 +261,7 @@ function route_(action, payload) {
       return {
         ok: true,
         service: "Imagine Saudi 2050",
-        status: "ready",
-        workbookFormatVersion: WORKBOOK_FORMAT_VERSION,
-        sheets: Object.keys(SHEETS).map(function(key) { return SHEETS[key].name; }).concat([GUIDE_SHEET_NAME]),
-        imageGeneration: cloudflareStatus_()
+        status: "ready"
       };
     case "aiStatus":
       return { ok: true, service: "Imagine Saudi 2050", imageGeneration: cloudflareStatus_() };
