@@ -1851,6 +1851,8 @@
     let liveStageOpen = false;
     let liveStageDemoMode = false;
     let liveStageDemoRecords = [];
+    let demoPendingRecords = [];
+    let demoSettingsSnapshot = null;
     let liveStageDemoTick = 0;
     let liveStageRefreshTimer = 0;
     let liveStageScoreSnapshot = new Map();
@@ -2863,7 +2865,6 @@
     }
 
     async function voteForVision(index) {
-      if (liveStageDemoMode) return;
       const vision = activeVisions[index];
       const voteButton = document.getElementById(`vote-${index}`);
       const selectedVision = localStorage.getItem("imagineSaudiVote");
@@ -2874,13 +2875,14 @@
       voteInFlight = true;
       voteButton?.classList.add("is-processing");
       try {
-        if (GOOGLE_APPS_SCRIPT_URL) {
+        if (GOOGLE_APPS_SCRIPT_URL && !liveStageDemoMode) {
           await googleRequest(action, { visionId: vision.id || vision.team, voterId });
         }
         vision.votes = Math.max(0, (vision.votes || 0) + (action === "vote" ? 1 : -1));
         if (action === "vote") localStorage.setItem("imagineSaudiVote", selectedVisionKey);
         else localStorage.removeItem("imagineSaudiVote");
-        await syncGallery();
+        if (liveStageDemoMode) renderDemoSurfaces();
+        else await syncGallery();
       } catch (error) {
         voteButton?.classList.add("is-rejected");
         alert(/RATE_LIMITED|rate limit/i.test(error?.message || "") ? t("rateLimited") : t("voteError"));
@@ -2900,9 +2902,8 @@
 
     form.addEventListener("submit", async (event) => {
       event.preventDefault();
-      if (liveStageDemoMode) return;
       if (Date.now() < submissionCooldownUntil) return;
-      if (!submissionsCurrentlyOpen() || isSubmissionLocked()) {
+      if (!liveStageDemoMode && (!submissionsCurrentlyOpen() || isSubmissionLocked())) {
         updateCompetitionMode(false);
         return;
       }
@@ -2912,7 +2913,7 @@
       const track = String(data.get("track") || "");
       const prompt = String(data.get("prompt") || "").trim();
       if (!team || !title || !prompt) return;
-      if (!GOOGLE_APPS_SCRIPT_URL) {
+      if (!GOOGLE_APPS_SCRIPT_URL && !liveStageDemoMode) {
         formNote.textContent = t("aiUnavailable");
         return;
       }
@@ -2943,16 +2944,22 @@
         participantId,
         submissionRound: settings.submissionRound,
         ...deviceMetadata,
-        image: "",
+        image: liveStageDemoMode ? createDemoPreviewImage(team + " " + title + " " + prompt) : "",
         color: colors[track] || "#D8D0ED",
          height: 280 + (((sourceVisions.length + localPublishedVisions.length) * 37) % 100),
          votes: 0,
          status: "pending",
-        imageSource: "generated"
+        imageSource: liveStageDemoMode ? "demo-preview" : "generated",
+        createdAt: new Date().toISOString()
       };
       try {
-        await ensureImageGenerationReady();
-        await googleRequest("submit", newVision, { timeout: 90000 });
+        if (liveStageDemoMode) {
+          await new Promise((resolve) => window.setTimeout(resolve, 500));
+          demoPendingRecords.unshift(newVision);
+        } else {
+          await ensureImageGenerationReady();
+          await googleRequest("submit", newVision, { timeout: 90000 });
+        }
       } catch (error) {
         generateButton.disabled = false;
         generateButton.removeAttribute("aria-busy");
@@ -2964,7 +2971,7 @@
         return;
       }
 
-      localStorage.setItem("imagineSaudiSubmittedRound", String(settings.submissionRound || "1"));
+      if (!liveStageDemoMode) localStorage.setItem("imagineSaudiSubmittedRound", String(settings.submissionRound || "1"));
       form.reset();
       updateTrackEnhancer();
       generateButton.disabled = false;
@@ -2973,7 +2980,13 @@
       form.classList.remove("is-submitting");
       submissionPanel.classList.remove("is-submitting");
        generateButton.textContent = currentLanguage === "ar" ? "✦ حوّلوا الفكرة إلى صورة" : "✦ Turn idea into image";
-      formNote.textContent = t("imageQueued");
+      formNote.textContent = liveStageDemoMode
+        ? liveStageCopy("Submission received — it is waiting in the review queue.", "تم استلام المشاركة — وهي الآن بانتظار المراجعة.")
+        : t("imageQueued");
+      if (liveStageDemoMode) {
+        renderDemoSurfaces();
+        return;
+      }
       if (organizerDetails.open) await loadReviewQueue();
       syncGallery();
     });
@@ -3084,6 +3097,14 @@
       if (document.fullscreenElement === liveStage && document.exitFullscreen) document.exitFullscreen().catch(() => {});
     }
 
+    function buildClientDemoPendingRecords() {
+      const now = new Date().toISOString();
+      return [
+        { id: "demo-pending-rimal", team: "Rimal Grid", title: "The Cooling Commons", track: "Smart Mobility & Future Cities", prompt: "A shaded public network that turns every waiting place into a cool, social room for people and neighborhoods.", image: createDemoPreviewImage("Rimal Grid The Cooling Commons"), color: "#D8D0ED", height: 300, votes: 0, status: "pending", imageSource: "demo-preview", createdAt: now, participantId: "demo-participant-rimal" },
+        { id: "demo-pending-noura", team: "Noura Makers", title: "Palm-to-Power Loop", track: "Future Food & Agriculture", prompt: "A circular farm system that turns date-palm waste into clean energy, soil nutrients, and new local jobs.", image: createDemoPreviewImage("Noura Makers Palm-to-Power Loop"), color: "#2C7562", height: 270, votes: 0, status: "pending", imageSource: "demo-preview", createdAt: now, participantId: "demo-participant-noura" }
+      ];
+    }
+
     function buildLiveStageDemoRecords() {
       const templates = [
         { id: "demo-solar", team: "Namaa Lab", title: "Solar Water Mesh", track: "Green Tech & Energy", votes: 21 },
@@ -3126,17 +3147,37 @@
     }
 
     function toggleOrganizerDemoMode() {
-      if (!liveStageOpen || !organizerUnlocked || !organizerKey) return;
+      if (!organizerUnlocked || !organizerKey) return;
       liveStageDemoMode = !liveStageDemoMode;
       liveStageDemoTick = 0;
-      liveStageDemoRecords = liveStageDemoMode ? buildLiveStageDemoRecords() : [];
-      publicWinner = liveStageDemoMode ? null : publicWinner;
+      if (liveStageDemoMode) {
+        demoSettingsSnapshot = { ...settings };
+        settings.submissionsOpen = true;
+        settings.votingOpen = true;
+        settings.submissionDeadline = "";
+        settings.votingDeadline = "";
+        pendingOrganizerRecords = [];
+        publishedOrganizerRecords = [];
+        demoPendingRecords = buildClientDemoPendingRecords();
+        liveStageDemoRecords = buildLiveStageDemoRecords();
+        publicWinner = null;
+      } else {
+        if (demoSettingsSnapshot) Object.assign(settings, demoSettingsSnapshot);
+        demoSettingsSnapshot = null;
+        demoPendingRecords = [];
+        liveStageDemoRecords = [];
+        pendingOrganizerRecords = [];
+        publishedOrganizerRecords = [];
+      }
       liveStageScoreSnapshot = new Map();
       liveStageRankSnapshot = new Map();
       liveStageLeaderKey = "";
       updateDemoControls();
       if (liveStageDemoMode) renderDemoSurfaces();
-      else syncGallery();
+      else {
+        syncGallery();
+        if (organizerDetails.open) loadReviewQueue();
+      }
       if (liveStageOpen) renderLiveStage();
       updateCompetitionMode(false);
       startLiveStageRefresh();
@@ -3166,6 +3207,8 @@
 
     function renderDemoSurfaces() {
       if (!liveStageDemoMode) return;
+      pendingOrganizerRecords = demoPendingRecords;
+      publishedOrganizerRecords = liveStageDemoRecords;
       activeVisions = liveStageDemoRecords;
       lastGalleryDataSignature = publicDataSignature(activeVisions);
       updateGalleryFilters();
@@ -3174,6 +3217,8 @@
       note.textContent = liveStageCopy("Demo mode · client only", "الوضع التجريبي · محلي فقط");
       syncState.textContent = liveStageCopy("Demo simulation", "محاكاة تجريبية");
       updatePublicCompetitionState(true);
+      updateReviewFilters();
+      rerenderReviewQueues();
       updateOrganizerSummary();
       if (liveStageOpen) renderLiveStage();
     }
@@ -3379,6 +3424,19 @@
     async function moderateSubmission(id, action) {
       if (["delete", "deletePublished"].includes(action) && !confirm(t("confirmDelete"))) return;
       try {
+        if (liveStageDemoMode) {
+          if (action === "deletePublished") {
+            const publishedIndex = liveStageDemoRecords.findIndex((vision) => vision.id === id);
+            if (publishedIndex !== -1) liveStageDemoRecords.splice(publishedIndex, 1);
+          } else {
+            const pendingIndex = demoPendingRecords.findIndex((vision) => vision.id === id);
+            if (pendingIndex === -1) return;
+            const [vision] = demoPendingRecords.splice(pendingIndex, 1);
+            if (action === "publish") liveStageDemoRecords.unshift({ ...vision, status: "published", publishedAt: new Date().toISOString() });
+          }
+          renderDemoSurfaces();
+          return;
+        }
         if (GOOGLE_APPS_SCRIPT_URL) {
           await adminRequest(action, { visionId: id });
         } else if (action === "deletePublished") {
@@ -3446,7 +3504,12 @@
     function lockOrganizerPanel() {
       if (liveStageDemoMode) {
         liveStageDemoMode = false;
+        if (demoSettingsSnapshot) Object.assign(settings, demoSettingsSnapshot);
+        demoSettingsSnapshot = null;
+        demoPendingRecords = [];
         liveStageDemoRecords = [];
+        pendingOrganizerRecords = [];
+        publishedOrganizerRecords = [];
         liveStageDemoTick = 0;
         stopLiveStageRefresh();
         syncGallery();
@@ -3483,18 +3546,18 @@
       const demoActive = liveStageDemoMode;
       submissionPanel.classList.toggle("is-closed", !submissionsOpen && !demoActive);
       formNote.textContent = demoActive
-        ? liveStageCopy("Client demo is running. Nothing will be submitted.", "التجربة المحلية تعمل. لن يتم إرسال أي مشاركة.")
+        ? liveStageCopy("Client demo is running. Submit a vision to place it in review.", "التجربة المحلية تعمل. أرسل مشاركة لوضعها في قائمة المراجعة.")
         : isSubmissionLocked()
           ? t("submissionAlreadyUsed")
           : submissionsOpen ? t("imageDemo") : t("submissionClosed");
       form.querySelectorAll("input, select, textarea, button").forEach((element) => {
-        element.disabled = demoActive || !submissionsOpen || isSubmissionLocked();
+        element.disabled = !demoActive && (!submissionsOpen || isSubmissionLocked());
       });
       updateTrackEnhancer();
       votingStatus.textContent = demoActive ? liveStageCopy("Demo simulation", "محاكاة تجريبية") : votingOpen ? t("votingOpen") : t("votingClosed");
       updatePublicCompetitionState();
       organizerStatus.textContent = demoActive
-        ? liveStageCopy("Client demo is running. Nothing is saved.", "التجربة المحلية تعمل. لا يتم حفظ أي شيء.")
+        ? liveStageCopy("Client demo is running. Submit, review, publish, and vote here — nothing touches the live backend.", "التجربة المحلية تعمل. أرسل وراجع وانشر وصوّت هنا — دون لمس النظام المباشر.")
         : submissionsOpen && votingOpen
           ? t("openCompetition")
           : t("status").replace("{submissions}", submissionsOpen ? t("open") : t("closed")).replace("{voting}", votingOpen ? t("open") : t("closed"));
@@ -3504,6 +3567,10 @@
     async function saveDeadlineSetting(key, input, storageKey) {
       const previous = settings[key];
       settings[key] = deadlineInputToIso(input.value);
+      if (liveStageDemoMode) {
+        updateCompetitionMode(false);
+        return;
+      }
       localStorage.setItem(storageKey, settings[key]);
       try {
         await saveRemoteSettings();
@@ -3521,6 +3588,10 @@
       const previous = settings.submissionsOpen;
       animateInteraction(submissionsToggle.closest(".control-card"), "is-changing");
       settings.submissionsOpen = submissionsToggle.checked;
+      if (liveStageDemoMode) {
+        updateCompetitionMode(false);
+        return;
+      }
       localStorage.setItem("imagineSaudiSubmissions", String(settings.submissionsOpen));
       try {
         await saveRemoteSettings();
@@ -3538,6 +3609,10 @@
       const previous = settings.votingOpen;
       animateInteraction(votingToggle.closest(".control-card"), "is-changing");
       settings.votingOpen = votingToggle.checked;
+      if (liveStageDemoMode) {
+        updateCompetitionMode(false);
+        return;
+      }
       localStorage.setItem("imagineSaudiVoting", String(settings.votingOpen));
       try {
         await saveRemoteSettings();
@@ -3559,6 +3634,12 @@
       if (!window.confirm(t("resetSubmissionsConfirm"))) return;
       organizerResetSubmissions.disabled = true;
       try {
+        if (liveStageDemoMode) {
+          demoPendingRecords = [];
+          renderDemoSurfaces();
+          organizerStatus.textContent = t("submissionReset");
+          return;
+        }
         if (GOOGLE_APPS_SCRIPT_URL) {
           const result = await adminRequest("resetSubmissions", {});
           applyPublicSettings(result.settings || { submissionRound: result.submissionRound });
