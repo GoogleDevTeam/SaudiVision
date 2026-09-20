@@ -214,6 +214,13 @@ Before coding, inspect the latest `main` branch and the live deployment state. T
 
 ### Current state
 
+### Countdown fix — 2026-09-20
+
+- Fixed public countdown state so a partial/older Apps Script response cannot erase locally configured submission and voting deadlines.
+- Added robust invalid-date handling and clearer Arabic/English guidance when no deadline is configured.
+- Demo mode now starts with visible future submission and voting deadlines, while restoring the real settings when the demo exits.
+- Frontend JavaScript syntax and countdown-specific static checks pass.
+
 ### Continuous demo refresh — 2026-09-20
 
 - Removed the demo toggle from the live display; the organizer panel remains the single start/stop control.
