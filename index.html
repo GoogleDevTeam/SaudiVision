@@ -1319,7 +1319,7 @@
 
     <header class="topline">
       <div class="brand-lockup">
-        <button class="google-dev-logo organizer-access" id="organizer-access" type="button" aria-label="وصول المنظم" title="وصول المنظم" data-aria-en="Organizer access" data-aria-ar="وصول المنظم" data-title-en="Organizer access" data-title-ar="وصول المنظم">
+        <button class="google-dev-logo organizer-access" id="organizer-access" type="button" hidden aria-hidden="true" tabindex="-1">
           <img src="google-developers-logo.png" alt="" width="32" height="24" decoding="async" />
         </button>
         <div class="brand-copy">
@@ -1517,8 +1517,8 @@
       <div class="submit-intro">
         <p class="submit-kicker" data-en="Your future / starts here" data-ar="مستقبلكم / يبدأ هنا">Your future / starts here</p>
         <h2 id="submit-heading" data-en="Put your imagination on stage." data-ar="خلّوا خيالكم يُعرض على المسرح.">خلّوا خيالكم يُعرض على المسرح.</h2>
-         <p data-en="Write a short description. A single server-generated visual will be created for your idea, then held for organizer approval before it appears in the gallery." data-ar="اكتبوا وصفًا قصيرًا. سيتم إنشاء تصور بصري واحد لفكرتكم على الخادم، ثم يُرسل إلى المنظم للموافقة قبل ظهوره في المعرض.">اكتبوا وصفًا قصيرًا. سيتم إنشاء تصور بصري واحد لفكرتكم على الخادم، ثم يُرسل إلى المنظم للموافقة قبل ظهوره في المعرض.</p>
-        <p class="closed-message" id="closed-message" data-en="Submissions are currently closed — the organizer can reopen them above." data-ar="التقديم مغلق حاليًا — يمكن للمنظم فتحه من لوحة التحكم.">التقديم مغلق حاليًا — يمكن للمنظم فتحه من لوحة التحكم.</p>
+         <p data-en="Write a short description. A single server-generated visual will be created for your idea, then prepared for the gallery." data-ar="اكتبوا وصفًا قصيرًا. سيتم إنشاء تصور بصري واحد لفكرتكم على الخادم، ثم تجهيزه للعرض في المعرض.">اكتبوا وصفًا قصيرًا. سيتم إنشاء تصور بصري واحد لفكرتكم على الخادم، ثم تجهيزه للعرض في المعرض.</p>
+        <p class="closed-message" id="closed-message" data-en="Submissions are currently closed." data-ar="التقديم مغلق حاليًا.">التقديم مغلق حاليًا.</p>
       </div>
       <form class="vision-form" id="vision-form">
         <div class="field">
@@ -1551,7 +1551,7 @@
           <small class="field-helper" data-en="The clearer the story, the stronger the generated visual and organizer review." data-ar="كلما كانت القصة أوضح، كان التصور البصري والمراجعة أقوى.">The clearer the story, the stronger the generated visual and organizer review.</small>
         </div>
         <div class="submit-actions">
-           <span class="form-note" id="form-note" role="status" aria-live="polite" data-en="AI visual generated server-side, then held for organizer approval." data-ar="يتم إنشاء التصور بالذكاء الاصطناعي ثم إرساله لموافقة المنظم.">يتم إنشاء التصور بالذكاء الاصطناعي ثم إرساله لموافقة المنظم.</span>
+           <span class="form-note" id="form-note" role="status" aria-live="polite" data-en="AI visual generated server-side." data-ar="يتم إنشاء التصور بالذكاء الاصطناعي على الخادم.">يتم إنشاء التصور بالذكاء الاصطناعي على الخادم.</span>
           <button class="generate-button" id="generate-button" type="submit" data-en="✦ Turn idea into image" data-ar="✦ حوّلوا الفكرة إلى صورة">✦ Turn idea into image</button>
         </div>
       </form>
@@ -2019,7 +2019,7 @@
         phaseVotingDetail: "Vote for the published vision that should lead the future.",
         phaseResultsDetail: "Voting is closed. The published visions are ranked below.",
         countdownLabel: "Countdown",
-        countdownNone: "No deadline set — choose one in Organizer controls",
+        countdownNone: "No deadline set",
         countdownFinished: "Deadline reached",
         publicResults: "Public results",
         resultsEmpty: "No published visions yet.",
@@ -2036,14 +2036,14 @@
          imageDemo: "One single AI image is generated with Cloudflare Workers AI for each submission.",
          imageGenerating: "Creating your one-image AI visual...",
          trackEnhancerPrefix: "Image prompt enhancer: ",
-         submissionAlreadyUsed: "You already submitted once in this round. The organizer can reset submissions for another round.",
+         submissionAlreadyUsed: "You already submitted once in this round. Please wait for the next round.",
          resetSubmissions: "Reset participant submissions",
          resetSubmissionsConfirm: "Start a new submission round? Existing submissions will stay safe, and each participant can submit once again.",
          submissionReset: "Submission round reset. Participants can submit once again.",
          imageGeneratingButton: "⟳ Creating AI visual...",
          imageAdded: "Your vision was published to the gallery.",
-        imageQueued: "Your vision was received and is waiting for organizer approval.",
-        submissionClosed: "Submissions are currently closed — the organizer can reopen them above.",
+        imageQueued: "Your vision was received successfully.",
+        submissionClosed: "Submissions are currently closed.",
          rateLimited: "Too many requests from this browser. Please wait a moment and try again.",
          submitError: "The submission could not be saved. Please try again.",
          settingsError: "Competition settings could not be saved. Please try again.",
@@ -2055,7 +2055,7 @@
          confirmDelete: "Delete this submission permanently? It will not be shown publicly.",
          demoBadge: "AI GENERATED",
          stockImage: "STOCK IMAGE",
-         aiUnavailable: "Live AI is not configured yet. Ask the organizer to add the Cloudflare API token and account ID.",
+         aiUnavailable: "Live image generation is temporarily unavailable. Please try again later.",
          aiKeyMissing: "Cloudflare image generation is not ready. Add CLOUDFLARE_API_TOKEN and CLOUDFLARE_ACCOUNT_ID in Apps Script Project Settings, then try again.",
          conceptArt: "concept art",
          visionLabel: "VISION",
@@ -2065,7 +2065,7 @@
         approve: "Approve",
         delete: "Delete",
         reviewError: "The review queue could not be loaded.",
-        organizerLocked: "Organizer panel locked for this browser session.",
+        organizerLocked: "Session locked.",
          organizerKeyLabel: "Organizer key",
          organizerUnlock: "Unlock",
          organizerCancel: "Cancel",
@@ -2075,8 +2075,8 @@
          leader: "Leader",
          tied: "Tie",
          winnerFinal: "Final winner",
-         winnerNoWinner: "The final winner will be announced after organizer review.",
-         winnerTiePublic: "The vote ended in a tie. The organizer will announce the final winner.",
+         winnerNoWinner: "The final winner will be announced later.",
+         winnerTiePublic: "The vote ended in a tie. The final result will be announced later.",
          winnerReady: "A top-scoring vision is ready to be declared the final winner.",
          winnerDeclared: "Winner declared",
          winnerDeclare: "Declare winner",
@@ -2119,7 +2119,7 @@
         phaseVotingDetail: "صوّتوا للرؤية المنشورة التي تقود المستقبل.",
         phaseResultsDetail: "أُغلق التصويت. تظهر الرؤى المنشورة مرتبة أدناه.",
         countdownLabel: "العدّ التنازلي",
-        countdownNone: "لم يُحدد موعد — حدده من لوحة المنظم",
+        countdownNone: "لم يتم تحديد موعد",
         countdownFinished: "انتهى الموعد",
         publicResults: "النتائج العامة",
         resultsEmpty: "لا توجد رؤى منشورة بعد.",
@@ -2136,14 +2136,14 @@
          imageDemo: "يتم إنشاء صورة واحدة فقط بالذكاء الاصطناعي لكل مشاركة باستخدام Cloudflare Workers AI.",
          imageGenerating: "يتم الآن إنشاء الصورة الوحيدة للمشاركة...",
          trackEnhancerPrefix: "مُحسّن مطالبة الصورة: ",
-         submissionAlreadyUsed: "لقد أرسلتم مشاركة واحدة في هذه الجولة. يستطيع المنظم إعادة فتح المشاركات لبدء جولة جديدة.",
+         submissionAlreadyUsed: "لقد أرسلتم مشاركة واحدة في هذه الجولة. انتظروا الجولة القادمة.",
          resetSubmissions: "إعادة فتح مشاركات المشاركين",
          resetSubmissionsConfirm: "بدء جولة تقديم جديدة؟ ستبقى المشاركات الحالية محفوظة، وسيتمكن كل مشارك من الإرسال مرة أخرى.",
          submissionReset: "تمت إعادة فتح جولة التقديم. يمكن للمشاركين الإرسال مرة أخرى.",
          imageGeneratingButton: "⟳ جارٍ إنشاء التصور بالذكاء الاصطناعي...",
          imageAdded: "تم نشر رؤيتكم في المعرض.",
-        imageQueued: "تم استلام رؤيتكم وهي بانتظار موافقة المنظم.",
-        submissionClosed: "التقديم مغلق حاليًا — يمكن للمنظم فتحه من لوحة التحكم.",
+        imageQueued: "تم استلام رؤيتكم بنجاح.",
+        submissionClosed: "التقديم مغلق حاليًا.",
          rateLimited: "تم تسجيل طلبات كثيرة من هذا المتصفح. انتظروا قليلًا ثم حاولوا مرة أخرى.",
          submitError: "تعذر حفظ المشاركة. حاول مرة أخرى.",
          settingsError: "تعذر حفظ إعدادات المسابقة. حاول مرة أخرى.",
@@ -2155,7 +2155,7 @@
          confirmDelete: "حذف هذه المشاركة نهائيًا؟ لن تظهر للجمهور.",
          demoBadge: "مولّد بالذكاء الاصطناعي",
          stockImage: "صورة مخزنة",
-         aiUnavailable: "لم يتم إعداد الذكاء الاصطناعي المباشر بعد. اطلبوا من المنظم إضافة إعدادات Cloudflare.",
+         aiUnavailable: "توليد الصور المباشر غير متاح مؤقتًا. حاولوا مرة أخرى لاحقًا.",
          aiKeyMissing: "توليد الصور عبر Cloudflare غير جاهز بعد. أضيفوا CLOUDFLARE_API_TOKEN وCLOUDFLARE_ACCOUNT_ID في إعدادات مشروع Apps Script ثم حاولوا مرة أخرى.",
          conceptArt: "تصور بصري",
          visionLabel: "رؤية",
@@ -2165,7 +2165,7 @@
         approve: "موافقة",
         delete: "حذف",
         reviewError: "تعذر تحميل قائمة المراجعة.",
-        organizerLocked: "تم قفل لوحة المنظم لهذه الجلسة.",
+        organizerLocked: "تم قفل الجلسة.",
          organizerKeyLabel: "رمز المنظم",
          organizerUnlock: "فتح",
          organizerCancel: "إلغاء",
@@ -2175,8 +2175,8 @@
          leader: "المتصدر",
          tied: "تعادل",
          winnerFinal: "الفائز النهائي",
-         winnerNoWinner: "سيُعلن الفائز النهائي بعد مراجعة المنظم.",
-         winnerTiePublic: "انتهى التصويت بالتعادل. سيعلن المنظم الفائز النهائي.",
+         winnerNoWinner: "سيُعلن الفائز النهائي لاحقًا.",
+         winnerTiePublic: "انتهى التصويت بالتعادل. ستُعلن النتيجة النهائية لاحقًا.",
          winnerReady: "توجد رؤية متصدرة جاهزة لإعلانها فائزًا نهائيًا.",
          winnerDeclared: "تم إعلان الفائز",
          winnerDeclare: "إعلان الفائز",
@@ -3709,6 +3709,22 @@
         organizerDetails.hidden = false;
         organizerDetails.open = true;
         await loadReviewQueue();
+      } else {
+        showOrganizerLogin();
+      }
+    });
+
+    // Private organizer entry: no public control or label is rendered.
+    document.addEventListener("keydown", (event) => {
+      const tagName = String(event.target?.tagName || "").toLowerCase();
+      if (["input", "textarea", "select"].includes(tagName)) return;
+      const modifier = event.ctrlKey || event.metaKey;
+      if (!modifier || !event.altKey || !event.shiftKey || event.key.toLowerCase() !== "o") return;
+      event.preventDefault();
+      if (organizerUnlocked) {
+        organizerDetails.hidden = false;
+        organizerDetails.open = true;
+        loadReviewQueue();
       } else {
         showOrganizerLogin();
       }
