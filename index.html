@@ -690,10 +690,38 @@
       transition: left .55s ease;
     }
     .generate-button:hover::after { left: 125%; }
+    .generate-button.is-generating {
+      animation: button-shimmer 1.1s ease-in-out infinite;
+    }
+    .generate-button.is-generating::before {
+      display: inline-block;
+      width: .78em;
+      height: .78em;
+      margin-inline-end: .45em;
+      content: "";
+      border: 2px solid currentColor;
+      border-top-color: transparent;
+      border-radius: 50%;
+      vertical-align: -.1em;
+      animation: spin .8s linear infinite;
+    }
     .generate-button.is-generating::after {
       left: 125%;
       transition: left 1.1s ease-in-out;
+      animation: generate-sheen 1.35s ease-in-out infinite;
     }
+    .generate-button.is-complete {
+      background: linear-gradient(100deg, #2c7562, #5aa489);
+      color: var(--off-white);
+      cursor: default;
+      box-shadow: 0 0 0 5px rgba(90, 164, 137, .16);
+    }
+    .generate-button.is-complete::before {
+      content: "✓";
+      margin-inline-end: .45em;
+      font-weight: 800;
+    }
+    .generate-button.is-complete::after { display: none; }
     .generate-button:hover, .vote-button:hover:not(:disabled) { box-shadow: 0 7px 20px rgba(155, 138, 196, .28); transform: translateY(-2px); }
     .generate-button:disabled { cursor: wait; opacity: .65; }
     .vote-row { display: flex; align-items: center; justify-content: flex-end; gap: 9px; margin-top: 17px; }
@@ -1139,6 +1167,10 @@
     @keyframes submit-pulse {
       0%, 100% { box-shadow: 0 0 0 rgba(155, 138, 196, 0); }
       50% { box-shadow: 0 0 0 8px rgba(155, 138, 196, .08); }
+    }
+    @keyframes generate-sheen {
+      0% { left: -70%; }
+      55%, 100% { left: 125%; }
     }
     /* Mobile-first motion polish: GPU-friendly transforms, touch-safe interactions, and lighter ambient work. */
     @keyframes mobile-rise {
@@ -2040,9 +2072,10 @@
          resetSubmissions: "Reset participant submissions",
          resetSubmissionsConfirm: "Start a new submission round? Existing submissions will stay safe, and each participant can submit once again.",
          submissionReset: "Submission round reset. Participants can submit once again.",
-         imageGeneratingButton: "⟳ Creating AI visual...",
+         imageGeneratingButton: "Creating AI visual...",
          imageAdded: "Your vision was published to the gallery.",
-        imageQueued: "Your vision was received successfully.",
+        imageQueued: "Your vision was received successfully and is ready for review.",
+        imageCompleteButton: "Submitted — ready for review",
         submissionClosed: "Submissions are currently closed.",
          rateLimited: "Too many requests from this browser. Please wait a moment and try again.",
          submitError: "The submission could not be saved. Please try again.",
@@ -2140,9 +2173,10 @@
          resetSubmissions: "إعادة فتح مشاركات المشاركين",
          resetSubmissionsConfirm: "بدء جولة تقديم جديدة؟ ستبقى المشاركات الحالية محفوظة، وسيتمكن كل مشارك من الإرسال مرة أخرى.",
          submissionReset: "تمت إعادة فتح جولة التقديم. يمكن للمشاركين الإرسال مرة أخرى.",
-         imageGeneratingButton: "⟳ جارٍ إنشاء التصور بالذكاء الاصطناعي...",
+         imageGeneratingButton: "جارٍ إنشاء التصور بالذكاء الاصطناعي...",
          imageAdded: "تم نشر رؤيتكم في المعرض.",
-        imageQueued: "تم استلام رؤيتكم بنجاح.",
+        imageQueued: "تم استلام رؤيتكم بنجاح وأصبحت جاهزة للمراجعة.",
+        imageCompleteButton: "تم الإرسال — جاهزة للمراجعة",
         submissionClosed: "التقديم مغلق حاليًا.",
          rateLimited: "تم تسجيل طلبات كثيرة من هذا المتصفح. انتظروا قليلًا ثم حاولوا مرة أخرى.",
          submitError: "تعذر حفظ المشاركة. حاول مرة أخرى.",
@@ -2964,12 +2998,18 @@
           demoPendingRecords.unshift(newVision);
         } else {
           await ensureImageGenerationReady();
-          await googleRequest("submit", newVision, { timeout: 90000 });
+          const submissionResult = await googleRequest("submit", newVision, { timeout: 90000 });
+          if (!submissionResult || submissionResult.status !== "pending") {
+            throw new Error(t("submitError"));
+          }
         }
       } catch (error) {
         generateButton.disabled = false;
         generateButton.removeAttribute("aria-busy");
-        generateButton.classList.remove("is-generating");
+        generateButton.classList.remove("is-generating", "is-complete");
+        generateButton.classList.add("is-rejected");
+        generateButton.textContent = currentLanguage === "ar" ? "✦ حوّلوا الفكرة إلى صورة" : "✦ Turn idea into image";
+        window.setTimeout(() => generateButton.classList.remove("is-rejected"), 600);
         form.classList.remove("is-submitting");
         submissionPanel.classList.remove("is-submitting");
         formNote.textContent = /RATE_LIMITED|rate limit/i.test(error?.message || "") ? t("rateLimited") : error?.message || t("submitError");
@@ -2980,12 +3020,16 @@
       if (!liveStageDemoMode) localStorage.setItem("imagineSaudiSubmittedRound", String(settings.submissionRound || "1"));
       form.reset();
       updateTrackEnhancer();
-      generateButton.disabled = false;
+      const submissionComplete = !liveStageDemoMode;
+      generateButton.disabled = submissionComplete;
       generateButton.removeAttribute("aria-busy");
-       generateButton.classList.remove("is-generating");
+      generateButton.classList.remove("is-generating");
+      generateButton.classList.toggle("is-complete", submissionComplete);
       form.classList.remove("is-submitting");
       submissionPanel.classList.remove("is-submitting");
-       generateButton.textContent = currentLanguage === "ar" ? "✦ حوّلوا الفكرة إلى صورة" : "✦ Turn idea into image";
+      generateButton.textContent = submissionComplete
+        ? t("imageCompleteButton")
+        : (currentLanguage === "ar" ? "✦ حوّلوا الفكرة إلى صورة" : "✦ Turn idea into image");
       formNote.textContent = liveStageDemoMode
         ? liveStageCopy("Submission received — it is waiting in the review queue.", "تم استلام المشاركة — وهي الآن بانتظار المراجعة.")
         : t("imageQueued");
