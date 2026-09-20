@@ -214,6 +214,14 @@ Before coding, inspect the latest `main` branch and the live deployment state. T
 
 ### Current state
 
+### End-to-end client demo — 2026-09-20
+
+- Expanded the organizer's client demo from a vote-race animation into a contained workflow simulation.
+- Demo mode now seeds a pending review queue, accepts new submissions locally with preview art, supports approve/delete moderation, moves approved visions into the public gallery, and supports local vote/unvote behavior.
+- Demo settings are isolated from the live backend and restored when the demo exits or the organizer locks the panel.
+- Frontend source is syntax-checked and security regression checks pass.
+- GitHub Pages still needs its normal hosting deployment/cache refresh after the source commit; Apps Script is not changed by this work.
+
 - The repository contains the working vanilla HTML frontend and Google Apps Script backend.
 - The organizer access flow uses a visible in-page key panel rather than a native browser prompt.
 - The public gallery supports search, track filtering, and sorting by featured order, votes, or newest.
