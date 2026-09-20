@@ -372,11 +372,9 @@
     .live-stage-actions { display: flex; align-items: center; gap: 9px; flex: 0 0 auto; }
     .live-stage-live-dot { display: inline-flex; align-items: center; gap: 7px; padding: 8px 11px; border: 1px solid rgba(216, 208, 237, .28); border-radius: 999px; color: var(--light-lavender); font-size: .67rem; font-weight: 700; letter-spacing: .12em; }
     .live-stage-live-dot::before { width: 7px; height: 7px; border-radius: 50%; background: #F0B7C8; box-shadow: 0 0 0 5px rgba(240, 183, 200, .12); content: ""; }
-    .live-stage-mode-badge, .live-stage-demo { display: inline-flex; align-items: center; min-height: 38px; padding: 9px 11px; border: 1px solid rgba(216, 208, 237, .28); border-radius: 9px; background: rgba(4, 43, 37, .78); color: var(--light-lavender); font: inherit; font-size: .66rem; font-weight: 700; letter-spacing: .06em; }
+    .live-stage-mode-badge { display: inline-flex; align-items: center; min-height: 38px; padding: 9px 11px; border: 1px solid rgba(216, 208, 237, .28); border-radius: 9px; background: rgba(4, 43, 37, .78); color: var(--light-lavender); font: inherit; font-size: .66rem; font-weight: 700; letter-spacing: .06em; }
     .live-stage-mode-badge { min-height: 0; padding: 8px 10px; border-radius: 999px; color: var(--dim); text-transform: uppercase; }
     .live-stage-mode-badge.is-demo { border-color: rgba(216, 208, 237, .7); background: rgba(155, 138, 196, .2); color: var(--light-lavender); }
-    .live-stage-demo { cursor: pointer; }
-    .live-stage-demo:hover { border-color: rgba(216, 208, 237, .64); transform: translateY(-1px); }
     .live-stage-close, .live-stage-fullscreen { min-height: 38px; padding: 9px 12px; border: 1px solid var(--line); border-radius: 9px; cursor: pointer; background: rgba(4, 43, 37, .78); color: var(--ink); font: inherit; font-size: .68rem; }
     .live-stage-close { font-size: 1.1rem; line-height: 1; }
     .live-stage-close:hover, .live-stage-fullscreen:hover { border-color: rgba(216, 208, 237, .64); transform: translateY(-1px); }
@@ -1453,7 +1451,6 @@
           <div class="live-stage-actions">
             <span class="live-stage-live-dot" data-en="Live" data-ar="مباشر">Live</span>
             <span class="live-stage-mode-badge" id="live-stage-mode-badge">LIVE DATA</span>
-            <button class="live-stage-demo" id="live-stage-demo" type="button" data-en="▶ Demo mode" data-ar="▶ الوضع التجريبي">▶ Demo mode</button>
             <button class="live-stage-fullscreen" id="live-stage-fullscreen" type="button" data-en="⛶ Full screen" data-ar="⛶ ملء الشاشة">⛶ Full screen</button>
             <button class="live-stage-close" id="live-stage-close" type="button" aria-label="Close live display" data-aria-en="Close live display" data-aria-ar="إغلاق الشاشة المباشرة">×</button>
           </div>
@@ -1790,7 +1787,10 @@
     const PUBLIC_CACHE_KEY = "imagineSaudiPublicCache";
     const PUBLIC_CACHE_TTL = 120000;
     const PUBLIC_SYNC_INTERVAL = 15000;
-    const DEMO_TICK_INTERVAL = 4500;
+    const DEMO_TICK_INTERVAL = 1800;
+    const DEMO_DECREASE_EVERY = 9;
+    const DEMO_SUBMISSION_EVERY = 4;
+    const DEMO_PENDING_LIMIT = 8;
     let publicSyncInFlight = null;
     let lastGalleryDataSignature = "";
     let hasRemoteSync = false;
@@ -1834,7 +1834,6 @@
     const liveStage = document.getElementById("live-stage");
     const liveStageClose = document.getElementById("live-stage-close");
     const liveStageFullscreen = document.getElementById("live-stage-fullscreen");
-    const liveStageDemoButton = document.getElementById("live-stage-demo");
     const liveStageModeBadge = document.getElementById("live-stage-mode-badge");
     const liveStageScreen = document.getElementById("live-stage-screen");
     const liveStageFeatureImage = document.getElementById("live-stage-feature-image");
@@ -1853,6 +1852,8 @@
     let liveStageDemoRecords = [];
     let demoPendingRecords = [];
     let demoSettingsSnapshot = null;
+    let demoIncomingSequence = 0;
+    let demoLastEvent = "";
     let liveStageDemoTick = 0;
     let liveStageRefreshTimer = 0;
     let liveStageScoreSnapshot = new Map();
@@ -2053,6 +2054,7 @@
          organizerLoading: "Checking organizer key...",
          confirmDelete: "Delete this submission permanently? It will not be shown publicly.",
          demoBadge: "AI GENERATED",
+         stockImage: "STOCK IMAGE",
          aiUnavailable: "Live AI is not configured yet. Ask the organizer to add the Cloudflare API token and account ID.",
          aiKeyMissing: "Cloudflare image generation is not ready. Add CLOUDFLARE_API_TOKEN and CLOUDFLARE_ACCOUNT_ID in Apps Script Project Settings, then try again.",
          conceptArt: "concept art",
@@ -2152,6 +2154,7 @@
          organizerLoading: "جارٍ التحقق من رمز المنظم...",
          confirmDelete: "حذف هذه المشاركة نهائيًا؟ لن تظهر للجمهور.",
          demoBadge: "مولّد بالذكاء الاصطناعي",
+         stockImage: "صورة مخزنة",
          aiUnavailable: "لم يتم إعداد الذكاء الاصطناعي المباشر بعد. اطلبوا من المنظم إضافة إعدادات Cloudflare.",
          aiKeyMissing: "توليد الصور عبر Cloudflare غير جاهز بعد. أضيفوا CLOUDFLARE_API_TOKEN وCLOUDFLARE_ACCOUNT_ID في إعدادات مشروع Apps Script ثم حاولوا مرة أخرى.",
          conceptArt: "تصور بصري",
@@ -2454,13 +2457,14 @@
       const imageSource = String(vision.imageSource || "").toLowerCase();
       const isDemoPreview = imageSource === "demo-preview";
       const isGeneratedImage = imageSource === "generated";
+      const isStockImage = imageSource === "stock";
       return `
         <article class="vision-card" style="animation-delay:${Math.min(index * 55, 500)}ms">
           <div class="vision-image-wrap">
             <img class="vision-image" style="height:${safeImageHeight(vision.height)}px" src="${safeImage}" alt="${escapeHTML(vision.team)} ${t("conceptArt")}" loading="${index < 2 ? "eager" : "lazy"}" fetchpriority="${index < 2 ? "high" : "low"}" decoding="async" data-fallback-src="${safeImageFallback}" />
             <div class="image-glow"></div>
             <span class="card-index">${t("visionLabel")} / ${String(index + 1).padStart(2, "0")}</span>
-            ${isDemoPreview || isGeneratedImage ? `<span class="image-source-badge">${isGeneratedImage ? t("demoBadge") : t("demoPreview")}</span>` : ""}
+            ${isDemoPreview || isGeneratedImage || isStockImage ? `<span class="image-source-badge">${isGeneratedImage ? t("demoBadge") : isStockImage ? t("stockImage") : t("demoPreview")}</span>` : ""}
           </div>
           <div class="vision-content">
             <div class="card-meta">
@@ -3024,7 +3028,6 @@
       liveStageRefreshState.textContent = liveStageDemoMode ? liveStageCopy("DEMO · client-only simulation", "تجريبي · محاكاة محلية فقط") : liveStageCopy("Live vote race", "سباق التصويت المباشر");
       liveStageModeBadge.textContent = liveStageDemoMode ? liveStageCopy("DEMO ONLY", "تجريبي فقط") : liveStageCopy("LIVE DATA", "بيانات مباشرة");
       liveStageModeBadge.classList.toggle("is-demo", liveStageDemoMode);
-      liveStageDemoButton.textContent = liveStageDemoMode ? liveStageCopy("■ Exit demo", "■ إنهاء التجربة") : liveStageCopy("▶ Demo mode", "▶ الوضع التجريبي");
       liveStageUpdated.textContent = liveStageCopy("Movement feed active", "حركة السباق نشطة");
       if (!ranked.length) {
         liveStageFeatureRank.textContent = "—";
@@ -3063,7 +3066,9 @@
         liveStageEvent.textContent = liveStageCopy("Leader changed to " + (feature.title || feature.team || "—"), "تغير المتصدر إلى " + (feature.title || feature.team || "—"));
       } else {
         const leaderDelta = (Number(feature.votes) || 0) - (liveStageScoreSnapshot.get(featureKey) ?? (Number(feature.votes) || 0));
-        liveStageEvent.textContent = leaderDelta > 0 ? liveStageCopy("Leader gaining +" + leaderDelta + " votes", "المتصدر يكسب +" + leaderDelta + " أصوات") : liveStageCopy("Waiting for the next movement", "بانتظار الحركة التالية");
+        liveStageEvent.textContent = liveStageDemoMode && demoLastEvent
+          ? demoLastEvent
+          : leaderDelta > 0 ? liveStageCopy("Leader gaining +" + leaderDelta + " votes", "المتصدر يكسب +" + leaderDelta + " أصوات") : liveStageCopy("Waiting for the next movement", "بانتظار الحركة التالية");
       }
       liveStageLeaderKey = featureKey;
       liveStageLeaderboard.innerHTML = ranked.slice(0, 8).map((vision, index) => {
@@ -3116,7 +3121,34 @@
       ];
       const liveSeeds = publishedOrganizerRecords.slice(0, 3).map((vision, index) => ({ ...vision, id: "demo-live-" + index, votes: 14 + (index * 5) }));
       const records = liveSeeds.length ? liveSeeds.concat(templates.slice(liveSeeds.length)) : templates;
-      return records.slice(0, 6).map((vision, index) => ({ ...vision, id: "demo-" + index + "-" + String(vision.id || index), votes: Number(vision.votes) || (12 + index * 3), status: "published" }));
+      return records.slice(0, 6).map((vision, index) => {
+        const stock = sourceVisions[index % sourceVisions.length];
+        return { ...vision, id: "demo-" + index + "-" + String(vision.id || index), votes: Number(vision.votes) || (12 + index * 3), status: "published", image: vision.image || stock.image, imageSource: vision.imageSource || "stock", color: vision.color || stock.color, height: vision.height || stock.height };
+      });
+    }
+
+    function buildDemoIncomingRecord() {
+      const templates = [
+        { team: "Rawaq Futures", title: "Shade for Every Street", track: "Human Potential & Wellbeing", prompt: "A neighborhood cooling network that makes walking, waiting, and gathering comfortable through the hottest months." },
+        { team: "Sadu Signal", title: "Memory in Motion", track: "Heritage, Culture & Tourism", prompt: "A living digital archive that lets young Saudis explore family stories through place, sound, and craft." },
+        { team: "Marsa Blue", title: "Tide-to-Table Labs", track: "Water & Oceans", prompt: "Coastal learning kitchens that turn marine research into everyday food, jobs, and ocean stewardship." },
+        { team: "Wasl Commons", title: "One Civic Layer", track: "Digital Society & Governance", prompt: "A trusted public layer that makes services, feedback, and local decisions easier to understand and join." }
+      ];
+      const template = templates[demoIncomingSequence % templates.length];
+      const stock = sourceVisions[demoIncomingSequence % sourceVisions.length];
+      const sequence = demoIncomingSequence++;
+      return {
+        id: "demo-incoming-" + sequence + "-" + liveStageDemoTick,
+        ...template,
+        image: stock.image,
+        imageSource: "stock",
+        color: stock.color,
+        height: stock.height,
+        votes: 0,
+        status: "pending",
+        createdAt: new Date().toISOString(),
+        participantId: "demo-participant-" + sequence
+      };
     }
 
     function runLiveStageDemoTick() {
@@ -3125,14 +3157,22 @@
       const records = liveStageDemoRecords;
       const risingIndex = (liveStageDemoTick * 2) % records.length;
       const fallingIndex = (liveStageDemoTick + 3) % records.length;
-      const risingAmount = [1, 2, 3, 4][liveStageDemoTick % 4];
+      const risingAmount = [2, 3, 4, 5][liveStageDemoTick % 4];
       records[risingIndex].votes = Math.max(0, (Number(records[risingIndex].votes) || 0) + risingAmount);
-      if (liveStageDemoTick % 3 === 0 && fallingIndex !== risingIndex) records[fallingIndex].votes = Math.max(0, (Number(records[fallingIndex].votes) || 0) - 1);
+      if (liveStageDemoTick % DEMO_DECREASE_EVERY === 0 && fallingIndex !== risingIndex) {
+        records[fallingIndex].votes = Math.max(0, (Number(records[fallingIndex].votes) || 0) - 1);
+      }
       if (liveStageDemoTick % 5 === 0) {
         const ranked = liveStageRankedRecords();
         const leaderIndex = records.findIndex((record) => liveStageKey(record) === liveStageKey(ranked[0]));
         const challengerIndex = (leaderIndex + 1 + (liveStageDemoTick % Math.max(1, records.length - 1))) % records.length;
-        if (challengerIndex !== leaderIndex) records[challengerIndex].votes += 6;
+        if (challengerIndex !== leaderIndex) records[challengerIndex].votes += 4;
+      }
+      if (liveStageDemoTick % DEMO_SUBMISSION_EVERY === 0) {
+        const incoming = buildDemoIncomingRecord();
+        demoPendingRecords.unshift(incoming);
+        if (demoPendingRecords.length > DEMO_PENDING_LIMIT) demoPendingRecords.pop();
+        demoLastEvent = liveStageCopy("New submission received from " + incoming.team, "تم استلام مشاركة جديدة من " + incoming.team);
       }
       renderDemoSurfaces();
     }
@@ -3150,6 +3190,8 @@
       if (!organizerUnlocked || !organizerKey) return;
       liveStageDemoMode = !liveStageDemoMode;
       liveStageDemoTick = 0;
+      demoIncomingSequence = 0;
+      demoLastEvent = "";
       if (liveStageDemoMode) {
         demoSettingsSnapshot = { ...settings };
         settings.submissionsOpen = true;
@@ -3202,7 +3244,6 @@
     function updateDemoControls() {
       const label = liveStageDemoMode ? liveStageCopy("■ Stop client demo", "■ إيقاف العرض التجريبي المحلي") : liveStageCopy("▶ Start client demo", "▶ بدء العرض التجريبي المحلي");
       if (organizerDemoButton) organizerDemoButton.textContent = label;
-      if (liveStageDemoButton) liveStageDemoButton.textContent = liveStageDemoMode ? liveStageCopy("■ Exit demo", "■ إنهاء التجربة") : liveStageCopy("▶ Demo mode", "▶ الوضع التجريبي");
     }
 
     function renderDemoSurfaces() {
@@ -3682,7 +3723,6 @@
     organizerLoginCancel.addEventListener("click", hideOrganizerLogin);
     liveStageButton.addEventListener("click", openLiveStage);
     liveStageClose.addEventListener("click", closeLiveStage);
-    liveStageDemoButton.addEventListener("click", toggleOrganizerDemoMode);
     organizerDemoButton.addEventListener("click", toggleOrganizerDemoMode);
     liveStageFullscreen.addEventListener("click", () => {
       if (document.fullscreenElement === liveStage && document.exitFullscreen) document.exitFullscreen().catch(() => {});
