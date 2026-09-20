@@ -1666,6 +1666,7 @@
     let hasRemoteSync = false;
     let publicSyncTimer = 0;
     let lastPublicPhase = "";
+     let publicWinner = null;
 
     const gallery = document.getElementById("gallery-grid");
     const count = document.getElementById("vision-count");
@@ -1722,7 +1723,9 @@
       votingOpen: localStorage.getItem("imagineSaudiVoting") !== "false",
       submissionDeadline: localStorage.getItem("imagineSaudiSubmissionDeadline") || "",
       votingDeadline: localStorage.getItem("imagineSaudiVotingDeadline") || "",
-      submissionRound: localStorage.getItem("imagineSaudiSubmissionRound") || "1"
+      submissionRound: localStorage.getItem("imagineSaudiSubmissionRound") || "1",
+       winnerVisionId: "",
+       winnerDeclaredAt: ""
     };
     const voterId = localStorage.getItem("imagineSaudiVoterId") ||
       (window.crypto && typeof window.crypto.randomUUID === "function"
@@ -1787,6 +1790,7 @@
     let pendingOrganizerRecords = [];
     let publishedOrganizerRecords = [];
     let organizerAnalytics = null;
+     let organizerWinner = null;
     let organizerUnlockInFlight = null;
     let organizerUnlockKey = "";
     let organizerLoadInFlight = null;
@@ -2349,6 +2353,7 @@
           settings: publishedResult?.settings || settings,
           pending: pendingResult?.visions || [],
           published: publishedResult?.visions || [],
+          winner: publishedResult?.winner || null,
           analytics: null
         };
       }
@@ -2362,6 +2367,8 @@
       settings.submissionDeadline = nextSettings.submissionDeadline || "";
       settings.votingDeadline = nextSettings.votingDeadline || "";
       settings.submissionRound = String(nextSettings.submissionRound || settings.submissionRound || "1");
+      settings.winnerVisionId = String(nextSettings.winnerVisionId || "");
+      settings.winnerDeclaredAt = String(nextSettings.winnerDeclaredAt || "");
       localStorage.setItem("imagineSaudiSubmissionRound", settings.submissionRound);
       syncDeadlineInputs();
       syncControlInputs();
@@ -2375,7 +2382,10 @@
           votingOpen: settings.votingOpen,
           submissionDeadline: settings.submissionDeadline,
           votingDeadline: settings.votingDeadline,
-          submissionRound: settings.submissionRound
+          submissionRound: settings.submissionRound,
+          winnerVisionId: settings.winnerVisionId,
+          winnerDeclaredAt: settings.winnerDeclaredAt,
+          winnerStatus: publicWinner?.status || ""
         },
         visions: visions.map((vision) => ({
           id: vision.id, createdAt: vision.createdAt, publishedAt: vision.publishedAt,
@@ -2392,6 +2402,7 @@
         const cached = JSON.parse(sessionStorage.getItem(PUBLIC_CACHE_KEY) || "null");
         if (!cached || !Array.isArray(cached.visions) || Date.now() - Number(cached.savedAt || 0) > PUBLIC_CACHE_TTL) return false;
         applyPublicSettings(cached.settings);
+        publicWinner = cached.winner || null;
         activeVisions = cached.visions.filter((vision) => String(vision.status || "published").toLowerCase() === "published");
         hasRemoteSync = true;
         lastGalleryDataSignature = publicDataSignature(activeVisions);
@@ -2564,11 +2575,12 @@
       if (GOOGLE_APPS_SCRIPT_URL) {
         const result = await googleRequest("visions", {}, { method: "GET" });
         applyPublicSettings(result.settings);
+        publicWinner = result.winner || null;
         const visions = (result.visions || []).filter((vision) =>
           String(vision.status || "").toLowerCase() === "published"
         );
         try {
-          sessionStorage.setItem(PUBLIC_CACHE_KEY, JSON.stringify({ savedAt: Date.now(), settings: { ...settings }, visions }));
+          sessionStorage.setItem(PUBLIC_CACHE_KEY, JSON.stringify({ savedAt: Date.now(), settings: { ...settings }, winner: publicWinner, visions }));
         } catch (error) { /* A full session cache is non-fatal. */ }
         return visions;
       }
@@ -2873,6 +2885,8 @@
           applyPublicSettings(data.settings);
           pendingOrganizerRecords = data.pending || [];
           publishedOrganizerRecords = data.published || [];
+          organizerWinner = data.winner || null;
+          publicWinner = data.winner || publicWinner;
           organizerAnalytics = data.analytics || null;
           updateReviewFilters();
           updateOrganizerSummary();
@@ -2949,7 +2963,8 @@
         competition: "Imagine Saudi 2050",
         settings: { ...settings },
         records: records,
-        publishedResults: rankedResults
+        publishedResults: rankedResults,
+         winner: organizerWinner
       };
       const link = document.createElement("a");
       link.href = URL.createObjectURL(new Blob([JSON.stringify(payload, null, 2)], { type: "application/json;charset=utf-8" }));
