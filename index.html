@@ -359,6 +359,80 @@
     .organizer-status.is-error {
       color: #F0B7C8;
     }
+
+    body.live-stage-active { overflow: hidden; }
+    .live-stage[hidden] { display: none !important; }
+    .live-stage { position: fixed; z-index: 100; inset: 0; overflow: auto; padding: clamp(16px, 3vw, 42px); background: radial-gradient(circle at 84% 8%, rgba(155, 138, 196, .28), transparent 31rem), radial-gradient(circle at 12% 88%, rgba(44, 117, 98, .34), transparent 34rem), #03231F; animation: live-stage-in .32s ease both; }
+    .live-stage::before { position: absolute; inset: 0; pointer-events: none; content: ""; opacity: .24; background-image: linear-gradient(rgba(216, 208, 237, .07) 1px, transparent 1px), linear-gradient(90deg, rgba(216, 208, 237, .07) 1px, transparent 1px); background-size: 48px 48px; mask-image: linear-gradient(to bottom, #000, transparent 88%); }
+    .live-stage-shell { position: relative; display: flex; flex-direction: column; width: min(100%, 1680px); min-height: 100%; margin: 0 auto; color: var(--ink); direction: ltr; }
+    .live-stage-header { display: flex; align-items: flex-start; justify-content: space-between; gap: 24px; }
+    .live-stage-kicker { display: block; color: var(--cyan); font-size: .68rem; font-weight: 700; letter-spacing: .18em; text-transform: uppercase; }
+    .live-stage-title { margin: 7px 0 0; font-size: clamp(1.8rem, 4vw, 4.4rem); line-height: .98; letter-spacing: -.05em; }
+    .live-stage-subtitle { max-width: 660px; margin: 13px 0 0; color: var(--dim); font-family: "Cairo", sans-serif; font-size: clamp(.72rem, 1.2vw, .94rem); line-height: 1.7; }
+    .live-stage-actions { display: flex; align-items: center; gap: 9px; flex: 0 0 auto; }
+    .live-stage-live-dot { display: inline-flex; align-items: center; gap: 7px; padding: 8px 11px; border: 1px solid rgba(216, 208, 237, .28); border-radius: 999px; color: var(--light-lavender); font-size: .67rem; font-weight: 700; letter-spacing: .12em; }
+    .live-stage-live-dot::before { width: 7px; height: 7px; border-radius: 50%; background: #F0B7C8; box-shadow: 0 0 0 5px rgba(240, 183, 200, .12); content: ""; animation: live-stage-pulse 1.7s ease-in-out infinite; }
+    .live-stage-close, .live-stage-fullscreen { min-height: 38px; padding: 9px 12px; border: 1px solid var(--line); border-radius: 9px; cursor: pointer; background: rgba(4, 43, 37, .78); color: var(--ink); font: inherit; font-size: .68rem; }
+    .live-stage-close { font-size: 1.1rem; line-height: 1; }
+    .live-stage-close:hover, .live-stage-fullscreen:hover { border-color: rgba(216, 208, 237, .64); transform: translateY(-1px); }
+    .live-stage-grid { display: grid; grid-template-columns: minmax(0, 1.18fr) minmax(360px, .82fr); gap: 18px; flex: 1; margin-top: clamp(22px, 4vw, 54px); }
+    .live-stage-stream, .live-stage-board { min-width: 0; border: 1px solid rgba(216, 208, 237, .2); border-radius: 22px; background: linear-gradient(145deg, rgba(7, 59, 53, .86), rgba(3, 35, 31, .91)); box-shadow: 0 25px 80px rgba(0, 0, 0, .22); }
+    .live-stage-stream { display: flex; flex-direction: column; padding: clamp(15px, 2.2vw, 30px); }
+    .live-stage-stream-header, .live-stage-board-header, .live-stage-stream-footer, .live-stage-footer { display: flex; align-items: center; justify-content: space-between; gap: 14px; }
+    .live-stage-stream-header { color: var(--dim); font-size: .7rem; letter-spacing: .1em; text-transform: uppercase; }
+    .live-stage-source { display: inline-flex; align-items: center; gap: 7px; color: var(--light-lavender); font-weight: 700; }
+    .live-stage-source::before { width: 6px; height: 6px; border-radius: 50%; background: var(--green); content: ""; box-shadow: 0 0 0 4px rgba(44, 117, 98, .18); }
+    .live-stage-screen { position: relative; display: flex; min-height: 430px; flex: 1; align-items: flex-end; overflow: hidden; margin: 15px 0; padding: clamp(18px, 3vw, 44px); border: 1px solid rgba(216, 208, 237, .2); border-radius: 17px; background: #073B35; isolation: isolate; }
+    .live-stage-screen::after { position: absolute; z-index: -1; inset: 0; content: ""; background: linear-gradient(180deg, transparent 16%, rgba(3, 35, 31, .3) 50%, rgba(3, 35, 31, .96) 100%); }
+    .live-stage-screen-glow { position: absolute; z-index: -2; inset: -10%; background: radial-gradient(circle at 78% 20%, rgba(155, 138, 196, .5), transparent 36%), radial-gradient(circle at 18% 80%, rgba(44, 117, 98, .55), transparent 42%); filter: blur(10px); transform: scale(1.1); }
+    .live-stage-screen-content { width: min(100%, 720px); }
+    .live-stage-screen-label { color: var(--light-lavender); font-size: .66rem; font-weight: 700; letter-spacing: .16em; text-transform: uppercase; }
+    .live-stage-feature-art { position: absolute; z-index: -1; inset: 0 0 31%; overflow: hidden; opacity: .78; mask-image: linear-gradient(to bottom, #000 60%, transparent 100%); }
+    .live-stage-feature-art img { width: 100%; height: 100%; object-fit: cover; filter: saturate(.82) contrast(1.08); transform: scale(1.04); }
+    .live-stage-feature-rank { display: inline-flex; align-items: center; justify-content: center; width: 47px; height: 47px; margin-top: 13px; border-radius: 12px; background: var(--lavender); color: var(--dark-green); font-size: 1.05rem; font-weight: 800; }
+    .live-stage-feature-title { max-width: 880px; margin: 13px 0 3px; font-size: clamp(1.6rem, 4vw, 4.1rem); line-height: 1; letter-spacing: -.055em; }
+    .live-stage-feature-team { margin: 0; color: var(--light-lavender); font-family: "Cairo", sans-serif; font-size: clamp(.78rem, 1.3vw, 1rem); }
+    .live-stage-feature-meta { display: flex; flex-wrap: wrap; align-items: center; gap: 9px; margin-top: 18px; }
+    .live-stage-feature-track, .live-stage-feature-votes { display: inline-flex; padding: 7px 10px; border: 1px solid rgba(216, 208, 237, .24); border-radius: 999px; background: rgba(3, 35, 31, .58); color: var(--ink); font-size: .7rem; }
+    .live-stage-feature-votes { border-color: rgba(216, 208, 237, .62); color: var(--light-lavender); font-weight: 700; }
+    .live-stage-stream-footer { padding-top: 15px; border-top: 1px solid rgba(216, 208, 237, .13); }
+    .live-stage-stream-footer > div { display: flex; flex-direction: column; gap: 4px; }
+    .live-stage-stream-footer span { color: var(--dim); font-size: .64rem; letter-spacing: .08em; text-transform: uppercase; }
+    .live-stage-stream-footer strong { font-size: 1.1rem; }
+    .live-stage-board { display: flex; flex-direction: column; padding: clamp(15px, 2.2vw, 30px); }
+    .live-stage-board-header { align-items: flex-start; padding-bottom: 17px; border-bottom: 1px solid rgba(216, 208, 237, .13); }
+    .live-stage-board-header h3 { margin: 6px 0 0; font-size: clamp(1.25rem, 2vw, 2rem); letter-spacing: -.035em; }
+    .live-stage-refresh-state { max-width: 145px; color: var(--dim); font-family: "Cairo", sans-serif; font-size: .65rem; line-height: 1.5; text-align: right; }
+    .live-stage-leaderboard { display: flex; flex-direction: column; gap: 9px; margin-top: 17px; }
+    .live-stage-row { display: grid; grid-template-columns: 34px minmax(0, 1fr) auto; align-items: center; gap: 11px; padding: 12px 10px; border: 1px solid transparent; border-radius: 13px; background: rgba(4, 43, 37, .45); animation: live-stage-row-in .42s ease both; transition: background .25s ease, border-color .25s ease, transform .25s ease; }
+    .live-stage-row.is-up { border-color: rgba(44, 117, 98, .6); background: rgba(44, 117, 98, .16); animation: live-stage-row-up .8s ease both; }
+    .live-stage-row.is-down { border-color: rgba(240, 183, 200, .45); background: rgba(155, 138, 196, .11); animation: live-stage-row-down .8s ease both; }
+    .live-stage-row.is-passing { box-shadow: inset 3px 0 0 var(--light-lavender); }
+    .live-stage-rank { color: var(--dim); font-size: .83rem; font-weight: 700; }
+    .live-stage-row:first-child .live-stage-rank { color: var(--light-lavender); }
+    .live-stage-row-copy { min-width: 0; }
+    .live-stage-row-copy strong, .live-stage-row-copy span { display: block; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .live-stage-row-copy strong { font-size: .82rem; }
+    .live-stage-row-copy span { margin-top: 3px; color: var(--dim); font-family: "Cairo", sans-serif; font-size: .62rem; }
+    .live-stage-bar { height: 5px; margin-top: 9px; overflow: hidden; border-radius: 99px; background: rgba(216, 208, 237, .11); }
+    .live-stage-bar i { display: block; height: 100%; border-radius: inherit; background: linear-gradient(90deg, var(--green), var(--lavender)); transform-origin: left center; animation: live-stage-bar-in .55s ease both; }
+    .live-stage-row-score { min-width: 58px; text-align: right; }
+    .live-stage-row-score strong { display: block; color: var(--light-lavender); font-size: .86rem; }
+    .live-stage-delta { display: inline-block; min-height: 15px; margin-top: 4px; color: var(--dim); font-size: .62rem; white-space: nowrap; }
+    .live-stage-delta.is-up { color: #A8E0C1; }
+    .live-stage-delta.is-down { color: #F0B7C8; }
+    .live-stage-empty { margin: auto; color: var(--dim); font-family: "Cairo", sans-serif; font-size: .8rem; text-align: center; }
+    .live-stage-footer { margin-top: 15px; color: var(--dim); font-family: "Cairo", sans-serif; font-size: .64rem; }
+    .live-stage-screen.is-switching { animation: live-stage-screen-switch .85s ease both; }
+    @keyframes live-stage-in { from { opacity: 0; transform: scale(.985); } to { opacity: 1; transform: scale(1); } }
+    @keyframes live-stage-pulse { 0%, 100% { opacity: .55; transform: scale(.8); } 50% { opacity: 1; transform: scale(1.18); } }
+    @keyframes live-stage-row-in { from { opacity: 0; transform: translateY(7px); } to { opacity: 1; transform: translateY(0); } }
+    @keyframes live-stage-row-up { 0% { transform: translateX(0); } 35% { transform: translateX(-5px); } 100% { transform: translateX(0); } }
+    @keyframes live-stage-row-down { 0% { transform: translateX(0); } 35% { transform: translateX(5px); } 100% { transform: translateX(0); } }
+    @keyframes live-stage-bar-in { from { transform: scaleX(0); } to { transform: scaleX(1); } }
+    @keyframes live-stage-screen-switch { 0% { opacity: .52; filter: saturate(.5); } 55% { opacity: 1; filter: saturate(1.35); } 100% { opacity: 1; filter: saturate(1); } }
+    @media (max-width: 960px) { .live-stage-grid { grid-template-columns: 1fr; } .live-stage-screen { min-height: 360px; } .live-stage-board { min-height: 420px; } }
+    @media (max-width: 560px) { .live-stage { padding: 13px; } .live-stage-header { flex-direction: column; } .live-stage-actions { width: 100%; justify-content: flex-end; } .live-stage-title { font-size: 2.25rem; } .live-stage-screen { min-height: 330px; padding: 19px; } .live-stage-feature-title { font-size: 2rem; } .live-stage-footer { align-items: flex-start; flex-direction: column; } }
     .review-panel {
       grid-column: 1 / -1;
       padding: 14px;
@@ -1309,6 +1383,7 @@
            <div class="organizer-metric"><span data-en="Last refresh" data-ar="آخر تحديث">Last refresh</span><strong id="organizer-last-refresh">—</strong></div>
          </div>
          <div class="organizer-actions">
+           <button class="organizer-action primary" id="organizer-live-stage" type="button" data-en="▶ Open live screen" data-ar="▶ فتح شاشة العرض المباشر">▶ Open live screen</button>
            <button class="organizer-action" id="organizer-refresh" type="button" data-en="↻ Refresh all" data-ar="↻ تحديث الكل">↻ Refresh all</button>
            <button class="organizer-action" id="organizer-reset-submissions" type="button" data-en="Reset participant submissions" data-ar="إعادة فتح مشاركات المشاركين">Reset participant submissions</button>
            <button class="organizer-action" id="organizer-export" type="button" data-en="↓ Export CSV" data-ar="↓ تصدير CSV">↓ Export CSV</button>
@@ -1353,6 +1428,46 @@
         </div>
       </div>
     </details>
+
+
+    <div class="live-stage" id="live-stage" hidden aria-hidden="true">
+      <div class="live-stage-shell" role="dialog" aria-modal="true" aria-labelledby="live-stage-title">
+        <header class="live-stage-header">
+          <div>
+            <span class="live-stage-kicker" data-en="Organizer live display" data-ar="شاشة المنظم المباشرة">Organizer live display</span>
+            <h2 class="live-stage-title" id="live-stage-title" data-en="The vote is moving" data-ar="التصويت يتحرك">The vote is moving</h2>
+            <p class="live-stage-subtitle" data-en="A clean, projector-ready view for the room: the connected laptop feed, the current leader, and every passing moment — without prompts or control clutter." data-ar="عرض واضح وجاهز للبث في القاعة: شاشة الحاسوب المتصل، والمتصدر الحالي، وكل لحظة تجاوز — بلا نصوص طويلة أو ازدحام تحكم.">A clean, projector-ready view for the room: the connected laptop feed, the current leader, and every passing moment — without prompts or control clutter.</p>
+          </div>
+          <div class="live-stage-actions">
+            <span class="live-stage-live-dot" data-en="Live" data-ar="مباشر">Live</span>
+            <button class="live-stage-fullscreen" id="live-stage-fullscreen" type="button" data-en="⛶ Full screen" data-ar="⛶ ملء الشاشة">⛶ Full screen</button>
+            <button class="live-stage-close" id="live-stage-close" type="button" aria-label="Close live display" data-aria-en="Close live display" data-aria-ar="إغلاق الشاشة المباشرة">×</button>
+          </div>
+        </header>
+        <main class="live-stage-grid">
+          <section class="live-stage-stream" aria-label="Connected laptop feed" data-aria-en="Connected laptop feed" data-aria-ar="بث الحاسوب المتصل">
+            <div class="live-stage-stream-header"><span data-en="Connected laptop feed" data-ar="بث الحاسوب المتصل">Connected laptop feed</span><span class="live-stage-source" data-en="Streaming now" data-ar="يتم البث الآن">Streaming now</span></div>
+            <div class="live-stage-screen" id="live-stage-screen">
+              <div class="live-stage-screen-glow"></div>
+              <div class="live-stage-feature-art"><img id="live-stage-feature-image" alt="" /></div>
+              <div class="live-stage-screen-content">
+                <span class="live-stage-screen-label" data-en="On screen now" data-ar="يظهر الآن على الشاشة">On screen now</span>
+                <span class="live-stage-feature-rank" id="live-stage-feature-rank">01</span>
+                <h3 class="live-stage-feature-title" id="live-stage-feature-title">—</h3>
+                <p class="live-stage-feature-team" id="live-stage-feature-team">—</p>
+                <div class="live-stage-feature-meta"><span class="live-stage-feature-track" id="live-stage-feature-track">—</span><span class="live-stage-feature-votes" id="live-stage-feature-votes">0</span></div>
+              </div>
+            </div>
+            <div class="live-stage-stream-footer"><div><span data-en="Audience total" data-ar="إجمالي أصوات الجمهور">Audience total</span><strong id="live-stage-total-votes">0</strong></div><div><span data-en="Last event" data-ar="آخر حدث">Last event</span><strong id="live-stage-event" data-en="Waiting for the next vote" data-ar="بانتظار التصويت التالي">Waiting for the next vote</strong></div></div>
+          </section>
+          <section class="live-stage-board" aria-label="Live vote race" data-aria-en="Live vote race" data-aria-ar="سباق التصويت المباشر">
+            <div class="live-stage-board-header"><div><span class="live-stage-kicker" data-en="Vote race" data-ar="سباق التصويت">Vote race</span><h3 data-en="Passing board" data-ar="لوحة التجاوز">Passing board</h3></div><span class="live-stage-refresh-state" id="live-stage-refresh-state" data-en="Live · refreshing every 15 seconds" data-ar="مباشر · تحديث كل 15 ثانية">Live · refreshing every 15 seconds</span></div>
+            <div class="live-stage-leaderboard" id="live-stage-leaderboard" aria-live="polite"></div>
+          </section>
+        </main>
+        <footer class="live-stage-footer"><span id="live-stage-updated" data-en="Waiting for first refresh" data-ar="بانتظار أول تحديث">Waiting for first refresh</span><span data-en="Keep this view on the room display while the audience votes." data-ar="اتركوا هذه الشاشة على شاشة القاعة أثناء تصويت الجمهور.">Keep this view on the room display while the audience votes.</span></footer>
+      </div>
+    </div>
 
     <section class="hero" aria-labelledby="page-title">
       <button class="language-toggle hero-language-toggle" id="language-toggle" type="button" aria-label="التبديل إلى الإنجليزية">عربي</button>
@@ -1698,6 +1813,29 @@
     const organizerExport = document.getElementById("organizer-export");
     const organizerExportJson = document.getElementById("organizer-export-json");
     const organizerLock = document.getElementById("organizer-lock");
+
+    const liveStageButton = document.getElementById("organizer-live-stage");
+    const liveStage = document.getElementById("live-stage");
+    const liveStageClose = document.getElementById("live-stage-close");
+    const liveStageFullscreen = document.getElementById("live-stage-fullscreen");
+    const liveStageScreen = document.getElementById("live-stage-screen");
+    const liveStageFeatureImage = document.getElementById("live-stage-feature-image");
+    const liveStageFeatureRank = document.getElementById("live-stage-feature-rank");
+    const liveStageFeatureTitle = document.getElementById("live-stage-feature-title");
+    const liveStageFeatureTeam = document.getElementById("live-stage-feature-team");
+    const liveStageFeatureTrack = document.getElementById("live-stage-feature-track");
+    const liveStageFeatureVotes = document.getElementById("live-stage-feature-votes");
+    const liveStageTotalVotes = document.getElementById("live-stage-total-votes");
+    const liveStageEvent = document.getElementById("live-stage-event");
+    const liveStageRefreshState = document.getElementById("live-stage-refresh-state");
+    const liveStageLeaderboard = document.getElementById("live-stage-leaderboard");
+    const liveStageUpdated = document.getElementById("live-stage-updated");
+    let liveStageOpen = false;
+    let liveStageRefreshTimer = 0;
+    let liveStageScoreSnapshot = new Map();
+    let liveStageRankSnapshot = new Map();
+    let liveStageLeaderKey = "";
+
     const reviewSearch = document.getElementById("review-search");
     const reviewTrackFilter = document.getElementById("review-track-filter");
     const votingStatus = document.getElementById("voting-status");
@@ -2832,6 +2970,107 @@
       });
     }
 
+
+    function liveStageCopy(en, ar) { return currentLanguage === "ar" ? ar : en; }
+    function liveStageKey(vision) { return String(vision.id || vision.team || vision.title || ""); }
+    function liveStageRankedRecords() {
+      return [...publishedOrganizerRecords].sort((left, right) => {
+        const voteDifference = (Number(right.votes) || 0) - (Number(left.votes) || 0);
+        if (voteDifference) return voteDifference;
+        return (Date.parse(right.publishedAt || right.createdAt || "") || 0) - (Date.parse(left.publishedAt || left.createdAt || "") || 0);
+      });
+    }
+    function renderLiveStage() {
+      if (!liveStage || !liveStageOpen) return;
+      const ranked = liveStageRankedRecords();
+      const now = new Date();
+      liveStageRefreshState.textContent = liveStageCopy("Live · refreshing every 15 seconds", "مباشر · تحديث كل 15 ثانية");
+      liveStageUpdated.textContent = liveStageCopy("Updated ", "آخر تحديث ") + now.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
+      if (!ranked.length) {
+        liveStageFeatureRank.textContent = "—";
+        liveStageFeatureTitle.textContent = "—";
+        liveStageFeatureTeam.textContent = liveStageCopy("Waiting for published visions", "بانتظار الرؤى المنشورة");
+        liveStageFeatureTrack.textContent = "—";
+        liveStageFeatureVotes.textContent = "0 " + t("votes");
+        liveStageTotalVotes.textContent = "0";
+        liveStageLeaderboard.innerHTML = '<p class="live-stage-empty">' + t("noPublishedResults") + '</p>';
+        liveStageScoreSnapshot = new Map();
+        liveStageRankSnapshot = new Map();
+        liveStageLeaderKey = "";
+        return;
+      }
+      const totalVotes = ranked.reduce((sum, vision) => sum + (Number(vision.votes) || 0), 0);
+      const feature = ranked[0];
+      const featureKey = liveStageKey(feature);
+      const featureImage = safeImageUrl(feature.image || driveImageFallbackUrl(feature));
+      const featureFallback = safeImageUrl(driveImageFallbackUrl(feature));
+      liveStageFeatureImage.src = featureImage;
+      liveStageFeatureImage.alt = String(feature.title || feature.team || "");
+      liveStageFeatureImage.onerror = () => {
+        if (liveStageFeatureImage.src !== featureFallback && featureFallback !== placeholderImage) liveStageFeatureImage.src = featureFallback;
+        else liveStageFeatureImage.src = placeholderImage;
+      };
+      liveStageFeatureRank.textContent = "01";
+      liveStageFeatureTitle.textContent = feature.title || feature.team || "—";
+      liveStageFeatureTeam.textContent = feature.team || "—";
+      liveStageFeatureTrack.textContent = trackLabel(feature.track || "Other");
+      liveStageFeatureVotes.textContent = String(Number(feature.votes) || 0) + " " + t("votes");
+      liveStageTotalVotes.textContent = String(totalVotes);
+      if (liveStageLeaderKey && liveStageLeaderKey !== featureKey) {
+        liveStageScreen.classList.remove("is-switching");
+        void liveStageScreen.offsetWidth;
+        liveStageScreen.classList.add("is-switching");
+        liveStageEvent.textContent = liveStageCopy("Leader changed to " + (feature.title || feature.team || "—"), "تغير المتصدر إلى " + (feature.title || feature.team || "—"));
+      } else {
+        const leaderDelta = (Number(feature.votes) || 0) - (liveStageScoreSnapshot.get(featureKey) ?? (Number(feature.votes) || 0));
+        liveStageEvent.textContent = leaderDelta > 0 ? liveStageCopy("Leader gaining +" + leaderDelta + " votes", "المتصدر يكسب +" + leaderDelta + " أصوات") : liveStageCopy("Waiting for the next vote", "بانتظار التصويت التالي");
+      }
+      liveStageLeaderKey = featureKey;
+      liveStageLeaderboard.innerHTML = ranked.slice(0, 8).map((vision, index) => {
+        const key = liveStageKey(vision);
+        const votes = Number(vision.votes) || 0;
+        const previousVotes = liveStageScoreSnapshot.get(key);
+        const delta = previousVotes == null ? 0 : votes - previousVotes;
+        const previousRank = liveStageRankSnapshot.get(key);
+        const rank = index + 1;
+        const rankDelta = previousRank == null ? 0 : previousRank - rank;
+        const movementClass = delta > 0 ? " is-up" : delta < 0 ? " is-down" : "";
+        const passingClass = rankDelta ? " is-passing" : "";
+        const deltaClass = delta > 0 ? " is-up" : delta < 0 ? " is-down" : "";
+        const deltaLabel = delta > 0 ? "+" + delta + " ↑" : delta < 0 ? String(delta) + " ↓" : rankDelta > 0 ? "↑ " + rankDelta : rankDelta < 0 ? "↓ " + Math.abs(rankDelta) : "";
+        const percent = totalVotes ? Math.round((votes / totalVotes) * 100) : 0;
+        const detail = [vision.team || "—", trackLabel(vision.track || "Other")].join(" · ");
+        return '<div class="live-stage-row' + movementClass + passingClass + '"><span class="live-stage-rank">' + String(rank).padStart(2, "0") + '</span><div class="live-stage-row-copy"><strong>' + escapeHTML(vision.title || vision.team || "—") + '</strong><span>' + escapeHTML(detail) + '</span><div class="live-stage-bar" aria-hidden="true"><i style="width:' + percent + '%"></i></div></div><div class="live-stage-row-score"><strong>' + votes + '</strong><span class="live-stage-delta' + deltaClass + '">' + escapeHTML(deltaLabel) + '</span></div></div>';
+      }).join("");
+      liveStageScoreSnapshot = new Map(ranked.map((vision) => [liveStageKey(vision), Number(vision.votes) || 0]));
+      liveStageRankSnapshot = new Map(ranked.map((vision, index) => [liveStageKey(vision), index + 1]));
+    }
+    function stopLiveStageRefresh() { window.clearInterval(liveStageRefreshTimer); liveStageRefreshTimer = 0; }
+    function closeLiveStage() {
+      if (!liveStage) return;
+      stopLiveStageRefresh();
+      liveStageOpen = false;
+      liveStage.hidden = true;
+      liveStage.setAttribute("aria-hidden", "true");
+      document.body.classList.remove("live-stage-active");
+      if (document.fullscreenElement === liveStage && document.exitFullscreen) document.exitFullscreen().catch(() => {});
+    }
+    function openLiveStage() {
+      if (!organizerUnlocked) { showOrganizerLogin(); return; }
+      liveStageOpen = true;
+      liveStage.hidden = false;
+      liveStage.setAttribute("aria-hidden", "false");
+      document.body.classList.add("live-stage-active");
+      liveStageScoreSnapshot = new Map();
+      liveStageRankSnapshot = new Map();
+      liveStageLeaderKey = "";
+      renderLiveStage();
+      stopLiveStageRefresh();
+      liveStageRefreshTimer = window.setInterval(() => { if (!document.hidden && liveStageOpen) loadReviewQueue(); }, PUBLIC_SYNC_INTERVAL);
+      if (liveStage.requestFullscreen) liveStage.requestFullscreen().catch(() => {});
+      loadReviewQueue();
+    }
+
     function updateOrganizerSummary() {
       organizerPendingCount.textContent = String(pendingOrganizerRecords.length);
       organizerPublishedCount.textContent = String(publishedOrganizerRecords.length);
@@ -2839,6 +3078,7 @@
       organizerVoteCount.textContent = String(organizerAnalytics?.activeVotes ?? publishedOrganizerRecords.reduce((sum, vision) => sum + (Number(vision.votes) || 0), 0));
       organizerLastRefresh.textContent = new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
       renderResultsDashboard();
+      renderLiveStage();
     }
 
 
@@ -3091,6 +3331,7 @@
     }
 
     function lockOrganizerPanel() {
+      closeLiveStage();
       organizerKey = "";
       organizerUnlocked = false;
       organizerUnlockInFlight = null;
@@ -3232,6 +3473,15 @@
       await unlockOrganizerControls(key);
     });
     organizerLoginCancel.addEventListener("click", hideOrganizerLogin);
+    liveStageButton.addEventListener("click", openLiveStage);
+    liveStageClose.addEventListener("click", closeLiveStage);
+    liveStageFullscreen.addEventListener("click", () => {
+      if (document.fullscreenElement === liveStage && document.exitFullscreen) document.exitFullscreen().catch(() => {});
+      else if (liveStage.requestFullscreen) liveStage.requestFullscreen().catch(() => {});
+    });
+    document.addEventListener("fullscreenchange", () => {
+      liveStageFullscreen.textContent = document.fullscreenElement === liveStage ? liveStageCopy("⛶ Exit full screen", "⛶ إنهاء ملء الشاشة") : liveStageCopy("⛶ Full screen", "⛶ ملء الشاشة");
+    });
     organizerRefresh.addEventListener("click", loadReviewQueue);
     organizerExport.addEventListener("click", downloadOrganizerCsv);
     organizerExportJson.addEventListener("click", downloadOrganizerJson);
