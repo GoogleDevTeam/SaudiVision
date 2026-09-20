@@ -3141,6 +3141,7 @@
       if (liveStageDemoMode) renderDemoSurfaces();
       else syncGallery();
       if (liveStageOpen) renderLiveStage();
+      updateCompetitionMode(false);
       startLiveStageRefresh();
     }
 
@@ -3446,6 +3447,14 @@
     }
 
     function lockOrganizerPanel() {
+      if (liveStageDemoMode) {
+        liveStageDemoMode = false;
+        liveStageDemoRecords = [];
+        liveStageDemoTick = 0;
+        stopLiveStageRefresh();
+        syncGallery();
+        updateDemoControls();
+      }
       closeLiveStage();
       organizerKey = "";
       organizerUnlocked = false;
@@ -3474,19 +3483,24 @@
       organizerStatus.classList.remove("is-error");
       const submissionsOpen = submissionsCurrentlyOpen();
       const votingOpen = votingCurrentlyOpen();
-      submissionPanel.classList.toggle("is-closed", !submissionsOpen);
-      formNote.textContent = isSubmissionLocked()
-        ? t("submissionAlreadyUsed")
-        : submissionsOpen ? t("imageDemo") : t("submissionClosed");
+      const demoActive = liveStageDemoMode;
+      submissionPanel.classList.toggle("is-closed", !submissionsOpen && !demoActive);
+      formNote.textContent = demoActive
+        ? liveStageCopy("Client demo is running. Nothing will be submitted.", "التجربة المحلية تعمل. لن يتم إرسال أي مشاركة.")
+        : isSubmissionLocked()
+          ? t("submissionAlreadyUsed")
+          : submissionsOpen ? t("imageDemo") : t("submissionClosed");
       form.querySelectorAll("input, select, textarea, button").forEach((element) => {
-        element.disabled = !submissionsOpen || isSubmissionLocked();
+        element.disabled = demoActive || !submissionsOpen || isSubmissionLocked();
       });
       updateTrackEnhancer();
-      votingStatus.textContent = votingOpen ? t("votingOpen") : t("votingClosed");
+      votingStatus.textContent = demoActive ? liveStageCopy("Demo simulation", "محاكاة تجريبية") : votingOpen ? t("votingOpen") : t("votingClosed");
       updatePublicCompetitionState();
-      organizerStatus.textContent = submissionsOpen && votingOpen
-        ? t("openCompetition")
-        : t("status").replace("{submissions}", submissionsOpen ? t("open") : t("closed")).replace("{voting}", votingOpen ? t("open") : t("closed"));
+      organizerStatus.textContent = demoActive
+        ? liveStageCopy("Client demo is running. Nothing is saved.", "التجربة المحلية تعمل. لا يتم حفظ أي شيء.")
+        : submissionsOpen && votingOpen
+          ? t("openCompetition")
+          : t("status").replace("{submissions}", submissionsOpen ? t("open") : t("closed")).replace("{voting}", votingOpen ? t("open") : t("closed"));
       if (shouldSync) syncGallery();
     }
 
