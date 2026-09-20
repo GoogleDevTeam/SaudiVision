@@ -171,7 +171,9 @@ const DEFAULT_SETTINGS = {
   votingOpen: true,
   submissionDeadline: "",
   votingDeadline: "",
-  submissionRound: "1"
+  submissionRound: "1",
+  winnerVisionId: "",
+  winnerDeclaredAt: ""
 };
 
 const TRACK_PROMPT_ENHANCERS_ = {
@@ -292,6 +294,12 @@ function route_(action, payload) {
     case "setSettings":
       requireAdmin_(payload);
       return saveSettings_(payload);
+    case "setWinner":
+      requireAdmin_(payload);
+      return setWinner_(payload.visionId);
+    case "clearWinner":
+      requireAdmin_(payload);
+      return clearWinner_();
     case "resetSubmissions":
       requireAdmin_(payload);
       return resetSubmissionRound_();
@@ -786,6 +794,8 @@ function getSettings_() {
     if (record.key === "submissionDeadline") settings.submissionDeadline = parseDeadline_(record.value, settings.submissionDeadline);
     if (record.key === "votingDeadline") settings.votingDeadline = parseDeadline_(record.value, settings.votingDeadline);
     if (record.key === "submissionRound") settings.submissionRound = String(record.value || settings.submissionRound);
+    if (record.key === "winnerVisionId") settings.winnerVisionId = String(record.value || "");
+    if (record.key === "winnerDeclaredAt") settings.winnerDeclaredAt = String(record.value || "");
   });
   return settings;
 }
@@ -797,10 +807,14 @@ function saveSettings_(payload) {
     settings.votingOpen = parseBoolean_(payload.votingOpen, settings.votingOpen);
     settings.submissionDeadline = parseDeadline_(payload.submissionDeadline, settings.submissionDeadline);
     settings.votingDeadline = parseDeadline_(payload.votingDeadline, settings.votingDeadline);
+    if (settings.votingOpen) {
+      settings.winnerVisionId = "";
+      settings.winnerDeclaredAt = "";
+    }
     const timestamp = now_();
     const definition = SHEETS.settings;
 
-    ["submissionsOpen", "votingOpen", "submissionDeadline", "votingDeadline"].forEach(function(key) {
+    ["submissionsOpen", "votingOpen", "submissionDeadline", "votingDeadline", "winnerVisionId", "winnerDeclaredAt"].forEach(function(key) {
       const record = findRecord_(definition, "key", key);
       if (record) {
         updateRecord_(record, { value: String(settings[key]), updatedAt: timestamp });
@@ -810,6 +824,75 @@ function saveSettings_(payload) {
     });
     invalidatePublicResponseCache_();
     return { ok: true, settings: settings };
+  });
+}
+
+function buildWinnerState_(visions, settings) {
+  const ranked = [...visions].sort(function(left, right) {
+    const voteDifference = (Number(right.votes) || 0) - (Number(left.votes) || 0);
+    if (voteDifference) return voteDifference;
+    return (Date.parse(right.publishedAt || right.createdAt || "") || 0) - (Date.parse(left.publishedAt || left.createdAt || "") || 0);
+  });
+  if (!ranked.length) return { status: "empty", vision: null, leaders: [], topVotes: 0, declaredAt: "" };
+  const topVotes = Number(ranked[0].votes) || 0;
+  const leaders = ranked.filter(function(vision) { return (Number(vision.votes) || 0) === topVotes; });
+  const declaredId = String(settings && settings.winnerVisionId || "");
+  const declaredVision = declaredId
+    ? leaders.find(function(vision) { return String(vision.id) === declaredId; }) || null
+    : null;
+  return {
+    status: declaredVision ? "declared" : leaders.length > 1 ? "tie" : "pending",
+    vision: declaredVision,
+    leaders: leaders,
+    topVotes: topVotes,
+    declaredAt: declaredVision ? String(settings.winnerDeclaredAt || "") : ""
+  };
+}
+
+function setWinner_(visionId) {
+  return withLock_(function() {
+    const settings = getSettings_();
+    if (settings.votingOpen) throw new Error("Close voting before declaring a winner.");
+    const normalizedId = cleanText_(visionId, 200, "Winner vision ID");
+    const record = findRecord_(SHEETS.visions, "id", normalizedId);
+    if (!record || String(record.status).toLowerCase() !== "published") {
+      throw new Error("Only a published vision can be declared winner.");
+    }
+    const published = objectRows_(SHEETS.visions)
+      .filter(function(item) { return String(item.status).toLowerCase() === "published"; })
+      .map(publicVision_);
+    const currentState = buildWinnerState_(published, settings);
+    if (!currentState.leaders.some(function(vision) { return String(vision.id) === normalizedId; })) {
+      throw new Error("Only a top-scoring vision can be declared winner.");
+    }
+    const timestamp = now_();
+    const definition = SHEETS.settings;
+    [
+      { key: "winnerVisionId", value: normalizedId },
+      { key: "winnerDeclaredAt", value: timestamp }
+    ].forEach(function(setting) {
+      const existing = findRecord_(definition, "key", setting.key);
+      if (existing) updateRecord_(existing, { value: setting.value, updatedAt: timestamp });
+      else appendRecord_(definition, { key: setting.key, value: setting.value, updatedAt: timestamp });
+    });
+    logActivity_("winner_declared", "published", record, "Organizer declared the final winner.", { winnerVisionId: normalizedId });
+    invalidatePublicResponseCache_();
+    const updatedSettings = getSettings_();
+    return { ok: true, settings: updatedSettings, winner: buildWinnerState_(published, updatedSettings) };
+  });
+}
+
+function clearWinner_() {
+  return withLock_(function() {
+    const timestamp = now_();
+    const definition = SHEETS.settings;
+    ["winnerVisionId", "winnerDeclaredAt"].forEach(function(key) {
+      const existing = findRecord_(definition, "key", key);
+      if (existing) updateRecord_(existing, { value: "", updatedAt: timestamp });
+      else appendRecord_(definition, { key: key, value: "", updatedAt: timestamp });
+    });
+    invalidatePublicResponseCache_();
+    return { ok: true, settings: getSettings_(), winner: { status: "pending", vision: null, leaders: [], topVotes: 0, declaredAt: "" } };
   });
 }
 
@@ -873,7 +956,7 @@ function buildPublicVisionsResponse_() {
   const visions = objectRows_(SHEETS.visions)
     .filter(function(record) { return String(record.status).toLowerCase() === "published"; })
     .map(publicVision_);
-  return { ok: true, settings: settings, visions: visions };
+  return { ok: true, settings: settings, visions: visions, winner: buildWinnerState_(visions, settings) };
 }
 
 function invalidatePublicResponseCache_() {
@@ -1210,6 +1293,7 @@ function getOrganizerSnapshot_() {
     settings: settings,
     pending: pending,
     published: published,
+    winner: buildWinnerState_(published, settings),
     analytics: getCompetitionAnalytics_(pending, published)
   };
 }
@@ -1309,6 +1393,13 @@ function deletePublishedVision_(visionId) {
     }
 
     const timestamp = now_();
+    const settings = getSettings_();
+    if (String(settings.winnerVisionId || "") === String(visionId)) {
+      ["winnerVisionId", "winnerDeclaredAt"].forEach(function(key) {
+        const winnerSetting = findRecord_(SHEETS.settings, "key", key);
+        if (winnerSetting) updateRecord_(winnerSetting, { value: "", updatedAt: timestamp });
+      });
+    }
     updateRecord_(vision, { status: "deleted" });
     objectRows_(SHEETS.votes)
       .filter(function(record) {
