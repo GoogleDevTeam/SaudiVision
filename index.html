@@ -1790,6 +1790,7 @@
     const PUBLIC_CACHE_KEY = "imagineSaudiPublicCache";
     const PUBLIC_CACHE_TTL = 120000;
     const PUBLIC_SYNC_INTERVAL = 15000;
+    const DEMO_TICK_INTERVAL = 4500;
     let publicSyncInFlight = null;
     let lastGalleryDataSignature = "";
     let hasRemoteSync = false;
@@ -3125,7 +3126,7 @@
         if (document.hidden) return;
         if (liveStageDemoMode) runLiveStageDemoTick();
         else if (liveStageOpen) loadReviewQueue();
-      }, liveStageDemoMode ? 1400 : PUBLIC_SYNC_INTERVAL);
+      }, liveStageDemoMode ? DEMO_TICK_INTERVAL : PUBLIC_SYNC_INTERVAL);
     }
 
     function toggleOrganizerDemoMode() {
