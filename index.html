@@ -1785,6 +1785,8 @@
     let localPublishedVisions = readLocalArray("imagineSaudiPublished")
       .filter((vision) => vision && String(vision.status || "").toLowerCase() === "published");
     let voteInFlight = false;
+     let voteCooldownUntil = 0;
+     let submissionCooldownUntil = 0;
     const TRACK_PROMPT_ENHANCERS = {
       "Green Tech & Energy": { en: "Use sustainability, resilience, resource-aware innovation, and responsible energy as a broad lens. Let the participant decide the technology, setting, people, and visual story.", ar: "استخدموا الاستدامة والمرونة والابتكار الواعي بالموارد والطاقة المسؤولة كإطار واسع، واتركوا للمشارك تحديد التقنية والمكان والناس والقصة البصرية." },
       "Smart Mobility & Future Cities": { en: "Use connected places, accessible movement, adaptable neighborhoods, and future urban life as a broad lens. Follow the participant’s own journey and priorities.", ar: "استخدموا ترابط الأماكن وسهولة التنقل والأحياء القابلة للتكيف والحياة الحضرية المستقبلية كإطار واسع، واتبعوا رحلة المشارك وأولوياته." },
@@ -1856,6 +1858,7 @@
          imageAdded: "Your vision was published to the gallery.",
         imageQueued: "Your vision was received and is waiting for organizer approval.",
         submissionClosed: "Submissions are currently closed — the organizer can reopen them above.",
+         rateLimited: "Too many requests from this browser. Please wait a moment and try again.",
          submitError: "The submission could not be saved. Please try again.",
          settingsError: "Competition settings could not be saved. Please try again.",
          backendUnavailable: "The backend is unavailable. Settings were not changed. Redeploy the Apps Script web app.",
@@ -1941,6 +1944,7 @@
          imageAdded: "تم نشر رؤيتكم في المعرض.",
         imageQueued: "تم استلام رؤيتكم وهي بانتظار موافقة المنظم.",
         submissionClosed: "التقديم مغلق حاليًا — يمكن للمنظم فتحه من لوحة التحكم.",
+         rateLimited: "تم تسجيل طلبات كثيرة من هذا المتصفح. انتظروا قليلًا ثم حاولوا مرة أخرى.",
          submitError: "تعذر حفظ المشاركة. حاول مرة أخرى.",
          settingsError: "تعذر حفظ إعدادات المسابقة. حاول مرة أخرى.",
          backendUnavailable: "الخادم غير متاح. لم يتم تغيير الإعدادات. أعد نشر تطبيق Apps Script.",
@@ -2574,7 +2578,7 @@
       const selectedVision = localStorage.getItem("imagineSaudiVote");
       const selectedVisionKey = vision ? visionKey(vision) : "";
       const isSelected = Boolean(vision) && (selectedVision === selectedVisionKey || selectedVision === vision.team);
-      if (voteInFlight || !votingCurrentlyOpen() || !vision || (selectedVision && !isSelected)) return;
+      if (voteInFlight || Date.now() < voteCooldownUntil || !votingCurrentlyOpen() || !vision || (selectedVision && !isSelected)) return;
       const action = isSelected ? "unvote" : "vote";
       voteInFlight = true;
       voteButton?.classList.add("is-processing");
@@ -2588,11 +2592,12 @@
         await syncGallery();
       } catch (error) {
         voteButton?.classList.add("is-rejected");
-        alert(t("voteError"));
+        alert(/RATE_LIMITED|rate limit/i.test(error?.message || "") ? t("rateLimited") : t("voteError"));
         console.error("Vote request failed:", error);
       } finally {
         voteButton?.classList.remove("is-processing");
         voteInFlight = false;
+        voteCooldownUntil = Date.now() + 900;
       }
     }
 
@@ -2604,6 +2609,7 @@
 
     form.addEventListener("submit", async (event) => {
       event.preventDefault();
+      if (Date.now() < submissionCooldownUntil) return;
       if (!submissionsCurrentlyOpen() || isSubmissionLocked()) {
         updateCompetitionMode(false);
         return;
@@ -2619,6 +2625,7 @@
         return;
       }
 
+      submissionCooldownUntil = Date.now() + 1500;
       form.classList.add("is-submitting");
       submissionPanel.classList.add("is-submitting");
       generateButton.disabled = true;
@@ -2660,7 +2667,7 @@
         generateButton.classList.remove("is-generating");
         form.classList.remove("is-submitting");
         submissionPanel.classList.remove("is-submitting");
-        formNote.textContent = error?.message || t("submitError");
+        formNote.textContent = /RATE_LIMITED|rate limit/i.test(error?.message || "") ? t("rateLimited") : error?.message || t("submitError");
         console.error("Live AI submission failed:", error);
         return;
       }

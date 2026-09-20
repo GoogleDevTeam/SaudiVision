@@ -89,6 +89,11 @@ const GENERATION_SLOT_KEY = "IMAGINE_SAUDI_CLOUDFLARE_GENERATION_SLOT";
 const PUBLIC_RESPONSE_CACHE_KEY_ = "IMAGINE_SAUDI_PUBLIC_RESPONSE_V1";
 const PUBLIC_RESPONSE_CACHE_TTL_SECONDS_ = 5;
 const PUBLIC_RESPONSE_CACHE_MAX_BYTES_ = 45000;
+const ABUSE_RATE_LIMIT_CACHE_PREFIX_ = "IMAGINE_SAUDI_RATE_V1_";
+const ABUSE_RATE_LIMITS_ = {
+  submission: { maxRequests: 3, windowSeconds: 600 },
+  voting: { maxRequests: 20, windowSeconds: 60 }
+};
 const CLOUDFLARE_IMAGE_MODEL = "@cf/black-forest-labs/flux-1-schnell";
 const CLOUDFLARE_API_BASE_URL = "https://api.cloudflare.com/client/v4";
 const THEME = {
@@ -692,6 +697,41 @@ function withLock_(callback) {
   }
 }
 
+function enforceRateLimit_(bucket, identifier) {
+  const limit = ABUSE_RATE_LIMITS_[bucket];
+  if (!limit) return;
+  const normalized = String(identifier == null ? "" : identifier).trim();
+  if (!normalized) throw new Error("RATE_LIMITED: An anonymous browser ID is required.");
+  const safeIdentifier = normalized.replace(/[^a-zA-Z0-9_-]/g, "_").slice(0, 100);
+  const cacheKey = ABUSE_RATE_LIMIT_CACHE_PREFIX_ + bucket + "_" + safeIdentifier;
+  const cache = CacheService.getScriptCache();
+  const lock = LockService.getScriptLock();
+  lock.waitLock(5000);
+  try {
+    const now = Date.now();
+    let state = null;
+    const cached = cache.get(cacheKey);
+    if (cached) {
+      try {
+        state = JSON.parse(cached);
+      } catch (error) {
+        state = null;
+      }
+    }
+    if (!state || Number(state.resetAt) <= now) {
+      state = { count: 0, resetAt: now + limit.windowSeconds * 1000 };
+    }
+    if (Number(state.count) >= limit.maxRequests) {
+      const waitSeconds = Math.max(1, Math.ceil((Number(state.resetAt) - now) / 1000));
+      throw new Error("RATE_LIMITED: Too many requests. Please wait " + waitSeconds + " seconds.");
+    }
+    state.count = Number(state.count) + 1;
+    cache.put(cacheKey, JSON.stringify(state), limit.windowSeconds);
+  } finally {
+    lock.releaseLock();
+  }
+}
+
 function parseBoolean_(value, fallback) {
   if (value === true || value === "true") return true;
   if (value === false || value === "false") return false;
@@ -846,6 +886,7 @@ function submitVision_(payload) {
   const prompt = cleanText_(payload.prompt, 2000, "Vision description");
   const participantId = cleanText_(payload.participantId, 160, "Participant session");
   const submissionRound = String(settings.submissionRound || "1");
+  enforceRateLimit_("submission", participantId);
   const deviceId = cleanOptionalText_(payload.deviceId || "", 80);
   const deviceLabel = cleanOptionalText_(payload.deviceLabel || "", 180);
   const browser = cleanOptionalText_(payload.browser || "", 80);
@@ -1291,13 +1332,14 @@ function validVoterId_(value) {
 }
 
 function voteForVision_(payload) {
+  const voterId = validVoterId_(payload.voterId);
+  enforceRateLimit_("voting", voterId);
   return withLock_(function() {
     const settings = getSettings_();
     if (!settings.votingOpen || !deadlineIsOpen_(settings.votingDeadline)) {
       throw new Error("Voting is currently closed or past its deadline.");
     }
 
-    const voterId = validVoterId_(payload.voterId);
     const visionId = cleanText_(payload.visionId, 200, "Vision ID");
     const vision = findRecord_(SHEETS.visions, "id", visionId);
     if (!vision || String(vision.status).toLowerCase() !== "published") {
@@ -1324,13 +1366,14 @@ function voteForVision_(payload) {
 }
 
 function unvoteVision_(payload) {
+  const voterId = validVoterId_(payload.voterId);
+  enforceRateLimit_("voting", voterId);
   return withLock_(function() {
     const settings = getSettings_();
     if (!settings.votingOpen || !deadlineIsOpen_(settings.votingDeadline)) {
       throw new Error("Voting is currently closed or past its deadline.");
     }
 
-    const voterId = validVoterId_(payload.voterId);
     const visionId = cleanText_(payload.visionId, 200, "Vision ID");
     const activeVote = objectRows_(SHEETS.votes).find(function(record) {
       return String(record.voterId) === voterId &&

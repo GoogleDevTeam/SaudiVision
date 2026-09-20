@@ -472,6 +472,16 @@ Before coding, inspect the latest `main` branch and the live deployment state. T
 - Direct Node syntax checks passed for the inline frontend JavaScript and Apps Script source.
 - GitHub Pages will rebuild the frontend from the new source. The Apps Script source must be copied into Apps Script and redeployed for the public-response cache to become active.
 
+### Login-free abuse protection update — 2026-09-20
+
+- Kept the entire site login-free.
+- Added server-side anonymous rate limits: up to 3 submission attempts per browser participant ID per 10 minutes, and up to 20 vote/unvote actions per browser voter ID per minute.
+- Added short client cooldowns to prevent accidental double-submit and rapid repeated voting.
+- Public reads remain unrestricted so a large audience can browse the gallery without friction.
+- This is abuse reduction, not strict human identity enforcement: clearing storage, changing browsers, or rotating IDs can bypass anonymous limits. Stronger protection would require an optional CAPTCHA/Turnstile challenge or authenticated identity.
+- Files changed: `index.html`, `google-apps-script.gs`.
+- Apps Script must be redeployed before the server-side limits become active; no login or organizer-key change is required.
+
 ### Next recommended step
 
 Deploy the updated google-apps-script.gs once, then test descriptions that intentionally combine two or three ideas. Confirm the generated image follows the participant's wording while using the selected track only as a broad lens.
