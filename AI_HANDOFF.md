@@ -483,6 +483,17 @@ Before coding, inspect the latest `main` branch and the live deployment state. T
 - Commit: `ae39e7d21f68616542188fd6a05e5654b97c4fdf`.
 - Apps Script must be redeployed before the server-side limits become active; no login or organizer-key change is required.
 
+### Generated-image delivery improvement — 2026-09-20
+
+- Drive-backed generated images now use the Google Drive thumbnail endpoint at a bounded width for faster, more reliable gallery delivery instead of sending every visitor to the full view endpoint first.
+- The backend includes the original Drive view URL as an image fallback for both new and existing records; existing records are upgraded at response time using their stored Drive file ID without changing spreadsheet data.
+- The frontend retries a failed thumbnail with the fallback URL before showing the placeholder, eagerly prioritizes the first two gallery images, and keeps lazy loading for the rest.
+- Files changed: google-apps-script.gs, index.html.
+- Backend commit: 73e6df9432a9c0b9c40e04138043ac8f8ee482b1.
+- Frontend commit: 7ebf123e28707d67496fa8453f7ca1c2c65988e4.
+- Direct new Function syntax checks passed for the Apps Script source and the inline frontend JavaScript; static wiring checks passed for thumbnail delivery, fallback payloads, retry handling, and first-image priority loading.
+- GitHub Pages will rebuild the frontend from the new source. The Apps Script source must be copied into Apps Script and redeployed for thumbnail URLs and fallback metadata to become active.
+
 ### Next recommended step
 
-Deploy the updated google-apps-script.gs once, then test descriptions that intentionally combine two or three ideas. Confirm the generated image follows the participant's wording while using the selected track only as a broad lens.
+Deploy the updated google-apps-script.gs once, then submit a vision with two or three related ideas and verify that the generated image loads quickly in the gallery and still follows the participant's wording while using the selected track only as a broad lens.
