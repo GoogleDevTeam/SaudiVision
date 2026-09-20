@@ -2019,7 +2019,7 @@
         phaseVotingDetail: "Vote for the published vision that should lead the future.",
         phaseResultsDetail: "Voting is closed. The published visions are ranked below.",
         countdownLabel: "Countdown",
-        countdownNone: "No deadline set",
+        countdownNone: "No deadline set — choose one in Organizer controls",
         countdownFinished: "Deadline reached",
         publicResults: "Public results",
         resultsEmpty: "No published visions yet.",
@@ -2119,7 +2119,7 @@
         phaseVotingDetail: "صوّتوا للرؤية المنشورة التي تقود المستقبل.",
         phaseResultsDetail: "أُغلق التصويت. تظهر الرؤى المنشورة مرتبة أدناه.",
         countdownLabel: "العدّ التنازلي",
-        countdownNone: "لم يُحدد موعد",
+        countdownNone: "لم يُحدد موعد — حدده من لوحة المنظم",
         countdownFinished: "انتهى الموعد",
         publicResults: "النتائج العامة",
         resultsEmpty: "لا توجد رؤى منشورة بعد.",
@@ -2421,10 +2421,11 @@
       if (phase === "results" && (phaseChanged || forceResultsRender)) renderPublicResults();
       const deadline = phase === "submissions" ? settings.submissionDeadline : phase === "voting" ? settings.votingDeadline : "";
       publicCountdownLabel.textContent = t("countdownLabel");
-      if (!deadline) {
+      const deadlineTimestamp = deadline ? new Date(deadline).getTime() : NaN;
+      if (!Number.isFinite(deadlineTimestamp)) {
         publicCountdown.textContent = t("countdownNone");
       } else {
-        const remaining = Date.parse(deadline) - Date.now();
+        const remaining = deadlineTimestamp - Date.now();
         publicCountdown.textContent = remaining > 0 ? formatCountdown(remaining) : t("countdownFinished");
       }
     }
@@ -2578,14 +2579,15 @@
 
     function applyPublicSettings(nextSettings) {
       if (!nextSettings) return;
+      const hasSetting = (key) => Object.prototype.hasOwnProperty.call(nextSettings, key);
       const asBoolean = (value) => value === true || String(value).toLowerCase() === "true";
-      settings.submissionsOpen = asBoolean(nextSettings.submissionsOpen);
-      settings.votingOpen = asBoolean(nextSettings.votingOpen);
-      settings.submissionDeadline = nextSettings.submissionDeadline || "";
-      settings.votingDeadline = nextSettings.votingDeadline || "";
-      settings.submissionRound = String(nextSettings.submissionRound || settings.submissionRound || "1");
-      settings.winnerVisionId = String(nextSettings.winnerVisionId || "");
-      settings.winnerDeclaredAt = String(nextSettings.winnerDeclaredAt || "");
+      if (hasSetting("submissionsOpen")) settings.submissionsOpen = asBoolean(nextSettings.submissionsOpen);
+      if (hasSetting("votingOpen")) settings.votingOpen = asBoolean(nextSettings.votingOpen);
+      if (hasSetting("submissionDeadline")) settings.submissionDeadline = nextSettings.submissionDeadline || "";
+      if (hasSetting("votingDeadline")) settings.votingDeadline = nextSettings.votingDeadline || "";
+      if (hasSetting("submissionRound")) settings.submissionRound = String(nextSettings.submissionRound || settings.submissionRound || "1");
+      if (hasSetting("winnerVisionId")) settings.winnerVisionId = String(nextSettings.winnerVisionId || "");
+      if (hasSetting("winnerDeclaredAt")) settings.winnerDeclaredAt = String(nextSettings.winnerDeclaredAt || "");
       localStorage.setItem("imagineSaudiSubmissionRound", settings.submissionRound);
       syncDeadlineInputs();
       syncControlInputs();
@@ -3196,8 +3198,9 @@
         demoSettingsSnapshot = { ...settings };
         settings.submissionsOpen = true;
         settings.votingOpen = true;
-        settings.submissionDeadline = "";
-        settings.votingDeadline = "";
+        const demoStartedAt = Date.now();
+        settings.submissionDeadline = new Date(demoStartedAt + 10 * 60 * 1000).toISOString();
+        settings.votingDeadline = new Date(demoStartedAt + 25 * 60 * 1000).toISOString();
         pendingOrganizerRecords = [];
         publishedOrganizerRecords = [];
         demoPendingRecords = buildClientDemoPendingRecords();
