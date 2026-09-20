@@ -1889,6 +1889,7 @@
          organizerRequired: "Organizer authorization is required.",
          organizerSlow: "The organizer service is taking too long. Try again after the Apps Script deployment finishes.",
          organizerInvalidKey: "The organizer key was rejected. Check the organizer setup and try again.",
+         organizerLoading: "Checking organizer key...",
          confirmDelete: "Delete this submission permanently? It will not be shown publicly.",
          demoBadge: "AI GENERATED",
          aiUnavailable: "Live AI is not configured yet. Ask the organizer to add the Cloudflare API token and account ID.",
@@ -1987,6 +1988,7 @@
          organizerRequired: "يلزم إدخال رمز صلاحية المنظم.",
          organizerSlow: "تستغرق خدمة المنظم وقتًا أطول من المتوقع. حاولوا مرة أخرى بعد اكتمال نشر Apps Script.",
          organizerInvalidKey: "تم رفض رمز المنظم. تحقق من إعدادات المنظم وحاول مرة أخرى.",
+         organizerLoading: "جارٍ التحقق من رمز المنظم...",
          confirmDelete: "حذف هذه المشاركة نهائيًا؟ لن تظهر للجمهور.",
          demoBadge: "مولّد بالذكاء الاصطناعي",
          aiUnavailable: "لم يتم إعداد الذكاء الاصطناعي المباشر بعد. اطلبوا من المنظم إضافة إعدادات Cloudflare.",
@@ -2543,7 +2545,13 @@
       organizerAccess.classList.add("is-processing");
       organizerUnlockInFlight = (async () => {
         try {
-          const snapshot = await requestOrganizerSnapshot(key);
+          let initialSnapshot = null;
+          try {
+            await adminRequest("organizerAuth", {}, key);
+          } catch (error) {
+            if (!/unknown action/i.test(error?.message || "")) throw error;
+            initialSnapshot = await requestOrganizerSnapshot(key);
+          }
           organizerKey = key;
           sessionStorage.setItem("imagineSaudiOrganizerKey", organizerKey);
           organizerUnlocked = true;
@@ -2552,7 +2560,9 @@
           organizerAccess.classList.remove("is-rejected");
           organizerAccess.classList.add("is-unlocked");
           hideOrganizerLogin();
-          await loadReviewQueue(snapshot);
+          organizerStatus.textContent = t("organizerLoading");
+          if (initialSnapshot) await loadReviewQueue(initialSnapshot);
+          else loadReviewQueue();
           return true;
         } catch (error) {
           organizerKey = "";
