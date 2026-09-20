@@ -2386,8 +2386,8 @@
       let winnerMarkup = '<div class="public-winner-pending"><strong>' + t("winnerNoWinner") + '</strong></div>';
       const winner = publicWinner && publicWinner.vision;
       if (publicWinner && publicWinner.status === "declared" && winner) {
-        const safeImage = escapeHTML(winner.image || placeholderImage);
-        const safeFallback = escapeHTML(driveImageFallbackUrl(winner));
+        const safeImage = escapeHTML(safeImageUrl(winner.image || placeholderImage));
+        const safeFallback = escapeHTML(safeImageUrl(driveImageFallbackUrl(winner)));
         winnerMarkup = '<article class="public-winner">' +
           '<div class="public-winner-copy"><span class="public-winner-eyebrow">' + t("winnerFinal") + '</span>' +
           '<h4>' + escapeHTML(winner.title || winner.team || "—") + '</h4>' +
@@ -2448,8 +2448,8 @@
     }
 
     function visionCard(vision, index) {
-      const safeImage = escapeHTML(vision.image || placeholderImage);
-      const safeImageFallback = escapeHTML(driveImageFallbackUrl(vision));
+      const safeImage = escapeHTML(safeImageUrl(vision.image || placeholderImage));
+      const safeImageFallback = escapeHTML(safeImageUrl(driveImageFallbackUrl(vision)));
       const selectedVision = localStorage.getItem("imagineSaudiVote");
       const isVoted = selectedVision === visionKey(vision) || selectedVision === vision.team;
       const anotherVisionVoted = Boolean(selectedVision && !isVoted);
