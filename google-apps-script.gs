@@ -1545,3 +1545,14 @@ function requireAdmin_(payload) {
   if (!expected) throw new Error("ADMIN_KEY is not configured in Script Properties.");
   if (!constantTimeEquals_(provided, expected)) throw new Error("Unauthorized: invalid organizer key.");
 }
+
+/**
+ * Run this once from the Apps Script editor to grant external-request permission.
+ * It does not access competition data or call Cloudflare. Delete it afterward if desired.
+ */
+function authorizeExternalRequest_() {
+  UrlFetchApp.fetch("https://www.google.com/generate_204", {
+    method: "get",
+    muteHttpExceptions: true
+  });
+}
