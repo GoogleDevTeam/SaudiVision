@@ -2176,17 +2176,37 @@
       return days + t("countdownDays") + " " + String(hours).padStart(2, "0") + t("countdownHours") + " " + String(minutes).padStart(2, "0") + t("countdownMinutes") + " " + String(seconds).padStart(2, "0") + t("countdownSeconds");
     }
 
+
     function renderPublicResults() {
       const ranked = [...activeVisions].sort((left, right) => {
         const voteDifference = (Number(right.votes) || 0) - (Number(left.votes) || 0);
         if (voteDifference) return voteDifference;
         return (Date.parse(right.publishedAt || right.createdAt || "") || 0) - (Date.parse(left.publishedAt || left.createdAt || "") || 0);
       });
-      publicResultsList.innerHTML = ranked.length
-        ? ranked.slice(0, 5).map((vision, index) =>
-          '<div class="public-result-item"><span class="public-result-rank">' + (index + 1) + '</span><div class="public-result-copy"><strong>' + escapeHTML(vision.team || "—") + '</strong><span>' + escapeHTML(trackLabel(vision.track)) + '</span></div><span class="public-result-score">' + t("resultsVoteLabel").replace("{votes}", Number(vision.votes) || 0) + '</span></div>'
-        ).join("")
-        : '<p class="gallery-empty">' + t("resultsEmpty") + '</p>';
+      if (!ranked.length) {
+        publicResultsList.innerHTML = '<p class="gallery-empty">' + t("resultsEmpty") + '</p>';
+        return;
+      }
+      let winnerMarkup = '<div class="public-winner-pending"><strong>' + t("winnerNoWinner") + '</strong></div>';
+      const winner = publicWinner && publicWinner.vision;
+      if (publicWinner && publicWinner.status === "declared" && winner) {
+        const safeImage = escapeHTML(winner.image || placeholderImage);
+        const safeFallback = escapeHTML(driveImageFallbackUrl(winner));
+        winnerMarkup = '<article class="public-winner">' +
+          '<div class="public-winner-copy"><span class="public-winner-eyebrow">' + t("winnerFinal") + '</span>' +
+          '<h4>' + escapeHTML(winner.title || winner.team || "—") + '</h4>' +
+          '<span class="public-winner-team">' + escapeHTML(winner.team || "—") + ' · ' + escapeHTML(trackLabel(winner.track)) + '</span>' +
+          '<p class="public-winner-prompt">' + escapeHTML(winner.prompt || "") + '</p>' +
+          '<span class="public-winner-votes">' + t("winnerVoteLabel").replace("{votes}", Number(winner.votes) || 0) + '</span></div>' +
+          '<div class="public-winner-image"><img src="' + safeImage + '" alt="' + escapeHTML(winner.team || "") + '" loading="eager" fetchpriority="high" decoding="async" data-fallback-src="' + safeFallback + '" onerror="if (this.dataset.fallbackSrc) { const fallback = this.dataset.fallbackSrc; this.dataset.fallbackSrc = ''; this.src = fallback; } else { this.onerror = null; this.src = '' + placeholderImage + ''; }" /></div>' +
+          '</article>';
+      } else if (publicWinner && publicWinner.status === "tie") {
+        winnerMarkup = '<div class="public-winner-pending"><strong>' + t("winnerTiePublic") + '</strong></div>';
+      }
+      const rankingMarkup = ranked.slice(0, 5).map((vision, index) =>
+        '<div class="public-result-item"><span class="public-result-rank">' + (index + 1) + '</span><div class="public-result-copy"><strong>' + escapeHTML(vision.title || vision.team || "—") + '</strong><span>' + escapeHTML((vision.team || "—") + " · " + trackLabel(vision.track)) + '</span></div><span class="public-result-score">' + t("resultsVoteLabel").replace("{votes}", Number(vision.votes) || 0) + '</span></div>'
+      ).join("");
+      publicResultsList.innerHTML = winnerMarkup + rankingMarkup;
     }
 
     function updatePublicCompetitionState(forceResultsRender = false) {
@@ -2780,6 +2800,72 @@
       renderResultsDashboard();
     }
 
+
+    function renderWinnerControls(ranked, leaders) {
+      if (!winnerControls) return;
+      if (!ranked.length) {
+        winnerControls.innerHTML = '<div class="winner-control-status">' + t("noPublishedResults") + '</div>';
+        return;
+      }
+      if (votingCurrentlyOpen()) {
+        winnerControls.innerHTML = '<div class="winner-control-status">' + t("winnerClosedRequired") + '</div>';
+        return;
+      }
+      const declared = organizerWinner && organizerWinner.status === "declared" && organizerWinner.vision;
+      if (declared) {
+        winnerControls.innerHTML = '<div class="winner-control-status"><strong>' + t("winnerDeclared") + ':</strong> ' + escapeHTML(declared.title || declared.team || "—") + '</div><div class="winner-control-actions"><button class="winner-control-button" type="button" data-winner-action="clear">' + t("winnerClear") + '</button></div>';
+      } else {
+        const status = leaders.length > 1 ? t("tied") + " — " + t("winnerReady") : t("winnerReady");
+        const buttons = leaders.map((vision) => '<button class="winner-control-button primary" type="button" data-winner-action="set" data-winner-id="' + escapeHTML(String(vision.id)) + '">' + t("winnerDeclare") + ': ' + escapeHTML(vision.title || vision.team || "—") + '</button>').join("");
+        winnerControls.innerHTML = '<div class="winner-control-status">' + status + '</div><div class="winner-control-actions">' + buttons + '</div>';
+      }
+      winnerControls.querySelectorAll("[data-winner-action]").forEach((button) => {
+        button.addEventListener("click", () => winnerAction(button.dataset.winnerAction, button.dataset.winnerId || ""));
+      });
+    }
+
+    async function winnerAction(action, visionId = "") {
+      if (action === "set" && votingCurrentlyOpen()) {
+        organizerStatus.textContent = t("winnerClosedRequired");
+        organizerStatus.classList.add("is-error");
+        return;
+      }
+      const vision = publishedOrganizerRecords.find((item) => String(item.id) === String(visionId));
+      if (action === "set" && !vision) return;
+      if (action === "set" && !window.confirm(t("winnerConfirm").replace("{team}", vision.title || vision.team || "—"))) return;
+      if (action === "clear" && !window.confirm(t("winnerClearConfirm"))) return;
+      winnerControls.querySelectorAll("button").forEach((button) => { button.disabled = true; });
+      try {
+        let result = null;
+        if (GOOGLE_APPS_SCRIPT_URL) {
+          result = await adminRequest(action === "set" ? "setWinner" : "clearWinner", action === "set" ? { visionId: visionId } : {});
+        } else if (action === "set") {
+          const ranked = [...publishedOrganizerRecords].sort((left, right) => (Number(right.votes) || 0) - (Number(left.votes) || 0));
+          const topVotes = Number(ranked[0]?.votes) || 0;
+          const leaders = ranked.filter((item) => (Number(item.votes) || 0) === topVotes);
+          organizerWinner = { status: "declared", vision: vision, leaders: leaders, topVotes: topVotes, declaredAt: new Date().toISOString() };
+          publicWinner = organizerWinner;
+        } else {
+          organizerWinner = { status: "pending", vision: null, leaders: [], topVotes: 0, declaredAt: "" };
+          publicWinner = organizerWinner;
+        }
+        if (result) {
+          applyPublicSettings(result.settings);
+          organizerWinner = result.winner || null;
+          publicWinner = result.winner || null;
+        }
+        renderResultsDashboard();
+        updatePublicCompetitionState(true);
+        await loadReviewQueue();
+        await syncGallery();
+      } catch (error) {
+        showOrganizerError(error);
+        console.error("Winner action failed:", error);
+      } finally {
+        if (winnerControls) winnerControls.querySelectorAll("button").forEach((button) => { button.disabled = false; });
+      }
+    }
+
     function renderResultsDashboard() {
       const ranked = [...publishedOrganizerRecords]
         .sort((left, right) => {
@@ -2791,33 +2877,21 @@
         });
       if (!ranked.length) {
         organizerLeader.textContent = "—";
-        resultsLeaderboard.innerHTML = `<p class="results-empty">${t("noPublishedResults")}</p>`;
+        resultsLeaderboard.innerHTML = '<p class="results-empty">' + t("noPublishedResults") + '</p>';
+        renderWinnerControls([], []);
         return;
       }
-
       const totalVotes = ranked.reduce((sum, vision) => sum + (Number(vision.votes) || 0), 0);
       const topVotes = Number(ranked[0].votes) || 0;
       const leaders = ranked.filter((vision) => (Number(vision.votes) || 0) === topVotes);
-      organizerLeader.textContent = leaders.length > 1
-        ? `${t("tied")} · ${topVotes} ${t("votes")}`
-        : `${t("leader")}: ${String(ranked[0].team || "—")}`;
+      organizerLeader.textContent = leaders.length > 1 ? t("tied") + " · " + topVotes + " " + t("votes") : t("leader") + ": " + String(ranked[0].team || "—");
       resultsLeaderboard.innerHTML = ranked.slice(0, 5).map((vision, index) => {
         const votes = Number(vision.votes) || 0;
         const percent = totalVotes ? Math.round((votes / totalVotes) * 100) : 0;
-        const label = t("resultsVotes")
-          .replace("{votes}", votes)
-          .replace("{percent}", percent);
-        return `
-          <div class="leaderboard-item">
-            <span class="leaderboard-rank">${index + 1}</span>
-            <div class="leaderboard-copy">
-              <strong>${escapeHTML(vision.team || "—")}</strong>
-              <span>${escapeHTML(vision.track || "")}</span>
-              <div class="leaderboard-bar" aria-hidden="true"><i style="width:${percent}%"></i></div>
-            </div>
-            <span class="leaderboard-score">${escapeHTML(label)}</span>
-          </div>`;
+        const label = t("resultsVotes").replace("{votes}", votes).replace("{percent}", percent);
+        return '<div class="leaderboard-item"><span class="leaderboard-rank">' + (index + 1) + '</span><div class="leaderboard-copy"><strong>' + escapeHTML(vision.title || vision.team || "—") + '</strong><span>' + escapeHTML(vision.track || "") + '</span><div class="leaderboard-bar" aria-hidden="true"><i style="width:' + percent + '%"></i></div></div><span class="leaderboard-score">' + escapeHTML(label) + '</span></div>';
       }).join("");
+      renderWinnerControls(ranked, leaders);
     }
 
     function updateReviewFilters() {
