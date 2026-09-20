@@ -103,9 +103,9 @@
     .decorative-mark {
       position: absolute;
       display: block;
+       pointer-events: none;
       transform: rotate(var(--rotation)) scale(var(--scale));
       transform-origin: center;
-      animation: decorative-drift var(--drift-duration) ease-in-out var(--drift-delay) infinite alternate;
     }
     .decorative-logo {
       width: clamp(26px, 2.9vw, 52px);
@@ -147,11 +147,6 @@
       -webkit-text-stroke: 1px rgba(216, 208, 237, .32);
       text-shadow: 0 0 42px rgba(155, 138, 196, .16);
     }
-    @keyframes decorative-drift {
-      from { margin: -4px 0 0 -3px; }
-      to { margin: 5px 0 0 4px; }
-    }
-
     .topline {
       display: flex;
       align-items: center;
@@ -1071,7 +1066,6 @@
     .organizer-metric strong.metric-pop { animation: metric-pop .38s ease both; }
     @media (max-width: 700px) {
       .brand-name { animation-duration: 16s; }
-      .decorative-mark { animation-duration: 14s; }
       .vision-card { box-shadow: 0 8px 24px rgba(0, 0, 0, .18); }
       .vision-card:hover { border-color: var(--line); box-shadow: 0 8px 24px rgba(0, 0, 0, .18); transform: none; }
       .vision-card:hover .vision-image { filter: none; transform: none; }
@@ -1421,7 +1415,7 @@
     <section aria-labelledby="gallery-heading">
       <div class="gallery-toolbar">
         <h2 class="section-title" id="gallery-heading" data-en="Vision gallery" data-ar="معرض الرؤى">معرض الرؤى</h2>
-        <div class="sync-state"><span id="voting-status" data-en="Voting open" data-ar="التصويت مفتوح">التصويت مفتوح</span><span class="sync-icon">↻</span><span id="sync-state" data-en="Syncing every 05 seconds" data-ar="تتم المزامنة كل 05 ثوانٍ">تتم المزامنة كل 05 ثوانٍ</span></div>
+        <div class="sync-state"><span id="voting-status" data-en="Voting open" data-ar="التصويت مفتوح">التصويت مفتوح</span><span class="sync-icon">↻</span><span id="sync-state" data-en="Syncing every 15 seconds" data-ar="تتم المزامنة كل 15 ثانية">تتم المزامنة كل 15 ثانية</span></div>
       </div>
       <div class="public-status" id="public-status" aria-live="polite">
         <div>
@@ -1506,8 +1500,6 @@
       else mark.style.width = geometry.width.toFixed(1) + "px";
       mark.style.setProperty("--rotation", randomBetween(-10, 10).toFixed(1) + "deg");
       mark.style.setProperty("--scale", randomBetween(.82, 1.02).toFixed(2));
-      mark.style.setProperty("--drift-duration", randomBetween(5, 11).toFixed(1) + "s");
-      mark.style.setProperty("--drift-delay", randomBetween(-8, 0).toFixed(1) + "s");
       mark.style.opacity = randomBetween(.035, .085).toFixed(3);
       if (kind === "logo") {
         const image = document.createElement("img"); image.src = "google-developers-logo.png"; image.alt = ""; image.decoding = "async"; mark.appendChild(image);
@@ -1519,12 +1511,16 @@
     }
     function spreadSlots(columns, rows, count) {
       const slots = [];
-      for (let index = 0; index < count; index += 1) {
-        const row = index % rows;
-        const column = Math.floor(Math.random() * columns);
-        slots.push({ row, column });
+      for (let row = 0; row < rows; row += 1) {
+        for (let column = 0; column < columns; column += 1) {
+          slots.push({ row, column });
+        }
       }
-      return slots;
+      for (let index = slots.length - 1; index > 0; index -= 1) {
+        const swapIndex = Math.floor(Math.random() * (index + 1));
+        [slots[index], slots[swapIndex]] = [slots[swapIndex], slots[index]];
+      }
+      return slots.slice(0, count);
     }
     function spawnBackgroundDecorations() {
       if (!decorativeLayer) return;
@@ -1535,7 +1531,8 @@
       const rows = Math.max(8, Math.ceil(spawnCount / columns));
       const cellWidth = bounds.width / columns;
       const cellHeight = bounds.height / rows;
-      const padding = 12;
+      const padding = 24;
+      const rotationAllowance = 1.2;
       const slots = spreadSlots(columns, rows, spawnCount);
       for (let index = 0; index < spawnCount; index += 1) {
         const roll = Math.random();
@@ -1544,19 +1541,28 @@
         const geometry = decorationGeometry(kind);
         const maxWidth = Math.max(18, cellWidth - padding * 2);
         const maxHeight = Math.max(18, cellHeight - padding * 2);
-        const scaleToFit = Math.min(1, maxWidth / geometry.width, maxHeight / geometry.height);
+        const scaleToFit = Math.min(
+          1,
+          maxWidth / (geometry.width * rotationAllowance),
+          maxHeight / (geometry.height * rotationAllowance)
+        );
         geometry.width *= scaleToFit; geometry.height *= scaleToFit;
         if (geometry.fontSize) geometry.fontSize *= scaleToFit;
         const slotLeft = slot.column * cellWidth;
         const slotTop = slot.row * cellHeight;
-        const left = slotLeft + randomBetween(padding, Math.max(padding, cellWidth - geometry.width - padding));
-        const top = slotTop + randomBetween(padding, Math.max(padding, cellHeight - geometry.height - padding));
+        const left = slotLeft + (cellWidth - geometry.width) / 2;
+        const top = slotTop + (cellHeight - geometry.height) / 2;
         const mark = createDecorativeMark(kind, geometry);
         mark.style.left = left.toFixed(1) + "px"; mark.style.top = top.toFixed(1) + "px";
         decorativeLayer.appendChild(mark);
       }
     }
     spawnBackgroundDecorations();
+    let decorationResizeTimer = 0;
+    window.addEventListener("resize", () => {
+      window.clearTimeout(decorationResizeTimer);
+      decorationResizeTimer = window.setTimeout(spawnBackgroundDecorations, 160);
+    }, { passive: true });
 
     const sourceVisions = [
       {
@@ -1635,9 +1641,12 @@
     let activeVisions = sourceVisions;
     const PUBLIC_CACHE_KEY = "imagineSaudiPublicCache";
     const PUBLIC_CACHE_TTL = 120000;
+    const PUBLIC_SYNC_INTERVAL = 15000;
     let publicSyncInFlight = null;
     let lastGalleryDataSignature = "";
     let hasRemoteSync = false;
+    let publicSyncTimer = 0;
+    let lastPublicPhase = "";
 
     const gallery = document.getElementById("gallery-grid");
     const count = document.getElementById("vision-count");
@@ -2054,6 +2063,7 @@
       updateCompetitionMode(false);
       updateTrackEnhancer();
       updateGalleryFilters();
+      if (!publicResults.hidden) renderPublicResults();
       syncGallery();
       if (organizerDetails.open) loadReviewQueue();
     }
@@ -2127,17 +2137,19 @@
         : '<p class="gallery-empty">' + t("resultsEmpty") + '</p>';
     }
 
-    function updatePublicCompetitionState() {
+    function updatePublicCompetitionState(forceResultsRender = false) {
       const phase = !votingCurrentlyOpen() ? "results" : !submissionsCurrentlyOpen() ? "voting" : "submissions";
       const phaseCopy = {
         submissions: ["phaseSubmissions", "phaseSubmissionsDetail"],
         voting: ["phaseVoting", "phaseVotingDetail"],
         results: ["phaseResults", "phaseResultsDetail"]
       }[phase];
+      const phaseChanged = phase !== lastPublicPhase;
+      lastPublicPhase = phase;
       publicPhase.textContent = t(phaseCopy[0]);
       publicPhaseDetail.textContent = t(phaseCopy[1]);
       publicResults.hidden = phase !== "results";
-      if (phase === "results") renderPublicResults();
+      if (phase === "results" && (phaseChanged || forceResultsRender)) renderPublicResults();
       const deadline = phase === "submissions" ? settings.submissionDeadline : phase === "voting" ? settings.votingDeadline : "";
       publicCountdownLabel.textContent = t("countdownLabel");
       if (!deadline) {
@@ -2526,13 +2538,13 @@
           const visions = await fetchVisionBatch();
           activeVisions = visions;
           hasRemoteSync = true;
-          updatePublicCompetitionState();
           const selectedVision = localStorage.getItem("imagineSaudiVote");
           if (selectedVision && !visions.some((vision) => visionKey(vision) === selectedVision || vision.team === selectedVision)) {
             localStorage.removeItem("imagineSaudiVote");
           }
           const nextSignature = publicDataSignature(visions);
           const dataChanged = nextSignature !== lastGalleryDataSignature;
+          updatePublicCompetitionState(dataChanged);
           if (dataChanged) {
             lastGalleryDataSignature = nextSignature;
             updateGalleryFilters();
@@ -3037,11 +3049,19 @@
     galleryTrackFilter.addEventListener("change", renderGallery);
     gallerySort.addEventListener("change", renderGallery);
     languageToggle.addEventListener("click", () => applyLanguage(currentLanguage === "ar" ? "en" : "ar"));
+    function schedulePublicSync() {
+      window.clearInterval(publicSyncTimer);
+      publicSyncTimer = document.hidden ? 0 : window.setInterval(syncGallery, PUBLIC_SYNC_INTERVAL);
+    }
+    document.addEventListener("visibilitychange", () => {
+      schedulePublicSync();
+      if (!document.hidden) syncGallery();
+    });
     restorePublicCache();
     applyLanguage(currentLanguage);
     setupRevealAnimations();
     restoreOrganizerSession();
-    setInterval(syncGallery, 5000);
+    schedulePublicSync();
     setInterval(updatePublicCompetitionState, 1000);
   </script>
 </body>
