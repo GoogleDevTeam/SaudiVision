@@ -651,6 +651,24 @@
     .public-results h3 { margin: 0; font-size: .9rem; }
     .public-results p { margin: 4px 0 0; color: var(--dim); font-family: "Cairo", sans-serif; font-size: .68rem; }
     .public-results-list { display: grid; gap: 8px; margin-top: 13px; }
+    .public-winner { display: grid; grid-template-columns: minmax(0, 1fr) 190px; gap: 16px; align-items: stretch; padding: 15px; border: 1px solid rgba(216, 208, 237, .42); border-radius: 15px; background: linear-gradient(135deg, rgba(44, 117, 98, .32), rgba(155, 138, 196, .18)); box-shadow: 0 12px 28px rgba(2, 24, 21, .22); }
+    .public-winner-copy { min-width: 0; }
+    .public-winner-eyebrow { color: var(--cyan); font-size: .62rem; letter-spacing: .14em; text-transform: uppercase; }
+    .public-winner h4 { margin: 5px 0 0; color: var(--ink); font-size: 1.05rem; }
+    .public-winner-team { display: block; margin-top: 3px; color: var(--light-lavender); font-family: "Cairo", sans-serif; font-size: .68rem; }
+    .public-winner-prompt { margin: 11px 0 0; color: var(--ink); font-family: "Cairo", sans-serif; font-size: .72rem; line-height: 1.7; }
+    .public-winner-votes { display: inline-flex; margin-top: 12px; padding: 5px 9px; border-radius: 999px; background: rgba(3, 35, 31, .42); color: var(--light-lavender); font-size: .68rem; }
+    .public-winner-image { min-height: 150px; overflow: hidden; border-radius: 11px; background: #0B4B41; }
+    .public-winner-image img { display: block; width: 100%; height: 100%; min-height: 150px; object-fit: cover; }
+    .public-winner-pending { padding: 12px 0; border-bottom: 1px solid rgba(255,255,255,.08); color: var(--light-lavender); font-family: "Cairo", sans-serif; font-size: .72rem; line-height: 1.6; }
+    .winner-controls { margin-top: 14px; padding-top: 13px; border-top: 1px solid rgba(216, 208, 237, .12); }
+    .winner-control-status { color: var(--dim); font-family: "Cairo", sans-serif; font-size: .68rem; line-height: 1.6; }
+    .winner-control-status strong { color: var(--light-lavender); }
+    .winner-control-actions { display: flex; flex-wrap: wrap; gap: 7px; margin-top: 9px; }
+    .winner-control-button { min-height: 31px; padding: 7px 10px; border: 1px solid var(--line); border-radius: 8px; background: rgba(4, 43, 37, .72); color: var(--ink); cursor: pointer; font: inherit; font-size: .65rem; }
+    .winner-control-button:hover { border-color: rgba(216, 208, 237, .62); transform: translateY(-1px); }
+    .winner-control-button.primary { border-color: rgba(216, 208, 237, .58); background: var(--lavender); color: var(--dark-green); font-weight: 700; }
+    @media (max-width: 700px) { .public-winner { grid-template-columns: 1fr; } .public-winner-image { min-height: 180px; } }
     .public-result-item { display: grid; grid-template-columns: 28px 1fr auto; align-items: center; gap: 10px; padding: 9px 0; border-top: 1px solid rgba(255,255,255,.08); }
     .public-result-rank { color: var(--cyan); font-size: .8rem; font-weight: 700; }
     .public-result-copy strong, .public-result-copy span { display: block; }
@@ -1306,6 +1324,7 @@
              <span class="organizer-leader" id="organizer-leader">—</span>
            </div>
            <div class="results-leaderboard" id="results-leaderboard" aria-live="polite"></div>
+           <div class="winner-controls" id="winner-controls" aria-live="polite"></div>
          </div>
          <div class="review-tools">
            <input id="review-search" type="search" data-placeholder-en="Search teams or visions" data-placeholder-ar="البحث في المجموعات والرؤى" placeholder="Search teams or visions" />
@@ -1672,6 +1691,7 @@
     const organizerLastRefresh = document.getElementById("organizer-last-refresh");
     const organizerLeader = document.getElementById("organizer-leader");
     const resultsLeaderboard = document.getElementById("results-leaderboard");
+    const winnerControls = document.getElementById("winner-controls");
     const organizerRefresh = document.getElementById("organizer-refresh");
     const organizerResetSubmissions = document.getElementById("organizer-reset-submissions");
     const organizerExport = document.getElementById("organizer-export");
@@ -1886,6 +1906,18 @@
          noPublishedResults: "No published visions yet.",
          leader: "Leader",
          tied: "Tie",
+         winnerFinal: "Final winner",
+         winnerNoWinner: "The final winner will be announced after organizer review.",
+         winnerTiePublic: "The vote ended in a tie. The organizer will announce the final winner.",
+         winnerReady: "A top-scoring vision is ready to be declared the final winner.",
+         winnerDeclared: "Winner declared",
+         winnerDeclare: "Declare winner",
+         winnerChange: "Change winner",
+         winnerClear: "Reset winner decision",
+         winnerConfirm: "Declare {team} as the final winner?",
+         winnerClearConfirm: "Reset the winner decision and return to the pending result state?",
+         winnerClosedRequired: "Close voting before declaring a winner.",
+         winnerVoteLabel: "{votes} votes",
          resultsVotes: "{votes} votes · {percent}%",
         impactLabel: "Impact",
         demoPreview: "DEMO PREVIEW",
@@ -1972,6 +2004,18 @@
          noPublishedResults: "لا توجد رؤى منشورة بعد.",
          leader: "المتصدر",
          tied: "تعادل",
+         winnerFinal: "الفائز النهائي",
+         winnerNoWinner: "سيُعلن الفائز النهائي بعد مراجعة المنظم.",
+         winnerTiePublic: "انتهى التصويت بالتعادل. سيعلن المنظم الفائز النهائي.",
+         winnerReady: "توجد رؤية متصدرة جاهزة لإعلانها فائزًا نهائيًا.",
+         winnerDeclared: "تم إعلان الفائز",
+         winnerDeclare: "إعلان الفائز",
+         winnerChange: "تغيير الفائز",
+         winnerClear: "إعادة قرار الفائز",
+         winnerConfirm: "إعلان {team} فائزًا نهائيًا؟",
+         winnerClearConfirm: "إعادة قرار الفائز إلى حالة الانتظار؟",
+         winnerClosedRequired: "أغلقوا التصويت قبل إعلان الفائز.",
+         winnerVoteLabel: "{votes} تصويت",
          resultsVotes: "{votes} تصويت · {percent}٪",
         impactLabel: "الأثر",
         demoPreview: "تصور تجريبي",
