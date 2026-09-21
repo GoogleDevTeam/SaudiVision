@@ -1474,7 +1474,7 @@ function publishSubmissionRecord_(submissionId, generated) {
       reviewedAt: timestamp,
       reviewedBy: "organizer"
     }, generatedFields));
-    const vision = copyRecordFields_(submission, SHEETS.visions.headers);
+    const vision = copyRecordFields_(Object.assign({}, submission, generatedFields), SHEETS.visions.headers);
     vision.publishedAt = timestamp;
     vision.status = "published";
     vision.votes = 0;
