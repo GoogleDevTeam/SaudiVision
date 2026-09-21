@@ -549,7 +549,21 @@ Before coding, inspect the latest `main` branch and the live deployment state. T
 - Frontend commit: e13de63aaf86ae2db9ac43e17e707fb37b547752.
 - Frontend and Apps Script source syntax validation passed. GitHub Pages will rebuild the frontend; the Apps Script source must be copied into Apps Script and redeployed for server-side vote status to become live.
 
+### Storage and workflow hardening — 2026-09-21
+
+- Added safe local-storage wrappers so blocked or restricted browser storage does not stop the frontend during startup or interaction.
+- Allowed only internally generated, encoded demo SVG previews through the image URL guard; remote and unsafe data URLs remain rejected.
+- Added workflow-tests.mjs with frontend/backend syntax checks, vote-state reconciliation tests, storage-failure tests, demo-SVG tests, submission idempotency contracts, and optional non-destructive live API smoke checks via SAUDI_VISION_API_URL.
+- Updated security-tests.mjs for the hardened image guard.
+- Files changed: index.html, security-tests.mjs, workflow-tests.mjs.
+- Frontend commit: 859c3fb2f9f71e7c6843862b560ad4254831099b.
+- Security test commit: 4167d67ee07c0cb420e20dc2a10c6ed13448e12c.
+- Workflow test commit: bc639d4c5036b94fec8408786ceeff57e562caa8.
+- Local workflow tests and security regression tests passed; live read-only API smoke checks passed.
 ### Next recommended step
+
+Run workflow-tests.mjs in the repository's normal CI or deployment check, then exercise one real vote/unvote cycle from a fresh browser session while monitoring the Apps Script response and Google Sheets audit rows.
+
 
 Deploy the updated google-apps-script.gs in Apps Script, then verify voting from a fresh browser session: cast one vote, reload, confirm the selected card remains marked, unvote it, and confirm the gallery returns to an available-to-vote state.
 
