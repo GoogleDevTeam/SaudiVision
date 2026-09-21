@@ -84,7 +84,7 @@ const SHEETS = {
 
 const GUIDE_SHEET_NAME = "START HERE";
 const WORKBOOK_FORMAT_VERSION = "2026-09-20-v9";
-const IMAGE_PROMPT_VERSION = "2026-09-21-v9-gemini-ready";
+const IMAGE_PROMPT_VERSION = "2026-09-21-v10-cloudflare";
 const GENERATION_SLOT_KEY = "IMAGINE_SAUDI_CLOUDFLARE_GENERATION_SLOT";
 const PUBLIC_RESPONSE_CACHE_KEY_ = "IMAGINE_SAUDI_PUBLIC_RESPONSE_V1";
 const PUBLIC_RESPONSE_CACHE_TTL_SECONDS_ = 5;
@@ -97,15 +97,7 @@ const ABUSE_RATE_LIMITS_ = {
 const CLOUDFLARE_IMAGE_MODEL = "@cf/black-forest-labs/flux-2-dev";
 const LEGACY_CLOUDFLARE_IMAGE_MODEL_ = "@cf/black-forest-labs/flux-1-schnell";
 const CLOUDFLARE_API_BASE_URL = "https://api.cloudflare.com/client/v4";
-const GEMINI_IMAGE_MODEL = "gemini-3.1-flash-image";
-const GEMINI_API_ENDPOINT = "https://generativelanguage.googleapis.com/v1beta/interactions";
-const GEMINI_REQUEST_COOLDOWN_MS_ = 12000;
-const GEMINI_DEFAULT_RETRY_DELAY_MS_ = 15000;
-const GEMINI_MAX_RETRY_DELAY_MS_ = 120000;
-const ACTIVE_AI_PROVIDER_PROPERTY_ = "IMAGINE_SAUDI_ACTIVE_AI_PROVIDER_V1";
-const ACTIVE_AI_PROVIDER_ERROR_PROPERTY_ = "IMAGINE_SAUDI_ACTIVE_AI_PROVIDER_ERROR_V1";
-const GEMINI_COOLDOWN_UNTIL_PROPERTY_ = "IMAGINE_SAUDI_GEMINI_COOLDOWN_UNTIL_V1";
-const GEMINI_429_COOLDOWN_MS_ = 120000;
+
 const DRIVE_IMAGE_THUMBNAIL_SIZE = "w1600";
 const THEME = {
   darkGreen: "#073B35",
@@ -241,13 +233,6 @@ function doPost(event) {
   }
 }
 
-function geminiConfig_() {
-  const properties = PropertiesService.getScriptProperties();
-  const apiKey = String(properties.getProperty("GEMINI_API_KEY") || "").trim();
-  const model = String(properties.getProperty("GEMINI_IMAGE_MODEL") || GEMINI_IMAGE_MODEL).trim();
-  return { apiKey: apiKey, model: model, endpoint: GEMINI_API_ENDPOINT };
-}
-
 function cloudflareConfig_() {
   const properties = PropertiesService.getScriptProperties();
   const apiToken = String(properties.getProperty("CLOUDFLARE_API_TOKEN") || "").trim();
@@ -264,63 +249,22 @@ function cloudflareConfig_() {
 }
 
 function imageGenerationModel_() {
-  const gemini = geminiConfig_();
-  const cloudflare = cloudflareConfig_();
-  return cloudflare.apiToken && cloudflare.endpoint ? cloudflare.model : gemini.model;
-}
-
-function providerErrorMessage_(error) {
-  return safeErrorMessage_(error)
-    .replace(/AIza[0-9A-Za-z_-]+/g, "[redacted]")
-    .replace(/Bearer\s+[^\s]+/gi, "Bearer [redacted]")
-    .slice(0, 240);
-}
-
-function geminiCooldownActive_() {
-  return false;
-}
-
-function setGeminiCooldown_(delayMs) {
-  const delay = Math.max(GEMINI_429_COOLDOWN_MS_, Number(delayMs) || 0);
-  PropertiesService.getScriptProperties().setProperty(
-    GEMINI_COOLDOWN_UNTIL_PROPERTY_,
-    String(Date.now() + delay)
-  );
-}
-
-function clearGeminiCooldown_() {
-  PropertiesService.getScriptProperties().deleteProperty(GEMINI_COOLDOWN_UNTIL_PROPERTY_);
-}
-
-function setActiveAiProvider_(provider, error) {
-  const properties = PropertiesService.getScriptProperties();
-  const normalizedProvider = String(provider || "");
-  properties.setProperty(ACTIVE_AI_PROVIDER_PROPERTY_, normalizedProvider);
-  if (normalizedProvider === "Cloudflare Workers AI" && error) {
-    properties.setProperty(ACTIVE_AI_PROVIDER_ERROR_PROPERTY_, providerErrorMessage_(error));
-  } else {
-    properties.deleteProperty(ACTIVE_AI_PROVIDER_ERROR_PROPERTY_);
-  }
+  return cloudflareConfig_().model;
 }
 
 function cloudflareStatus_() {
-  const gemini = geminiConfig_();
   const cloudflare = cloudflareConfig_();
-  const geminiAvailable = Boolean(gemini.apiKey);
-  const cloudflareAvailable = Boolean(cloudflare.apiToken && cloudflare.endpoint);
-  const savedProvider = String(PropertiesService.getScriptProperties().getProperty(ACTIVE_AI_PROVIDER_PROPERTY_) || "");
-  const activeProvider = savedProvider === "Cloudflare Workers AI" && cloudflareAvailable
-    ? savedProvider
-    : geminiAvailable ? "Google Gemini" : cloudflareAvailable ? "Cloudflare Workers AI" : "none";
+  const configured = Boolean(cloudflare.apiToken && cloudflare.endpoint);
+  const provider = configured ? "Cloudflare Workers AI" : "none";
   return {
-    configured: Boolean(geminiAvailable || cloudflareAvailable),
-    status: activeProvider === "Cloudflare Workers AI" ? "fallback_active" : activeProvider === "Google Gemini" ? "ready" : "needs_gemini_or_cloudflare_settings",
-    provider: activeProvider,
-    activeProvider: activeProvider,
-    model: activeProvider === "Google Gemini" ? gemini.model : cloudflare.model,
-    primaryProvider: "Google Gemini",
-    fallbackProvider: cloudflareAvailable ? "Cloudflare Workers AI" : "not_configured",
-    fallbackConfigured: cloudflareAvailable
+    configured: configured,
+    status: configured ? "ready" : "needs_cloudflare_settings",
+    provider: provider,
+    activeProvider: provider,
+    model: cloudflare.model,
+    primaryProvider: "Cloudflare Workers AI",
+    fallbackProvider: "not_configured",
+    fallbackConfigured: false
   };
 }
 
@@ -1276,24 +1220,6 @@ function withGenerationSlot_(callback) {
   throw new Error("Image generation is busy. The submission was recorded; try again shortly.");
 }
 
-function waitForGeminiRequestCooldown_() {
-  // Deliberately do not delay requests; the caller is testing Gemini availability.
-}
-
-function geminiRetryDelayMs_(response, responseText) {
-  const headers = response.getHeaders() || {};
-  const retryAfter = headers["Retry-After"] || headers["retry-after"];
-  const retryAfterSeconds = Number(retryAfter);
-  if (isFinite(retryAfterSeconds) && retryAfterSeconds > 0) {
-    return Math.min(GEMINI_MAX_RETRY_DELAY_MS_, Math.max(1000, retryAfterSeconds * 1000));
-  }
-  const retryDelayMatch = String(responseText || "").match(/(?:retryDelay|retry in)\D+(\d+(?:\.\d+)?)s/i);
-  if (retryDelayMatch) {
-    return Math.min(GEMINI_MAX_RETRY_DELAY_MS_, Math.max(1000, Number(retryDelayMatch[1]) * 1000));
-  }
-  return GEMINI_DEFAULT_RETRY_DELAY_MS_;
-}
-
 function generateVisionImageWithRetry_(submissionId, team, track, prompt, details) {
   let lastError = null;
   for (let attempt = 1; attempt <= 3; attempt += 1) {
@@ -1304,77 +1230,16 @@ function generateVisionImageWithRetry_(submissionId, team, track, prompt, detail
       lastError = error;
       error.generationAttempts = attempt;
       if (!isRetryableGenerationError_(error) || attempt === 3) throw error;
-      const retryDelayMs = Number(error.retryAfterMs) || GEMINI_DEFAULT_RETRY_DELAY_MS_;
-      Utilities.sleep(Math.min(GEMINI_MAX_RETRY_DELAY_MS_, Math.max(1000, retryDelayMs)));
+      Utilities.sleep(Math.min(15000, 3000 * attempt));
     }
   }
   throw lastError || new Error("Image generation failed.");
 }
 
-function generateGeminiVisionImage_(submissionId, imagePrompt, config) {
-  waitForGeminiRequestCooldown_();
-  const response = UrlFetchApp.fetch(config.endpoint, {
-    method: "post",
-    contentType: "application/json",
-    headers: { "x-goog-api-key": config.apiKey },
-    payload: JSON.stringify({
-      model: config.model,
-      input: [{ type: "text", text: imagePrompt }]
-    }),
-    muteHttpExceptions: true
-  });
-  const status = response.getResponseCode();
-  if (status < 200 || status >= 300) {
-    const responseText = response.getContentText();
-    let detail = "Google Gemini image generation failed.";
-    try {
-      const errorBody = JSON.parse(responseText);
-      detail = errorBody.error?.message || errorBody.message || detail;
-    } catch (ignored) {}
-    const safeDetail = providerErrorMessage_(new Error(String(detail)));
-    const error = new Error(status === 429
-      ? "Google Gemini returned HTTP 429: " + safeDetail
-      : safeDetail);
-    error.httpStatus = status;
-    if (status === 429) error.retryAfterMs = geminiRetryDelayMs_(response, responseText);
-    throw error;
-  }
-  let result;
-  try {
-    result = JSON.parse(response.getContentText());
-  } catch (error) {
-    throw new Error("Google Gemini returned an invalid image response.");
-  }
-  const candidates = [];
-  if (result.output_image) candidates.push(result.output_image);
-  if (Array.isArray(result.output)) candidates.push.apply(candidates, result.output);
-  if (Array.isArray(result.outputs)) candidates.push.apply(candidates, result.outputs);
-  const image = candidates.find(function(candidate) {
-    return candidate && (candidate.data || (candidate.image && candidate.image.data));
-  });
-  const encodedImage = image && (image.data || (image.image && image.image.data));
-  if (!encodedImage) throw new Error("Google Gemini did not return an image. Try a shorter vision description.");
-  const mimeType = String((image && (image.mime_type || image.mimeType)) || "image/png");
-  const blob = Utilities.newBlob(
-    Utilities.base64Decode(String(encodedImage).replace(/^data:[^;]+;base64,/, "")),
-    mimeType,
-    "saudi-vision-" + submissionId + ".png"
-  );
-  const file = DriveApp.createFile(blob);
-  file.setSharing(DriveApp.Access.ANYONE_WITH_LINK, DriveApp.Permission.VIEW);
-  const fileId = file.getId();
-  return {
-    url: driveThumbnailUrl_(fileId),
-    fallbackUrl: driveViewUrl_(fileId),
-    mimeType: mimeType,
-    fileId: fileId
-  };
-}
-
 function generateVisionImage_(submissionId, team, track, prompt, details) {
   details = details || {};
-  const gemini = geminiConfig_();
   const config = cloudflareConfig_();
+  const cloudflareAvailable = Boolean(config.apiToken && config.endpoint);
   const imagePrompt = [
     "Create ONE polished wide editorial concept image for the participant's idea below.",
     "PRIMARY RULE: depict the participant idea literally and specifically. The participant idea is the source of truth.",
@@ -1396,27 +1261,8 @@ function generateVisionImage_(submissionId, team, track, prompt, details) {
     "Use the prompt enhancer only as broad context. Never replace, narrow, or contradict the participant idea.",
     "=== END PARTICIPANT IDEA ===",
   ].join("\n");
-  const cloudflareAvailable = Boolean(config.apiToken && config.endpoint);
-  const geminiCoolingDown = cloudflareAvailable && geminiCooldownActive_();
-  if (gemini.apiKey && !geminiCoolingDown && !cloudflareAvailable) {
-    setActiveAiProvider_("Google Gemini");
-    try {
-      const generated = generateGeminiVisionImage_(submissionId, imagePrompt, gemini);
-      clearGeminiCooldown_();
-      return generated;
-    } catch (error) {
-      if (!cloudflareAvailable) throw error;
-      if (Number(error.httpStatus) === 429) {
-        setGeminiCooldown_(Number(error.retryAfterMs) || GEMINI_429_COOLDOWN_MS_);
-      }
-      setActiveAiProvider_("Cloudflare Workers AI", error);
-    }
-  }
   if (!cloudflareAvailable) {
-    throw new Error("Live AI is not configured. Add GEMINI_API_KEY or the Cloudflare settings in Apps Script Project Settings.");
-  }
-  if (!gemini.apiKey || geminiCoolingDown || cloudflareAvailable) {
-    setActiveAiProvider_("Cloudflare Workers AI", geminiCoolingDown ? new Error("Gemini is temporarily paused after a rate-limit response.") : null);
+    throw new Error("Cloudflare Workers AI is not configured. Add CLOUDFLARE_API_TOKEN and CLOUDFLARE_ACCOUNT_ID in Apps Script Project Settings.");
   }
   const response = UrlFetchApp.fetch(config.endpoint, {
     method: "post",
