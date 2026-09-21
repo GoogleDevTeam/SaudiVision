@@ -2470,6 +2470,24 @@
       return String(vision.id || vision.team || "");
     }
 
+    function applyRemoteVoteStatus(voteStatus, visions) {
+      if (!voteStatus || voteStatus.ok === false) return false;
+      const before = localStorage.getItem("imagineSaudiVote");
+      const status = String(voteStatus.status || "").toLowerCase();
+      const hasVote = status === "voted" || voteStatus.voted === true;
+      const hasNoVote = status === "not_voted" || voteStatus.voted === false;
+      if (hasVote && voteStatus.visionId) {
+        const remoteVisionId = String(voteStatus.visionId);
+        const matchingVision = visions.find((vision) =>
+          visionKey(vision) === remoteVisionId || String(vision.team || "") === remoteVisionId
+        );
+        localStorage.setItem("imagineSaudiVote", matchingVision ? visionKey(matchingVision) : remoteVisionId);
+      } else if (hasNoVote) {
+        localStorage.removeItem("imagineSaudiVote");
+      }
+      return before !== localStorage.getItem("imagineSaudiVote");
+    }
+
     function safeImageHeight(value) {
       const height = Number(value);
       return Number.isFinite(height) ? Math.min(520, Math.max(180, Math.round(height))) : 280;
@@ -3020,7 +3038,18 @@
       publicSyncInFlight = (async () => {
         syncState.textContent = t("receiving");
         try {
+          const selectedVisionBeforeSync = localStorage.getItem("imagineSaudiVote");
           const visions = await fetchVisionBatch();
+          let voteStatus = null;
+          if (GOOGLE_APPS_SCRIPT_URL && !liveStageDemoMode) {
+            try {
+              voteStatus = await googleRequest("voteStatus", { voterId }, { timeout: 12000, retries: 1 });
+            } catch (error) {
+              // Older deployed Apps Script versions may not have voteStatus yet.
+              console.warn("Vote status sync unavailable:", error);
+            }
+          }
+          const remoteVoteChanged = applyRemoteVoteStatus(voteStatus, visions);
           activeVisions = visions;
           hasRemoteSync = true;
           const selectedVision = localStorage.getItem("imagineSaudiVote");
@@ -3029,8 +3058,9 @@
           }
           const nextSignature = publicDataSignature(visions);
           const dataChanged = nextSignature !== lastGalleryDataSignature;
+          const voteStateChanged = remoteVoteChanged || selectedVisionBeforeSync !== localStorage.getItem("imagineSaudiVote");
           updatePublicCompetitionState(dataChanged);
-          if (dataChanged) {
+          if (dataChanged || voteStateChanged) {
             lastGalleryDataSignature = nextSignature;
             updateGalleryFilters();
             renderGallery();
