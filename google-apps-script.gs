@@ -94,7 +94,8 @@ const ABUSE_RATE_LIMITS_ = {
   submission: { maxRequests: 3, windowSeconds: 600 },
   voting: { maxRequests: 20, windowSeconds: 60 }
 };
-const CLOUDFLARE_IMAGE_MODEL = "@cf/black-forest-labs/flux-1-schnell";
+const CLOUDFLARE_IMAGE_MODEL = "@cf/black-forest-labs/flux-2-dev";
+const LEGACY_CLOUDFLARE_IMAGE_MODEL_ = "@cf/black-forest-labs/flux-1-schnell";
 const CLOUDFLARE_API_BASE_URL = "https://api.cloudflare.com/client/v4";
 const GEMINI_IMAGE_MODEL = "gemini-3.1-flash-image";
 const GEMINI_API_ENDPOINT = "https://generativelanguage.googleapis.com/v1beta/interactions";
@@ -251,7 +252,10 @@ function cloudflareConfig_() {
   const properties = PropertiesService.getScriptProperties();
   const apiToken = String(properties.getProperty("CLOUDFLARE_API_TOKEN") || "").trim();
   const accountId = String(properties.getProperty("CLOUDFLARE_ACCOUNT_ID") || "").trim();
-  const model = String(properties.getProperty("CLOUDFLARE_IMAGE_MODEL") || CLOUDFLARE_IMAGE_MODEL).trim();
+  const configuredModel = String(properties.getProperty("CLOUDFLARE_IMAGE_MODEL") || "").trim();
+  const model = configuredModel === LEGACY_CLOUDFLARE_IMAGE_MODEL_
+    ? CLOUDFLARE_IMAGE_MODEL
+    : configuredModel || CLOUDFLARE_IMAGE_MODEL;
   const customEndpoint = String(properties.getProperty("CLOUDFLARE_AI_ENDPOINT") || "").trim();
   const endpoint = customEndpoint || (accountId
     ? CLOUDFLARE_API_BASE_URL + "/accounts/" + accountId + "/ai/run/" + model
