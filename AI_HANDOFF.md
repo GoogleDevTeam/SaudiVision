@@ -524,6 +524,14 @@ Before coding, inspect the latest `main` branch and the live deployment state. T
 - Backend commit: `4a96391e61dbceff1c30f3be9373abae6f035ff4`.
 - Backend source syntax validation passed. The Apps Script web app still needs the updated source copied into Apps Script and redeployed before this fix is live.
 
+### Organizer panel responsive repair — 2026-09-21
+
+- Fixed narrow-screen overflow by allowing organizer cards, provider status, deadline inputs, review panels, and action buttons to shrink and wrap safely.
+- Added mobile stacking for review headers and organizer actions.
+- Added keyboard activation and touch-safe semantics to the private organizer entry control.
+- Frontend commit: `d6dff51e4c398f561dea75fa0fef4f10c89c48c1`.
+- Inline frontend JavaScript syntax validation passed. GitHub Pages still needs to finish its normal hosting refresh.
+
 ### Next recommended step
 
 Deploy the updated google-apps-script.gs once, then submit a vision with two or three related ideas and verify that the generated image loads quickly in the gallery and still follows the participant's wording while using the selected track only as a broad lens.
