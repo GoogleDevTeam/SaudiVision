@@ -3933,13 +3933,24 @@
     });
     organizerLogin.addEventListener("submit", async (event) => {
       event.preventDefault();
-      if (organizerUnlockInFlight) return;
       const key = organizerKeyInput.value.trim();
       if (!key) {
         organizerKeyInput.focus();
         return;
       }
-      await unlockOrganizerControls(key);
+      const submitButton = organizerLogin.querySelector('button[type="submit"]');
+      if (submitButton) {
+        submitButton.disabled = true;
+        submitButton.setAttribute("aria-busy", "true");
+      }
+      try {
+        await unlockOrganizerControls(key);
+      } finally {
+        if (submitButton) {
+          submitButton.disabled = false;
+          submitButton.removeAttribute("aria-busy");
+        }
+      }
     });
     organizerLoginCancel.addEventListener("click", hideOrganizerLogin);
     liveStageButton.addEventListener("click", openLiveStage);
