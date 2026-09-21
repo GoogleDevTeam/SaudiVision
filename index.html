@@ -3156,10 +3156,16 @@
       voteButton?.setAttribute("disabled", "");
       setInteractionStatus(t("voteSending"), "pending");
       try {
+        let voteResult = null;
         if (GOOGLE_APPS_SCRIPT_URL && !liveStageDemoMode) {
-          await googleRequest(action, { visionId: vision.id || vision.team, voterId }, { timeout: 15000, retries: 1 });
+          voteResult = await googleRequest(action, { visionId: vision.id || vision.team, voterId }, { timeout: 8000, retries: 0 });
         }
-        vision.votes = Math.max(0, (vision.votes || 0) + (action === "vote" ? 1 : -1));
+        // An old local vote may survive a server-side reset. Only change the
+        // displayed count when the backend confirms that state changed.
+        const serverChanged = !voteResult || voteResult.changed !== false;
+        if (serverChanged) {
+          vision.votes = Math.max(0, (vision.votes || 0) + (action === "vote" ? 1 : -1));
+        }
         if (action === "vote") safeLocalSet("imagineSaudiVote", selectedVisionKey);
         else safeLocalRemove("imagineSaudiVote");
         if (liveStageDemoMode) renderDemoSurfaces();
