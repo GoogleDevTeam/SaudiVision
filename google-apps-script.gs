@@ -1326,9 +1326,10 @@ function generateGeminiVisionImage_(submissionId, imagePrompt, config) {
       const errorBody = JSON.parse(responseText);
       detail = errorBody.error?.message || errorBody.message || detail;
     } catch (ignored) {}
+    const safeDetail = providerErrorMessage_(new Error(String(detail)));
     const error = new Error(status === 429
-      ? "Google Gemini is rate-limiting image generation. Please retry shortly."
-      : String(detail).slice(0, 240));
+      ? "Google Gemini returned HTTP 429: " + safeDetail
+      : safeDetail);
     error.httpStatus = status;
     if (status === 429) error.retryAfterMs = geminiRetryDelayMs_(response, responseText);
     throw error;
