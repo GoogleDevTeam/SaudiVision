@@ -329,7 +329,7 @@ Before coding, inspect the latest `main` branch and the live deployment state. T
 - Added server-side validation and deadline enforcement for submissions and voting.
 - Made row serialization header-aware so older spreadsheets keep their original column order and data when new headers are appended.
 - Added organizer analytics: total submissions, pending count, published count, active votes, and per-track breakdown.
-- Improved Gemini image prompts with the new structured context so generated concepts reflect the team’s title, challenge, impact, and beneficiaries.
+- Improved OpenRouter Nano Banana 2 Lite image prompts with the new structured context so generated concepts reflect the team’s title, challenge, impact, and beneficiaries.
 - Upgraded the participant form and gallery/review cards to surface the richer details in English and Arabic.
 - Moved **تخيّل السعودية** beside the language switch on the opposite side of the header.
 - Added a five-metric organizer summary including all submissions and active votes.
@@ -351,7 +351,7 @@ Before coding, inspect the latest `main` branch and the live deployment state. T
 ### Category prompts and participant round reset — 2026-09-19
 
 - Expanded the Strategic track selector from 8 to 15 practical categories, including Future Food & Agriculture, Health & Wellbeing, Education & Skills, Tourism & Culture, Digital Society & Governance, Advanced Energy & Industry, and Other.
-- Added a bilingual prompt enhancer for every category. The selected enhancer is shown to participants and applied server-side to Gemini image generation.
+- Added a bilingual prompt enhancer for every category. The selected enhancer is shown to participants and applied server-side to OpenRouter Nano Banana 2 Lite image generation.
 - Hardened image generation instructions so every accepted submission requests exactly one single image, never a collage, variation set, or text response.
 - Added a server-owned submission round and anonymous browser participant identifier. Each participant can submit once per round; the organizer menu now has Reset participant submissions, which increments the round without deleting existing records.
 - Frontend commit: 7be0ae45b0d79c569fd8a5b0536dda8fbd9e2f30. Backend commit: 5def846b07a82a7e56b245aae26906771e781a3f.
@@ -368,9 +368,9 @@ Before coding, inspect the latest `main` branch and the live deployment state. T
 ### Live verification — 2026-09-19
 
 - Confirmed the live Apps Script health endpoint responds with workbook format version \"2026-09-19-v7\" and all expected sheets: Visions, Submissions, Settings, Votes, Unvotes, and START HERE.
-- Attempted one clearly labeled live verification submission after user approval. The request reached the backend but returned \"Live AI is not configured. Add GEMINI_API_KEY in Apps Script Project Settings.\"
+- Attempted one clearly labeled live verification submission after user approval. The request reached the backend but returned \"Live AI is not configured. Add OPENROUTER_API_KEY in Apps Script Project Settings.\"
 - The backend generates the image before appending the submission, so this failed before creating a spreadsheet row. No test submission was created.
-- Apps Script deployment is serving the current backend; add GEMINI_API_KEY in Apps Script Project Settings, then retry the same submission verification.
+- Apps Script deployment is serving the current backend; add OPENROUTER_API_KEY in Apps Script Project Settings, then retry the same submission verification.
 
 ### Consolidated strategic tracks — 2026-09-19
 
@@ -379,10 +379,10 @@ Before coding, inspect the latest `main` branch and the live deployment state. T
 - Kept a dedicated bilingual frontend and server-side prompt enhancer for every canonical choice. Legacy backend labels remain supported for existing records.
 - Updated demo gallery tracks, submission color mapping, and the AI handoff. Frontend and backend source changes are ready for deployment; GitHub Pages and the Apps Script web app still need their normal deployment/verification cycle.
 
-### Gemini readiness and visual prompt upgrade — 2026-09-19
+### OpenRouter Nano Banana 2 Lite readiness and visual prompt upgrade — 2026-09-19
 
 - Reworked every canonical track enhancer into a more specific visual brief with one focal scene, a clear human benefit, and stronger Saudi environmental, cultural, or civic context.
-- Added a live aiStatus endpoint and imageGeneration readiness details to health. The backend reads and trims GEMINI_API_KEY from Apps Script Project Settings on every request; adding the key takes effect immediately without redeploying code.
+- Added a live aiStatus endpoint and imageGeneration readiness details to health. The backend reads and trims OPENROUTER_API_KEY from Apps Script Project Settings on every request; adding the key takes effect immediately without redeploying code.
 - The frontend checks aiStatus immediately before submission and shows a direct setup message instead of waiting for a failed image request.
 - Added stronger image-generation constraints: one coherent 16:9 editorial scene, plausible near-future design, restrained local palette, one focal subject, and no text, logos, flags, collages, or variations.
 - Source files updated: index.html and google-apps-script.gs. Apps Script still needs the updated backend source deployed once; after that, future API-key changes only require updating the Script property.
@@ -399,16 +399,16 @@ Before coding, inspect the latest `main` branch and the live deployment state. T
 
 ### Spreadsheet operations and burst-safety upgrade — 2026-09-19
 
-- Added useful generation and moderation fields to Visions and Submissions: generation status, start/completion timestamps, attempts, safe error text, prompt version, Gemini model, image MIME type, Drive file ID, reviewed time, and reviewer role.
+- Added useful generation and moderation fields to Visions and Submissions: generation status, start/completion timestamps, attempts, safe error text, prompt version, OpenRouter Nano Banana 2 Lite model, image MIME type, Drive file ID, reviewed time, and reviewer role.
 - Added an Activity Log sheet for submission received, generation succeeded/failed, and moderation events. It stores safe operational details without secrets.
-- Submission handling now reserves a row under a short script lock before calling Gemini, so simultaneous requests cannot duplicate the same participant or race spreadsheet writes. Image generation happens outside the sheet lock but through a server-side generation slot, so ten simultaneous requests do not burst Gemini calls at once. Each request gets up to three retries for transient Gemini/API failures.
+- Submission handling now reserves a row under a short script lock before calling OpenRouter Nano Banana 2 Lite, so simultaneous requests cannot duplicate the same participant or race spreadsheet writes. Image generation happens outside the sheet lock but through a server-side generation slot, so ten simultaneous requests do not burst OpenRouter Nano Banana 2 Lite calls at once. Each request gets up to three retries for transient OpenRouter Nano Banana 2 Lite/API failures.
 - Failed generations remain recorded with a retryable failed status instead of disappearing or crashing the workflow. The frontend submit request now allows normal image-generation latency.
 - Workbook format version is now v8. The health/setup path adds all new headers and formats the operational columns automatically.
 
 ### Description-led prompt enhancer update — 2026-09-19
 
 - Changed the eight canonical enhancers from detailed scene instructions into broad thematic lenses.
-- Gemini now treats the participant description as the primary creative brief, preserves its concrete details, and combines related ideas instead of replacing them with a track-specific storyline.
+- OpenRouter Nano Banana 2 Lite now treats the participant description as the primary creative brief, preserves its concrete details, and combines related ideas instead of replacing them with a track-specific storyline.
 - The selected track supplies context only; it cannot narrow, contradict, or add an unrelated concept to the participant's idea.
 - Bumped the prompt version to v5 so the spreadsheet shows which submissions used the new description-led behavior.
 
