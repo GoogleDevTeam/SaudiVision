@@ -84,7 +84,7 @@ const SHEETS = {
 
 const GUIDE_SHEET_NAME = "START HERE";
 const WORKBOOK_FORMAT_VERSION = "2026-09-20-v9";
-const IMAGE_PROMPT_VERSION = "2026-09-21-v8-no-track-enhancer";
+const IMAGE_PROMPT_VERSION = "2026-09-21-v9-gemini-ready";
 const GENERATION_SLOT_KEY = "IMAGINE_SAUDI_CLOUDFLARE_GENERATION_SLOT";
 const PUBLIC_RESPONSE_CACHE_KEY_ = "IMAGINE_SAUDI_PUBLIC_RESPONSE_V1";
 const PUBLIC_RESPONSE_CACHE_TTL_SECONDS_ = 5;
@@ -96,6 +96,8 @@ const ABUSE_RATE_LIMITS_ = {
 };
 const CLOUDFLARE_IMAGE_MODEL = "@cf/black-forest-labs/flux-1-schnell";
 const CLOUDFLARE_API_BASE_URL = "https://api.cloudflare.com/client/v4";
+const GEMINI_IMAGE_MODEL = "gemini-3.1-flash-image";
+const GEMINI_API_ENDPOINT = "https://generativelanguage.googleapis.com/v1beta/interactions";
 const DRIVE_IMAGE_THUMBNAIL_SIZE = "w1600";
 const THEME = {
   darkGreen: "#073B35",
@@ -231,6 +233,13 @@ function doPost(event) {
   }
 }
 
+function geminiConfig_() {
+  const properties = PropertiesService.getScriptProperties();
+  const apiKey = String(properties.getProperty("GEMINI_API_KEY") || "").trim();
+  const model = String(properties.getProperty("GEMINI_IMAGE_MODEL") || GEMINI_IMAGE_MODEL).trim();
+  return { apiKey: apiKey, model: model, endpoint: GEMINI_API_ENDPOINT };
+}
+
 function cloudflareConfig_() {
   const properties = PropertiesService.getScriptProperties();
   const apiToken = String(properties.getProperty("CLOUDFLARE_API_TOKEN") || "").trim();
@@ -243,12 +252,26 @@ function cloudflareConfig_() {
   return { apiToken: apiToken, accountId: accountId, model: model, endpoint: endpoint };
 }
 
+function imageGenerationModel_() {
+  const gemini = geminiConfig_();
+  return gemini.apiKey ? gemini.model : cloudflareConfig_().model;
+}
+
 function cloudflareStatus_() {
+  const gemini = geminiConfig_();
+  if (gemini.apiKey) {
+    return {
+      configured: true,
+      status: "ready",
+      provider: "Google Gemini",
+      model: gemini.model
+    };
+  }
   const config = cloudflareConfig_();
   const configured = Boolean(config.apiToken && config.endpoint);
   return {
     configured: configured,
-    status: configured ? "ready" : "needs_cloudflare_settings",
+    status: configured ? "ready" : "needs_gemini_or_cloudflare_settings",
     provider: "Cloudflare Workers AI",
     model: config.model
   };
@@ -1059,7 +1082,7 @@ function submitVision_(payload) {
     generationAttempts: 0,
     generationError: "",
     promptVersion: IMAGE_PROMPT_VERSION,
-    imageModel: cloudflareConfig_().model,
+    imageModel: imageGenerationModel_(),
     imageMimeType: "",
     driveFileId: "",
     reviewedAt: "",
@@ -1214,12 +1237,62 @@ function generateVisionImageWithRetry_(submissionId, team, track, prompt, detail
   throw lastError || new Error("Image generation failed.");
 }
 
+function generateGeminiVisionImage_(submissionId, imagePrompt, config) {
+  const response = UrlFetchApp.fetch(config.endpoint, {
+    method: "post",
+    contentType: "application/json",
+    headers: { "x-goog-api-key": config.apiKey },
+    payload: JSON.stringify({
+      model: config.model,
+      input: [{ type: "text", text: imagePrompt }]
+    }),
+    muteHttpExceptions: true
+  });
+  const status = response.getResponseCode();
+  if (status < 200 || status >= 300) {
+    let detail = "Google Gemini image generation failed.";
+    try {
+      const errorBody = JSON.parse(response.getContentText());
+      detail = errorBody.error?.message || errorBody.message || detail;
+    } catch (ignored) {}
+    throw new Error(String(detail).slice(0, 240));
+  }
+  let result;
+  try {
+    result = JSON.parse(response.getContentText());
+  } catch (error) {
+    throw new Error("Google Gemini returned an invalid image response.");
+  }
+  const candidates = [];
+  if (result.output_image) candidates.push(result.output_image);
+  if (Array.isArray(result.output)) candidates.push.apply(candidates, result.output);
+  if (Array.isArray(result.outputs)) candidates.push.apply(candidates, result.outputs);
+  const image = candidates.find(function(candidate) {
+    return candidate && (candidate.data || (candidate.image && candidate.image.data));
+  });
+  const encodedImage = image && (image.data || (image.image && image.image.data));
+  if (!encodedImage) throw new Error("Google Gemini did not return an image. Try a shorter vision description.");
+  const mimeType = String((image && (image.mime_type || image.mimeType)) || "image/png");
+  const blob = Utilities.newBlob(
+    Utilities.base64Decode(String(encodedImage).replace(/^data:[^;]+;base64,/, "")),
+    mimeType,
+    "saudi-vision-" + submissionId + ".png"
+  );
+  const file = DriveApp.createFile(blob);
+  file.setSharing(DriveApp.Access.ANYONE_WITH_LINK, DriveApp.Permission.VIEW);
+  const fileId = file.getId();
+  return {
+    url: driveThumbnailUrl_(fileId),
+    fallbackUrl: driveViewUrl_(fileId),
+    mimeType: mimeType,
+    fileId: fileId
+  };
+}
+
 function generateVisionImage_(submissionId, team, track, prompt, details) {
   details = details || {};
+  const gemini = geminiConfig_();
   const config = cloudflareConfig_();
-  if (!config.apiToken || !config.endpoint) {
-    throw new Error("Live AI is not configured. Add CLOUDFLARE_API_TOKEN and CLOUDFLARE_ACCOUNT_ID in Apps Script Project Settings.");
-  }
   const imagePrompt = [
     "Create ONE polished wide editorial concept image for the participant's idea below.",
     "PRIMARY RULE: depict the participant idea literally and specifically. The participant idea is the source of truth.",
@@ -1237,6 +1310,10 @@ function generateVisionImage_(submissionId, team, track, prompt, details) {
     "Beneficiaries: " + String(details.beneficiaries || ""),
     "=== END PARTICIPANT IDEA ===",
   ].join("\n");
+  if (gemini.apiKey) return generateGeminiVisionImage_(submissionId, imagePrompt, gemini);
+  if (!config.apiToken || !config.endpoint) {
+    throw new Error("Live AI is not configured. Add GEMINI_API_KEY or the Cloudflare settings in Apps Script Project Settings.");
+  }
   const response = UrlFetchApp.fetch(config.endpoint, {
     method: "post",
     contentType: "application/json",
