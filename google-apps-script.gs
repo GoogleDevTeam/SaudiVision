@@ -274,6 +274,21 @@ function organizerAiStatus_() {
   return status;
 }
 
+function cloudflareMultipartPayload_(fields) {
+  const boundary = "----ImagineSaudi" + Utilities.getUuid().replace(/-/g, "");
+  const chunks = [];
+  Object.keys(fields || {}).forEach(function(name) {
+    chunks.push("--" + boundary + "\r\n");
+    chunks.push("Content-Disposition: form-data; name=\"" + name + "\"\r\n\r\n");
+    chunks.push(String(fields[name] === undefined || fields[name] === null ? "" : fields[name]) + "\r\n");
+  });
+  chunks.push("--" + boundary + "--\r\n");
+  return {
+    payload: Utilities.newBlob(chunks.join(""), "application/octet-stream"),
+    contentType: "multipart/form-data; boundary=" + boundary
+  };
+}
+
 function route_(action, payload) {
   switch (action) {
     case "health":
@@ -285,6 +300,9 @@ function route_(action, payload) {
       };
     case "aiStatus":
       return { ok: true, service: "Imagine Saudi 2050", imageGeneration: cloudflareStatus_() };
+    case "aiDiagnostics":
+      requireAdmin_(payload);
+      return getAiDiagnostics_();
     case "visions":
       return getPublicVisions_();
     case "submit":
@@ -1262,11 +1280,17 @@ function generateVisionImage_(submissionId, team, track, prompt, details) {
   if (!cloudflareAvailable) {
     throw new Error("Cloudflare Workers AI is not configured. Add CLOUDFLARE_API_TOKEN and CLOUDFLARE_ACCOUNT_ID in Apps Script Project Settings.");
   }
+  const multipart = cloudflareMultipartPayload_({
+    prompt: imagePrompt,
+    width: "1024",
+    height: "576",
+    steps: "28"
+  });
   const response = UrlFetchApp.fetch(config.endpoint, {
     method: "post",
-    contentType: "application/json",
-    headers: { Authorization: "Bearer " + config.apiToken, Accept: "image/png" },
-    payload: JSON.stringify({ prompt: imagePrompt }),
+    contentType: multipart.contentType,
+    headers: { Authorization: "Bearer " + config.apiToken, Accept: "application/json" },
+    payload: multipart.payload,
     muteHttpExceptions: true
   });
   const status = response.getResponseCode();
@@ -1325,6 +1349,30 @@ function getOrganizerSnapshot_() {
     winner: buildWinnerState_(published, settings),
     analytics: getCompetitionAnalytics_(pending, published),
     ai: organizerAiStatus_()
+  };
+}
+
+function getAiDiagnostics_() {
+  initializeSheets_();
+  const failures = objectRows_(SHEETS.activityLog)
+    .filter(function(record) { return String(record.action || "") === "generation_failed"; })
+    .sort(function(a, b) { return String(b.timestamp || "").localeCompare(String(a.timestamp || "")); })
+    .slice(0, 10)
+    .map(function(record) {
+      return {
+        timestamp: String(record.timestamp || ""),
+        submissionId: String(record.submissionId || ""),
+        team: String(record.team || ""),
+        track: String(record.track || ""),
+        status: String(record.status || ""),
+        message: String(record.message || ""),
+        details: String(record.details || "")
+      };
+    });
+  return {
+    ok: true,
+    imageGeneration: cloudflareStatus_(),
+    recentFailures: failures
   };
 }
 
