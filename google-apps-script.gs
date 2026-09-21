@@ -1385,6 +1385,10 @@ function generateVisionImage_(submissionId, team, track, prompt, details) {
     "Problem or opportunity: " + String(details.problem || ""),
     "Expected impact: " + String(details.impact || ""),
     "Beneficiaries: " + String(details.beneficiaries || ""),
+    "=== TRACK CONTEXT — BROAD LENS ONLY ===",
+    "Selected track: " + String(track || "Other"),
+    "Prompt enhancer: " + trackPromptEnhancer_(track),
+    "Use the prompt enhancer only as broad context. Never replace, narrow, or contradict the participant idea.",
     "=== END PARTICIPANT IDEA ===",
   ].join("\n");
   const cloudflareAvailable = Boolean(config.apiToken && config.endpoint);
