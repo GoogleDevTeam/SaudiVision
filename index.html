@@ -1431,7 +1431,7 @@
           <input class="deadline-input" id="voting-deadline" type="datetime-local" aria-label="Voting deadline" data-aria-en="Voting deadline" data-aria-ar="موعد إغلاق التصويت" />
         </div>
         <p class="organizer-status" id="organizer-status" data-en="Competition is live. Settings are saved on this device." data-ar="المسابقة مباشرة. يتم حفظ الإعدادات على هذا الجهاز.">المسابقة مباشرة. يتم حفظ الإعدادات على هذا الجهاز.</p>
-       <div class="organizer-ai-provider" id="organizer-ai-provider" data-provider="gemini" aria-live="polite">
+       <div class="organizer-ai-provider" id="organizer-ai-provider" data-provider="cloudflare" aria-live="polite">
          <span data-en="Active image provider" data-ar="مزود الصور النشط">Active image provider</span>
          <div>
            <strong id="organizer-ai-provider-name">—</strong>
@@ -2094,7 +2094,7 @@
         status: "Submissions {submissions} · Voting {voting}.",
         open: "open",
         closed: "closed",
-         imageDemo: "One single AI image is generated with Gemini, with Cloudflare as the fallback.",
+         imageDemo: "One single AI image is generated with Cloudflare FLUX.2 Dev.",
          imageGenerating: "Creating your one-image AI visual...",
          trackEnhancerPrefix: "Image prompt enhancer: ",
          submissionAlreadyUsed: "You already submitted once in this round. Please wait for the next round.",
@@ -2118,7 +2118,7 @@
          demoBadge: "AI GENERATED",
          stockImage: "STOCK IMAGE",
          aiUnavailable: "Live image generation is temporarily unavailable. Please try again later.",
-         aiKeyMissing: "Image generation is not ready. Add GEMINI_API_KEY or the Cloudflare fallback settings in Apps Script Project Settings, then try again.",
+         aiKeyMissing: "Image generation is not ready. Add the Cloudflare Workers AI settings in Apps Script Project Settings, then try again.",
          conceptArt: "concept art",
          visionLabel: "VISION",
         voteError: "The vote could not be saved. Please try again.",
@@ -2131,10 +2131,8 @@
          organizerKeyLabel: "Organizer key",
          organizerUnlock: "Unlock",
          organizerCancel: "Cancel",
-         aiProviderGemini: "Gemini is active. Cloudflare remains the fallback.",
-         aiProviderCloudflare: "Cloudflare is active because Gemini was unavailable for the latest request.",
-         aiProviderBackup: "Gemini will be tried again on the next request.",
-         aiProviderUnavailable: "Provider status is unavailable until the organizer refreshes.",
+                  aiProviderCloudflare: "Cloudflare FLUX.2 Dev is the active image provider.",
+                  aiProviderUnavailable: "Provider status is unavailable until the organizer refreshes.",
          aiProviderCloudflareNoError: "Cloudflare is active as the configured provider.",
          aiProviderReason: "Reason: {error}",
          liveResults: "Live results",
@@ -2201,7 +2199,7 @@
         status: "المشاركات {submissions} · التصويت {voting}.",
         open: "مفتوحة",
         closed: "مغلقة",
-         imageDemo: "يتم إنشاء صورة واحدة فقط باستخدام Gemini، مع استخدام Cloudflare كخيار احتياطي.",
+         imageDemo: "يتم إنشاء صورة واحدة فقط باستخدام Cloudflare FLUX.2 Dev.",
          imageGenerating: "يتم الآن إنشاء الصورة الوحيدة للمشاركة...",
          trackEnhancerPrefix: "مُحسّن مطالبة الصورة: ",
          submissionAlreadyUsed: "لقد أرسلتم مشاركة واحدة في هذه الجولة. انتظروا الجولة القادمة.",
@@ -2225,7 +2223,7 @@
          demoBadge: "مولّد بالذكاء الاصطناعي",
          stockImage: "صورة مخزنة",
          aiUnavailable: "توليد الصور المباشر غير متاح مؤقتًا. حاولوا مرة أخرى لاحقًا.",
-         aiKeyMissing: "توليد الصور غير جاهز بعد. أضيفوا GEMINI_API_KEY أو إعدادات Cloudflare الاحتياطية في إعدادات مشروع Apps Script ثم حاولوا مرة أخرى.",
+         aiKeyMissing: "توليد الصور غير جاهز بعد. أضيفوا إعدادات Cloudflare Workers AI في إعدادات مشروع Apps Script ثم حاولوا مرة أخرى.",
          conceptArt: "تصور بصري",
          visionLabel: "رؤية",
         voteError: "تعذر حفظ التصويت. حاول مرة أخرى.",
@@ -2238,10 +2236,8 @@
          organizerKeyLabel: "رمز المنظم",
          organizerUnlock: "فتح",
          organizerCancel: "إلغاء",
-         aiProviderGemini: "Gemini هو المزود النشط، وCloudflare هو الخيار الاحتياطي.",
-         aiProviderCloudflare: "Cloudflare هو المزود النشط لأن Gemini لم يكن متاحًا في آخر طلب.",
-         aiProviderBackup: "سيتم تجربة Gemini مرة أخرى في الطلب التالي.",
-         aiProviderUnavailable: "تظهر حالة المزود بعد تحديث المنظم.",
+                  aiProviderCloudflare: "Cloudflare FLUX.2 Dev هو مزود الصور النشط.",
+                  aiProviderUnavailable: "تظهر حالة المزود بعد تحديث المنظم.",
          aiProviderCloudflareNoError: "Cloudflare هو المزود النشط والمُعد حاليًا.",
          aiProviderReason: "السبب: {error}",
          liveResults: "النتائج المباشرة",
@@ -3364,22 +3360,22 @@
     function updateOrganizerAiProvider() {
       if (!organizerAiProvider) return;
       if (!organizerAiStatus || liveStageDemoMode) {
-        organizerAiProvider.dataset.provider = "gemini";
+        organizerAiProvider.dataset.provider = "cloudflare";
         organizerAiProviderName.textContent = "—";
         organizerAiProviderDetail.textContent = t("aiProviderUnavailable");
         organizerAiProviderError.textContent = "";
         return;
       }
       const activeProvider = organizerAiStatus.activeProvider || organizerAiStatus.provider || "none";
-      const isGemini = activeProvider === "Google Gemini";
-      const fallbackError = String(organizerAiStatus.lastFallbackError || "").trim();
-      organizerAiProvider.dataset.provider = isGemini ? "gemini" : "cloudflare";
+      const providerConfigured = activeProvider === "Cloudflare Workers AI";
+      const providerError = String(organizerAiStatus.lastFallbackError || "").trim();
+      organizerAiProvider.dataset.provider = "cloudflare";
       organizerAiProviderName.textContent = activeProvider;
-      organizerAiProviderDetail.textContent = isGemini
-        ? t("aiProviderGemini")
-        : (fallbackError ? t("aiProviderCloudflare") : t("aiProviderCloudflareNoError")) + " " + t("aiProviderBackup");
-      organizerAiProviderError.textContent = fallbackError
-        ? t("aiProviderReason").replace("{error}", fallbackError)
+      organizerAiProviderDetail.textContent = providerConfigured
+        ? (providerError ? t("aiProviderCloudflare") : t("aiProviderCloudflareNoError"))
+        : t("aiProviderUnavailable");
+      organizerAiProviderError.textContent = providerError
+        ? t("aiProviderReason").replace("{error}", providerError)
         : "";
     }
 
