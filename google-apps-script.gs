@@ -328,6 +328,8 @@ function route_(action, payload) {
       return voteForVision_(payload);
     case "unvote":
       return unvoteVision_(payload);
+    case "voteStatus":
+      return getVoteStatus_(payload);
     case "pending":
       requireAdmin_(payload);
       return { ok: true, visions: getPendingSubmissions_() };
@@ -1657,6 +1659,19 @@ function voteForVision_(payload) {
     invalidatePublicResponseCache_();
     return { ok: true, action: "vote", visionId: visionId };
   });
+}
+
+function getVoteStatus_(payload) {
+  const voterId = validVoterId_(payload.voterId);
+  const activeVote = objectRows_(SHEETS.votes).find(function(record) {
+    return String(record.voterId) === voterId && parseBoolean_(record.active, false);
+  });
+  return {
+    ok: true,
+    status: activeVote ? "voted" : "not_voted",
+    voted: Boolean(activeVote),
+    visionId: activeVote ? String(activeVote.visionId || "") : ""
+  };
 }
 
 function unvoteVision_(payload) {
