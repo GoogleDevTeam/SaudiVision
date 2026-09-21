@@ -86,7 +86,7 @@ const SHEETS = {
 
 const GUIDE_SHEET_NAME = "START HERE";
 const WORKBOOK_FORMAT_VERSION = "2026-09-20-v9";
-const IMAGE_PROMPT_VERSION = "2026-09-21-v11-openrouter-cloudflare";
+const IMAGE_PROMPT_VERSION = "2026-09-21-v12-organizer-approval";
 const GENERATION_SLOT_KEY = "IMAGINE_SAUDI_IMAGE_GENERATION_SLOT";
 const PUBLIC_RESPONSE_CACHE_KEY_ = "IMAGINE_SAUDI_PUBLIC_RESPONSE_V1";
 const PUBLIC_RESPONSE_CACHE_TTL_SECONDS_ = 5;
@@ -122,7 +122,7 @@ const FIELD_NOTES = {
   createdAt: "When the record was created.",
   publishedAt: "When an organizer approved the vision.",
   updatedAt: "When the submission status or record was last changed.",
-  status: "Workflow state: pending, published, or deleted.",
+  status: "Workflow state: pending, generating, published, or deleted.",
   team: "Participant group name.",
   track: "Strategic competition track selected by the group.",
   prompt: "The group's Saudi 2050 vision description.",
@@ -739,7 +739,7 @@ function cleanOptionalText_(value, maxLength) {
 
 function imageSource_(value) {
   const source = String(value == null ? "" : value).trim().toLowerCase();
-  return ["demo-preview", "generated", "uploaded", "curated"].indexOf(source) !== -1
+  return ["demo-preview", "awaiting-approval", "generated", "uploaded", "curated"].indexOf(source) !== -1
     ? source
     : "demo-preview";
 }
@@ -1106,7 +1106,7 @@ function submitVision_(payload) {
     id: submissionId,
     createdAt: timestamp,
     updatedAt: timestamp,
-    status: "processing",
+    status: "pending",
     team: team,
     title: title,
     track: track,
@@ -1116,7 +1116,7 @@ function submitVision_(payload) {
     beneficiaries: beneficiaries,
     tags: tags,
     image: "",
-    imageSource: "generated",
+    imageSource: "awaiting-approval",
     color: /^#[0-9a-f]{6}$/i.test(String(payload.color || "")) ? String(payload.color) : "#D8D0ED",
     height: cleanNumber_(payload.height, 280, 180, 520),
     submittedBy: cleanOptionalText_(payload.submittedBy || "", 120),
@@ -1133,13 +1133,13 @@ function submitVision_(payload) {
     timezone: timezone,
     language: language,
     userAgent: userAgent,
-    generationStatus: "queued",
+    generationStatus: "awaiting_approval",
     generationStartedAt: "",
     generationCompletedAt: "",
     generationAttempts: 0,
     generationError: "",
     promptVersion: IMAGE_PROMPT_VERSION,
-    imageModel: imageGenerationModel_(),
+    imageModel: "",
     imageMimeType: "",
     driveFileId: "",
     reviewedAt: "",
@@ -1161,58 +1161,12 @@ function submitVision_(payload) {
 
   if (existingRecord) return submissionStatusResponse_(existingRecord);
 
-  const generationStartedAt = now_();
-  withLock_(function() {
-    const reserved = findRecord_(SHEETS.submissions, "id", submissionId);
-    if (reserved) updateRecord_(reserved, { generationStatus: "generating", generationStartedAt: generationStartedAt, updatedAt: generationStartedAt });
-  });
-
-  try {
-    const generated = withGenerationSlot_(function() {
-      return generateVisionImageWithRetry_(submissionId, team, track, prompt, {
-        title: title,
-        problem: problem,
-        impact: impact,
-        beneficiaries: beneficiaries
-      });
-    });
-    const completedAt = now_();
-    withLock_(function() {
-      const saved = findRecord_(SHEETS.submissions, "id", submissionId);
-      if (!saved) throw new Error("Reserved submission record disappeared.");
-      updateRecord_(saved, {
-        status: "pending",
-        updatedAt: completedAt,
-        image: generated.image.url,
-        imageSource: "generated",
-        generationStatus: "generated",
-        generationCompletedAt: completedAt,
-        generationAttempts: generated.attempts,
-        generationError: "",
-        imageMimeType: generated.image.mimeType,
-        driveFileId: generated.image.fileId || ""
-      });
-      logActivity_("generation_succeeded", "pending", saved, "Image generated and submission queued for organizer review.", { attempts: generated.attempts, mimeType: generated.image.mimeType });
-    });
-    return { ok: true, status: "pending", submissionId: submissionId, imageSource: "generated", generationAttempts: generated.attempts };
-  } catch (error) {
-    const completedAt = now_();
-    const message = safeErrorMessage_(error);
-    withLock_(function() {
-      const failed = findRecord_(SHEETS.submissions, "id", submissionId);
-      if (failed) {
-        updateRecord_(failed, {
-          status: "failed",
-          updatedAt: completedAt,
-          generationStatus: "failed",
-          generationCompletedAt: completedAt,
-          generationAttempts: Number(error.generationAttempts) || 1,
-          generationError: message
-        });
-        logActivity_("generation_failed", "failed", failed, message, { retryable: isRetryableGenerationError_(error) });
-      }
-    });
-    return { ok: false, status: "failed", submissionId: submissionId, error: message };
+  return {
+    ok: true,
+    status: "pending",
+    submissionId: submissionId,
+    imageSource: "awaiting-approval",
+    generationStatus: "awaiting_approval"
   }
 }
 
@@ -1488,37 +1442,111 @@ function copyRecordFields_(record, headers) {
   return copy;
 }
 
-function moderateSubmission_(submissionId, nextStatus) {
+function publishSubmissionRecord_(submissionId, generated) {
   return withLock_(function() {
-    if (["published", "deleted"].indexOf(nextStatus) === -1) {
-      throw new Error("Invalid moderation status.");
-    }
     const submission = findRecord_(SHEETS.submissions, "id", submissionId);
     if (!submission) throw new Error("Submission not found.");
-    if (String(submission.status).toLowerCase() !== "pending") {
-      throw new Error("Only pending submissions can be moderated.");
-    }
-    if (nextStatus === "published" && !String(submission.image || "")) {
-      throw new Error("This submission has no generated image yet.");
-    }
-
+    const existingVision = findRecord_(SHEETS.visions, "id", submission.id);
+    if (existingVision) throw new Error("This submission already has a vision record.");
+    const image = generated && generated.image ? generated.image : {
+      url: String(submission.image || ""),
+      mimeType: String(submission.imageMimeType || ""),
+      fileId: String(submission.driveFileId || "")
+    };
+    if (!image.url) throw new Error("Image generation did not return an image.");
     const timestamp = now_();
-    updateRecord_(submission, { status: nextStatus, updatedAt: timestamp, reviewedAt: timestamp, reviewedBy: "organizer" });
-    if (nextStatus === "published") {
-      const existingVision = findRecord_(SHEETS.visions, "id", submission.id);
-      if (existingVision) throw new Error("This submission already has a vision record.");
-      const vision = copyRecordFields_(submission, SHEETS.visions.headers);
-      vision.publishedAt = timestamp;
-      vision.status = "published";
-      vision.votes = 0;
-      vision.reviewedAt = timestamp;
-      vision.reviewedBy = "organizer";
-      appendRecord_(SHEETS.visions, vision);
-    }
-    logActivity_("moderation", nextStatus, submission, "Organizer changed submission status.", { nextStatus: nextStatus });
+    const generatedFields = generated && generated.image ? {
+      image: image.url,
+      imageSource: "generated",
+      generationStatus: "generated",
+      generationCompletedAt: timestamp,
+      generationAttempts: generated.attempts,
+      generationError: "",
+      imageModel: imageGenerationModel_(),
+      imageMimeType: image.mimeType || "",
+      driveFileId: image.fileId || ""
+    } : {};
+    updateRecord_(submission, Object.assign({
+      status: "published",
+      updatedAt: timestamp,
+      reviewedAt: timestamp,
+      reviewedBy: "organizer"
+    }, generatedFields));
+    const vision = copyRecordFields_(submission, SHEETS.visions.headers);
+    vision.publishedAt = timestamp;
+    vision.status = "published";
+    vision.votes = 0;
+    vision.reviewedAt = timestamp;
+    vision.reviewedBy = "organizer";
+    appendRecord_(SHEETS.visions, vision);
+    logActivity_("moderation", "published", submission, "Organizer approved the submission and its AI image is ready.", { nextStatus: "published", generated: Boolean(generated && generated.image) });
     invalidatePublicResponseCache_();
-    return { ok: true, status: nextStatus, submissionId: String(submission.id) };
+    return { ok: true, status: "published", submissionId: String(submission.id), imageSource: "generated" };
   });
+}
+
+function moderateSubmission_(submissionId, nextStatus) {
+  if (["published", "deleted"].indexOf(nextStatus) === -1) {
+    throw new Error("Invalid moderation status.");
+  }
+  if (nextStatus === "deleted") {
+    return withLock_(function() {
+      const submission = findRecord_(SHEETS.submissions, "id", submissionId);
+      if (!submission) throw new Error("Submission not found.");
+      if (["pending", "failed"].indexOf(String(submission.status).toLowerCase()) === -1) {
+        throw new Error("Only pending submissions can be declined.");
+      }
+      const timestamp = now_();
+      updateRecord_(submission, { status: "deleted", updatedAt: timestamp, reviewedAt: timestamp, reviewedBy: "organizer" });
+      logActivity_("moderation", "deleted", submission, "Organizer declined the submission before image generation.", { nextStatus: "deleted", generated: false });
+      invalidatePublicResponseCache_();
+      return { ok: true, status: "deleted", submissionId: String(submission.id), imageGenerated: false };
+    });
+  }
+
+  let submission = withLock_(function() {
+    const record = findRecord_(SHEETS.submissions, "id", submissionId);
+    if (!record) throw new Error("Submission not found.");
+    if (String(record.status).toLowerCase() !== "pending") {
+      throw new Error("Only pending submissions can be approved.");
+    }
+    if (String(record.image || "")) return record;
+    const timestamp = now_();
+    updateRecord_(record, { status: "generating", generationStatus: "generating", generationStartedAt: timestamp, updatedAt: timestamp, generationError: "" });
+    logActivity_("approval_received", "generating", record, "Organizer approved the idea; AI image generation started.", { nextStatus: "published" });
+    return record;
+  });
+
+  if (String(submission.image || "")) return publishSubmissionRecord_(submissionId, null);
+
+  try {
+    const generated = withGenerationSlot_(function() {
+      return generateVisionImageWithRetry_(submissionId, submission.team, submission.track, submission.prompt, {
+        title: submission.title,
+        problem: submission.problem,
+        impact: submission.impact,
+        beneficiaries: submission.beneficiaries
+      });
+    });
+    return publishSubmissionRecord_(submissionId, generated);
+  } catch (error) {
+    const message = safeErrorMessage_(error);
+    withLock_(function() {
+      const failed = findRecord_(SHEETS.submissions, "id", submissionId);
+      if (failed) {
+        updateRecord_(failed, {
+          status: "pending",
+          updatedAt: now_(),
+          generationStatus: "failed",
+          generationCompletedAt: now_(),
+          generationAttempts: Number(error.generationAttempts) || 1,
+          generationError: message
+        });
+        logActivity_("generation_failed", "pending", failed, "Approved image generation failed; the submission remains available for retry.", { retryable: isRetryableGenerationError_(error) });
+      }
+    });
+    return { ok: false, status: "generation_failed", submissionId: String(submissionId), error: "AI image generation failed. The submission remains available for retry." };
+  }
 }
 
 function deletePublishedVision_(visionId) {
