@@ -372,6 +372,7 @@
     }
     .organizer-ai-provider span { color: var(--dim); font-family: "Cairo", sans-serif; font-size: .68rem; }
     .organizer-ai-provider strong { color: var(--green); font-size: .76rem; }
+    .organizer-ai-provider small { display: block; margin-top: 3px; color: var(--dim); font-family: "Cairo", sans-serif; font-size: .64rem; }
     .organizer-ai-provider[data-provider="cloudflare"] strong { color: #D6AA62; }
 
     body.live-stage-active { overflow: hidden; }
@@ -1435,6 +1436,7 @@
          <div>
            <strong id="organizer-ai-provider-name">—</strong>
            <small id="organizer-ai-provider-detail">—</small>
+           <small id="organizer-ai-provider-error"></small>
          </div>
        </div>
          <div class="organizer-summary" aria-label="Organizer summary" data-aria-en="Organizer summary" data-aria-ar="ملخص المنظم">
@@ -1872,6 +1874,7 @@
     const organizerAiProvider = document.getElementById("organizer-ai-provider");
     const organizerAiProviderName = document.getElementById("organizer-ai-provider-name");
     const organizerAiProviderDetail = document.getElementById("organizer-ai-provider-detail");
+    const organizerAiProviderError = document.getElementById("organizer-ai-provider-error");
     const organizerPendingCount = document.getElementById("organizer-pending-count");
     const organizerPublishedCount = document.getElementById("organizer-published-count");
     const organizerTotalCount = document.getElementById("organizer-total-count");
@@ -2132,6 +2135,8 @@
          aiProviderCloudflare: "Cloudflare is active because Gemini was unavailable for the latest request.",
          aiProviderBackup: "Gemini will be tried again on the next request.",
          aiProviderUnavailable: "Provider status is unavailable until the organizer refreshes.",
+         aiProviderCloudflareNoError: "Cloudflare is active as the configured provider.",
+         aiProviderReason: "Reason: {error}",
          liveResults: "Live results",
          resultsDescription: "A ranked view of published visions and active votes.",
          noPublishedResults: "No published visions yet.",
@@ -2237,6 +2242,8 @@
          aiProviderCloudflare: "Cloudflare هو المزود النشط لأن Gemini لم يكن متاحًا في آخر طلب.",
          aiProviderBackup: "سيتم تجربة Gemini مرة أخرى في الطلب التالي.",
          aiProviderUnavailable: "تظهر حالة المزود بعد تحديث المنظم.",
+         aiProviderCloudflareNoError: "Cloudflare هو المزود النشط والمُعد حاليًا.",
+         aiProviderReason: "السبب: {error}",
          liveResults: "النتائج المباشرة",
          resultsDescription: "ترتيب الرؤى المنشورة والأصوات النشطة.",
          noPublishedResults: "لا توجد رؤى منشورة بعد.",
@@ -3352,15 +3359,20 @@
         organizerAiProvider.dataset.provider = "gemini";
         organizerAiProviderName.textContent = "—";
         organizerAiProviderDetail.textContent = t("aiProviderUnavailable");
+        organizerAiProviderError.textContent = "";
         return;
       }
       const activeProvider = organizerAiStatus.activeProvider || organizerAiStatus.provider || "none";
       const isGemini = activeProvider === "Google Gemini";
+      const fallbackError = String(organizerAiStatus.lastFallbackError || "").trim();
       organizerAiProvider.dataset.provider = isGemini ? "gemini" : "cloudflare";
       organizerAiProviderName.textContent = activeProvider;
       organizerAiProviderDetail.textContent = isGemini
         ? t("aiProviderGemini")
-        : t("aiProviderCloudflare") + " " + t("aiProviderBackup");
+        : (fallbackError ? t("aiProviderCloudflare") : t("aiProviderCloudflareNoError")) + " " + t("aiProviderBackup");
+      organizerAiProviderError.textContent = fallbackError
+        ? t("aiProviderReason").replace("{error}", fallbackError)
+        : "";
     }
 
     function updateOrganizerSummary() {
