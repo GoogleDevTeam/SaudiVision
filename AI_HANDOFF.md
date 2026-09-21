@@ -532,6 +532,13 @@ Before coding, inspect the latest `main` branch and the live deployment state. T
 - Frontend commit: `d6dff51e4c398f561dea75fa0fef4f10c89c48c1`.
 - Inline frontend JavaScript syntax validation passed. GitHub Pages still needs to finish its normal hosting refresh.
 
+### Organizer intermittent loading repair — 2026-09-21
+
+- Live public probes returned healthy Apps Script responses: `health` ready, `aiStatus` configured/ready, and non-empty published visions.
+- Organizer requests previously used the generic 12-second browser timeout; the organizer snapshot could also wait for Apps Script/Sheets work and generation-slot contention.
+- Added a 30-second organizer snapshot/fallback timeout, one retry for timeout/5xx failures, and a public `aiStatus` fallback when an older backend snapshot omits AI status.
+- Frontend JavaScript syntax validation passed. Commit: `168e92abd821369226482abe8750fff86cfaa3ab`.
+
 ### Next recommended step
 
 Deploy the updated google-apps-script.gs once, then submit a vision with two or three related ideas and verify that the generated image loads quickly in the gallery and still follows the participant's wording while using the selected track only as a broad lens.
