@@ -365,6 +365,9 @@ function route_(action, payload) {
     case "resetSubmissions":
       requireAdmin_(payload);
       return resetSubmissionRound_();
+    case "resetVotes":
+      requireAdmin_(payload);
+      return resetVotes_();
     default:
       throw new Error("Unknown action.");
   }
@@ -977,6 +980,41 @@ function resetSubmissionRound_() {
     settings.submissionRound = nextRound;
     invalidatePublicResponseCache_();
     return { ok: true, submissionRound: nextRound, settings: settings };
+  });
+}
+
+function resetVotes_() {
+  return withLock_(function() {
+    const timestamp = now_();
+    const activeVotes = objectRows_(SHEETS.votes).filter(function(record) {
+      return parseBoolean_(record.active, false);
+    });
+    activeVotes.forEach(function(record) {
+      updateRecord_(record, { active: false });
+    });
+
+    objectRows_(SHEETS.visions).forEach(function(record) {
+      if (Number(record.votes) || 0) updateRecord_(record, { votes: 0 });
+    });
+
+    const settingsDefinition = SHEETS.settings;
+    ["winnerVisionId", "winnerDeclaredAt"].forEach(function(key) {
+      const existing = findRecord_(settingsDefinition, "key", key);
+      if (existing) updateRecord_(existing, { value: "", updatedAt: timestamp });
+      else appendRecord_(settingsDefinition, { key: key, value: "", updatedAt: timestamp });
+    });
+
+    invalidatePublicResponseCache_();
+    const settings = getSettings_();
+    const published = objectRows_(SHEETS.visions)
+      .filter(function(record) { return String(record.status).toLowerCase() === "published"; })
+      .map(publicVision_);
+    return {
+      ok: true,
+      resetVotes: activeVotes.length,
+      settings: settings,
+      winner: buildWinnerState_(published, settings)
+    };
   });
 }
 
