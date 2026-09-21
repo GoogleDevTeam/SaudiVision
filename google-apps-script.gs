@@ -253,7 +253,7 @@ function cloudflareConfig_() {
 }
 
 function imageGenerationModel_() {
-  return cloudflareConfig_().model;
+  return imageGenerationStatus_().model;
 }
 
 function openrouterConfig_() {
@@ -281,21 +281,7 @@ function imageGenerationStatus_() {
   };
 }
 
-function imageGenerationStatus_() {
-  const cloudflare = cloudflareConfig_();
-  const configured = Boolean(cloudflare.apiToken && cloudflare.endpoint);
-  const provider = configured ? "Cloudflare Workers AI" : "none";
-  return {
-    configured: configured,
-    status: configured ? "ready" : "needs_cloudflare_settings",
-    provider: provider,
-    activeProvider: provider,
-    model: cloudflare.model,
-    primaryProvider: "Cloudflare Workers AI",
-    fallbackProvider: "not_configured",
-    fallbackConfigured: false
-  };
-}
+
 
 function organizerAiStatus_() {
   const status = imageGenerationStatus_();
@@ -336,6 +322,8 @@ function route_(action, payload) {
       return getPublicVisions_();
     case "submit":
       return submitVision_(payload);
+    case "submissionStatus":
+      return getSubmissionStatus_(payload);
     case "vote":
       return voteForVision_(payload);
     case "unvote":
@@ -1060,6 +1048,28 @@ function publicVision_(record) {
   };
 }
 
+function submissionStatusResponse_(record) {
+  const status = String(record && record.status || "").toLowerCase();
+  return {
+    ok: true,
+    status: status || "unknown",
+    submissionId: String(record && record.id || ""),
+    generationStatus: String(record && record.generationStatus || ""),
+    generationAttempts: Number(record && record.generationAttempts) || 0,
+    error: String(record && record.generationError || "")
+  };
+}
+
+function getSubmissionStatus_(payload) {
+  const submissionId = cleanText_(payload.submissionId, 200, "Submission ID");
+  const participantId = cleanText_(payload.participantId, 160, "Participant session");
+  const record = findRecord_(SHEETS.submissions, "id", submissionId);
+  if (!record || String(record.participantId || "") !== participantId) {
+    return { ok: true, status: "not_found", submissionId: submissionId };
+  }
+  return submissionStatusResponse_(record);
+}
+
 function submitVision_(payload) {
   const settings = getSettings_();
   if (!settings.submissionsOpen || !deadlineIsOpen_(settings.submissionDeadline)) {
@@ -1087,7 +1097,10 @@ function submitVision_(payload) {
   const impact = cleanOptionalText_(payload.impact, 800);
   const beneficiaries = cleanOptionalText_(payload.beneficiaries, 200);
   const tags = cleanOptionalText_(payload.tags, 200);
-  const submissionId = newId_();
+  const requestedSubmissionId = cleanOptionalText_(payload.submissionId || "", 200);
+  const submissionId = requestedSubmissionId && /^[a-zA-Z0-9._:-]+$/.test(requestedSubmissionId)
+    ? requestedSubmissionId
+    : newId_();
   const timestamp = now_();
   const record = {
     id: submissionId,
@@ -1133,13 +1146,20 @@ function submitVision_(payload) {
     reviewedBy: ""
   };
 
+  let existingRecord = null;
   withLock_(function() {
+    if (requestedSubmissionId) {
+      existingRecord = findRecord_(SHEETS.submissions, "id", submissionId);
+      if (existingRecord) return;
+    }
     if (participantHasSubmitted_(participantId, submissionRound)) {
       throw new Error("This participant has already submitted in the current round.");
     }
     appendRecord_(SHEETS.submissions, record);
     logActivity_("submission_received", "queued", record, "Submission reserved before image generation.", { promptVersion: IMAGE_PROMPT_VERSION });
   });
+
+  if (existingRecord) return submissionStatusResponse_(existingRecord);
 
   const generationStartedAt = now_();
   withLock_(function() {
@@ -1593,6 +1613,9 @@ function voteForVision_(payload) {
       return String(record.voterId) === voterId && parseBoolean_(record.active, false);
     });
     if (activeVote) {
+      if (String(activeVote.visionId) === visionId) {
+        return { ok: true, action: "vote", changed: false, visionId: visionId };
+      }
       throw new Error("This voter already has an active vote.");
     }
 
