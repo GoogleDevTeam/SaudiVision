@@ -16,6 +16,7 @@ assert.match(backend, /case "voteStatus":\s*return getVoteStatus_\(payload\);/);
 assert.match(backend, /This voter already has an active vote/);
 assert.match(backend, /requestedSubmissionId/);
 assert.match(backend, /participantHasSubmitted_\(participantId, submissionRound\)/);
+assert.match(backend, /copyRecordFields_\(Object\.assign\(\{\}, submission, generatedFields\), SHEETS\.visions\.headers\)/, "published vision must include generated fields");
 assert.match(html, /googleRequest\("submit", newVision/);
 assert.match(html, /waitForSubmissionStatus\(submissionId\)/);
 assert.match(html, /function safeLocalGet/);
@@ -57,6 +58,20 @@ const safeStorage = new Function("window", storageCode + " return { get: safeLoc
 assert.equal(safeStorage.get("blocked-key", "fallback"), "fallback");
 assert.equal(safeStorage.set("blocked-key", "value"), false);
 assert.equal(safeStorage.remove("blocked-key"), false);
+
+const workingStorageState = new Map();
+const workingStorage = new Function("window", storageCode + " return { get: safeLocalGet, set: safeLocalSet, remove: safeLocalRemove };")({
+  localStorage: {
+    getItem: key => workingStorageState.has(key) ? workingStorageState.get(key) : null,
+    setItem: (key, value) => workingStorageState.set(key, String(value)),
+    removeItem: key => workingStorageState.delete(key)
+  }
+});
+assert.equal(workingStorage.get("missing-key", "fallback"), "fallback");
+assert.equal(workingStorage.set("persisted-key", "value"), true);
+assert.equal(workingStorage.get("persisted-key", "fallback"), "value");
+assert.equal(workingStorage.remove("persisted-key"), true);
+assert.equal(workingStorage.get("persisted-key", "fallback"), "fallback");
 
 const imageStart = html.indexOf("function safeImageUrl");
 const imageEnd = html.indexOf("function bindGalleryInteractions", imageStart);
