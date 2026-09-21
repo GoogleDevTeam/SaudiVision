@@ -1596,7 +1596,7 @@
       <div class="submit-intro">
         <p class="submit-kicker" data-en="Your future / starts here" data-ar="مستقبلكم / يبدأ هنا">Your future / starts here</p>
         <h2 id="submit-heading" data-en="Put your imagination on stage." data-ar="خلّوا خيالكم يُعرض على المسرح.">خلّوا خيالكم يُعرض على المسرح.</h2>
-         <p data-en="Write a short description. A single server-generated visual will be created for your idea, then prepared for the gallery." data-ar="اكتبوا وصفًا قصيرًا. سيتم إنشاء تصور بصري واحد لفكرتكم على الخادم، ثم تجهيزه للعرض في المعرض.">اكتبوا وصفًا قصيرًا. سيتم إنشاء تصور بصري واحد لفكرتكم على الخادم، ثم تجهيزه للعرض في المعرض.</p>
+         <p data-en="Write a short description. Your idea goes to the organizer first; an AI image is created only after approval." data-ar="اكتبوا وصفًا قصيرًا. ستصل فكرتكم إلى المنظم أولًا، ولن يتم إنشاء صورة بالذكاء الاصطناعي إلا بعد الموافقة.">اكتبوا وصفًا قصيرًا. ستصل فكرتكم إلى المنظم أولًا، ولن يتم إنشاء صورة بالذكاء الاصطناعي إلا بعد الموافقة.</p>
         <p class="closed-message" id="closed-message" data-en="Submissions are currently closed." data-ar="التقديم مغلق حاليًا.">التقديم مغلق حاليًا.</p>
       </div>
       <form class="vision-form" id="vision-form">
@@ -1627,11 +1627,11 @@
         <div class="field full">
           <label for="prompt-input" data-en="Describe your Saudi 2050 vision" data-ar="وصف رؤيتكم للسعودية 2050">Describe your Saudi 2050 vision</label>
           <textarea id="prompt-input" name="prompt" maxlength="2000" placeholder="مثال: مدن صحراوية خضراء تنتج طاقتها وتجمع مياهها من الهواء..." data-placeholder-en="Example: Green desert cities that produce their own energy and collect water from the air..." data-placeholder-ar="مثال: مدن صحراوية خضراء تنتج طاقتها وتجمع مياهها من الهواء..." required></textarea>
-          <small class="field-helper" data-en="The clearer the story, the stronger the generated visual and organizer review." data-ar="كلما كانت القصة أوضح، كان التصور البصري والمراجعة أقوى.">The clearer the story, the stronger the generated visual and organizer review.</small>
+          <small class="field-helper" data-en="The organizer reviews your idea first. An AI image is created only after approval." data-ar="يراجع المنظم فكرتكم أولًا. لن يتم إنشاء صورة بالذكاء الاصطناعي إلا بعد الموافقة.">The organizer reviews your idea first. An AI image is created only after approval.</small>
         </div>
         <div class="submit-actions">
-           <span class="form-note" id="form-note" role="status" aria-live="polite" data-en="AI visual generated server-side." data-ar="يتم إنشاء التصور بالذكاء الاصطناعي على الخادم.">يتم إنشاء التصور بالذكاء الاصطناعي على الخادم.</span>
-          <button class="generate-button" id="generate-button" type="submit" data-en="✦ Turn idea into image" data-ar="✦ حوّلوا الفكرة إلى صورة">✦ Turn idea into image</button>
+           <span class="form-note" id="form-note" role="status" aria-live="polite" data-en="Sent to organizer; image created only after approval." data-ar="تم الإرسال إلى المنظم؛ تُنشأ الصورة بعد الموافقة فقط.">تم الإرسال إلى المنظم؛ تُنشأ الصورة بعد الموافقة فقط.</span>
+          <button class="generate-button" id="generate-button" type="submit" data-en="✦ Send idea to organizer" data-ar="✦ أرسلوا الفكرة إلى المنظم">✦ Send idea to organizer</button>
         </div>
       </form>
     </section>
@@ -2129,23 +2129,23 @@
         status: "Submissions {submissions} · Voting {voting}.",
         open: "open",
         closed: "closed",
-         imageDemo: "One single AI image is created for each accepted submission.",
-         imageGenerating: "Creating your one-image AI visual...",
-         imageSending: "Sending your submission...",
-         imageStillProcessing: "Still processing — your submission may already be sent. Checking again...",
-         imageSent: "Sent successfully — waiting for review.",
+         imageDemo: "An AI image is created only after organizer approval.",
+         imageGenerating: "Preparing your idea for organizer review...",
+         imageSending: "Sending your idea to the organizer...",
+         imageStillProcessing: "Still sending — checking whether your idea was received...",
+         imageSent: "Sent to organizer — waiting for approval.",
          imageFailed: "Error — please try again.",
-         imageNotSent: "Not sent. No AI image was created.",
+         imageNotSent: "Not sent.",
          confirmImageGeneration: "Continue? One AI image will be created for this submission.",
          trackEnhancerPrefix: "Image prompt enhancer: ",
          submissionAlreadyUsed: "You already submitted once in this round. Please wait for the next round.",
          resetSubmissions: "Reset participant submissions",
          resetSubmissionsConfirm: "Start a new submission round? Existing submissions will stay safe, and each participant can submit once again.",
          submissionReset: "Submission round reset. Participants can submit once again.",
-         imageGeneratingButton: "Creating AI visual...",
+         imageGeneratingButton: "Sending to organizer...",
          imageAdded: "Your vision was published to the gallery.",
         imageQueued: "Your vision was received successfully and is ready for review.",
-        imageCompleteButton: "Submitted — ready for review",
+        imageCompleteButton: "Sent — awaiting organizer approval",
         submissionClosed: "Submissions are currently closed.",
          rateLimited: "Too many requests from this browser. Please wait a moment and try again.",
          submitError: "The submission could not be saved. Please try again.",
@@ -2156,9 +2156,17 @@
          organizerInvalidKey: "The organizer key was rejected. Check the organizer setup and try again.",
          organizerLoading: "Checking organizer key...",
          confirmDelete: "Delete this submission permanently? It will not be shown publicly.",
+          confirmDecline: "Decline this submission? No AI image will be created.",
+          imageAwaitingOrganizer: "No AI image has been created yet. Approve to generate it.",
+          approveAndGenerate: "Approve & create AI image",
+          decline: "Decline",
+          reviewGenerating: "Approved. Creating the AI image now...",
+          reviewApproved: "Approved and published successfully.",
+          reviewDeclined: "Declined. No AI image was created.",
+          reviewGenerationError: "The idea was not published because image generation failed. It remains available to retry.",
          demoBadge: "AI GENERATED",
          stockImage: "STOCK IMAGE",
-         aiUnavailable: "Live image generation is temporarily unavailable. Please try again later.",
+         aiUnavailable: "The submission service is temporarily unavailable. Please try again later.",
          aiKeyMissing: "AI image generation is not ready. Please try again later.",
          conceptArt: "concept art",
          visionLabel: "VISION",
@@ -2244,23 +2252,23 @@
         status: "المشاركات {submissions} · التصويت {voting}.",
         open: "مفتوحة",
         closed: "مغلقة",
-         imageDemo: "يتم إنشاء صورة واحدة فقط لكل مشاركة مقبولة بالذكاء الاصطناعي.",
-         imageGenerating: "يتم الآن إنشاء الصورة الوحيدة للمشاركة...",
-         imageSending: "جارٍ إرسال المشاركة...",
-         imageStillProcessing: "لا تزال المشاركة قيد المعالجة — ربما تم إرسالها، جارٍ التحقق مرة أخرى...",
-         imageSent: "تم الإرسال بنجاح — بانتظار المراجعة.",
+         imageDemo: "لا يتم إنشاء صورة بالذكاء الاصطناعي إلا بعد موافقة المنظم.",
+         imageGenerating: "جارٍ تجهيز فكرتكم لمراجعة المنظم...",
+         imageSending: "جارٍ إرسال فكرتكم إلى المنظم...",
+         imageStillProcessing: "لا تزال المشاركة قيد الإرسال — جارٍ التحقق من استلام الفكرة...",
+         imageSent: "تم الإرسال إلى المنظم — بانتظار الموافقة.",
          imageFailed: "حدث خطأ — حاول مرة أخرى.",
-         imageNotSent: "لم يتم الإرسال. لم يتم إنشاء صورة بالذكاء الاصطناعي.",
+         imageNotSent: "لم يتم الإرسال.",
          confirmImageGeneration: "هل تريدون المتابعة؟ سيتم إنشاء صورة واحدة بالذكاء الاصطناعي لهذه المشاركة.",
          trackEnhancerPrefix: "مُحسّن مطالبة الصورة: ",
          submissionAlreadyUsed: "لقد أرسلتم مشاركة واحدة في هذه الجولة. انتظروا الجولة القادمة.",
          resetSubmissions: "إعادة فتح مشاركات المشاركين",
          resetSubmissionsConfirm: "بدء جولة تقديم جديدة؟ ستبقى المشاركات الحالية محفوظة، وسيتمكن كل مشارك من الإرسال مرة أخرى.",
          submissionReset: "تمت إعادة فتح جولة التقديم. يمكن للمشاركين الإرسال مرة أخرى.",
-         imageGeneratingButton: "جارٍ إنشاء التصور بالذكاء الاصطناعي...",
+         imageGeneratingButton: "جارٍ الإرسال إلى المنظم...",
          imageAdded: "تم نشر رؤيتكم في المعرض.",
         imageQueued: "تم استلام رؤيتكم بنجاح وأصبحت جاهزة للمراجعة.",
-        imageCompleteButton: "تم الإرسال — جاهزة للمراجعة",
+        imageCompleteButton: "تم الإرسال — بانتظار موافقة المنظم",
         submissionClosed: "التقديم مغلق حاليًا.",
          rateLimited: "تم تسجيل طلبات كثيرة من هذا المتصفح. انتظروا قليلًا ثم حاولوا مرة أخرى.",
          submitError: "تعذر حفظ المشاركة. حاول مرة أخرى.",
@@ -2271,9 +2279,17 @@
          organizerInvalidKey: "تم رفض رمز المنظم. تحقق من إعدادات المنظم وحاول مرة أخرى.",
          organizerLoading: "جارٍ التحقق من رمز المنظم...",
          confirmDelete: "حذف هذه المشاركة نهائيًا؟ لن تظهر للجمهور.",
+          confirmDecline: "رفض هذه المشاركة؟ لن يتم إنشاء صورة بالذكاء الاصطناعي.",
+          imageAwaitingOrganizer: "لم يتم إنشاء صورة بالذكاء الاصطناعي بعد. وافقوا لإنشائها.",
+          approveAndGenerate: "موافقة وإنشاء صورة بالذكاء الاصطناعي",
+          decline: "رفض",
+          reviewGenerating: "تمت الموافقة. جارٍ إنشاء صورة الذكاء الاصطناعي الآن...",
+          reviewApproved: "تمت الموافقة والنشر بنجاح.",
+          reviewDeclined: "تم الرفض. لم يتم إنشاء صورة بالذكاء الاصطناعي.",
+          reviewGenerationError: "لم يتم نشر الفكرة لأن إنشاء الصورة فشل. ما زالت متاحة لإعادة المحاولة.",
          demoBadge: "مولّد بالذكاء الاصطناعي",
          stockImage: "صورة مخزنة",
-         aiUnavailable: "توليد الصور المباشر غير متاح مؤقتًا. حاولوا مرة أخرى لاحقًا.",
+         aiUnavailable: "خدمة إرسال المشاركات غير متاحة مؤقتًا. حاولوا مرة أخرى لاحقًا.",
          aiKeyMissing: "توليد الصور بالذكاء الاصطناعي غير جاهز بعد. حاولوا مرة أخرى لاحقًا.",
          conceptArt: "تصور بصري",
          visionLabel: "رؤية",
@@ -3086,12 +3102,6 @@
       return { ok: true, status: "processing", submissionId };
     }
 
-    async function ensureImageGenerationReady() {
-      const status = await googleRequest("aiStatus", {}, { method: "GET", timeout: 8000 });
-      if (!status?.imageGeneration?.configured) throw new Error(t("aiKeyMissing"));
-      return status;
-    }
-
     form.addEventListener("submit", async (event) => {
       event.preventDefault();
       if (Date.now() < submissionCooldownUntil) return;
@@ -3110,12 +3120,6 @@
         formNote.className = "form-note is-error";
         return;
       }
-      if (!liveStageDemoMode && !window.confirm(t("confirmImageGeneration"))) {
-        formNote.textContent = t("imageNotSent");
-        formNote.className = "form-note";
-        return;
-      }
-
       submissionCooldownUntil = Date.now() + 1500;
       form.classList.add("is-submitting");
       submissionPanel.classList.add("is-submitting");
@@ -3152,7 +3156,7 @@
         height: 280 + (((sourceVisions.length + localPublishedVisions.length) * 37) % 100),
         votes: 0,
         status: "pending",
-        imageSource: liveStageDemoMode ? "demo-preview" : "generated",
+        imageSource: liveStageDemoMode ? "demo-preview" : "awaiting-approval",
         createdAt: new Date().toISOString()
       };
       let submissionResult = null;
@@ -3161,8 +3165,7 @@
           await new Promise((resolve) => window.setTimeout(resolve, 500));
           demoPendingRecords.unshift(newVision);
         } else {
-          await ensureImageGenerationReady();
-          submissionResult = await googleRequest("submit", newVision, { timeout: 300000 });
+          submissionResult = await googleRequest("submit", newVision, { timeout: 30000 });
           if (!submissionResult || !["pending", "processing"].includes(submissionResult.status)) {
             throw new Error(t("submitError"));
           }
@@ -3192,13 +3195,13 @@
         generateButton.removeAttribute("aria-busy");
         generateButton.classList.remove("is-generating", "is-complete");
         generateButton.classList.add("is-rejected");
-        generateButton.textContent = currentLanguage === "ar" ? "✦ حوّلوا الفكرة إلى صورة" : "✦ Turn idea into image";
+        generateButton.textContent = currentLanguage === "ar" ? "✦ أرسلوا الفكرة إلى المنظم" : "✦ Send idea to organizer";
         window.setTimeout(() => generateButton.classList.remove("is-rejected"), 600);
         form.classList.remove("is-submitting");
         submissionPanel.classList.remove("is-submitting");
         formNote.textContent = /RATE_LIMITED|rate limit/i.test(error?.message || "") ? t("rateLimited") : t("imageFailed");
         formNote.className = "form-note is-error";
-        console.error("Live AI submission failed:", error);
+        console.error("Submission failed:", error);
         return;
       }
 
@@ -3214,7 +3217,7 @@
       submissionPanel.classList.remove("is-submitting");
       generateButton.textContent = submissionComplete
         ? t("imageCompleteButton")
-        : (currentLanguage === "ar" ? "✦ حوّلوا الفكرة إلى صورة" : "✦ Turn idea into image");
+        : (currentLanguage === "ar" ? "✦ أرسلوا الفكرة إلى المنظم" : "✦ Send idea to organizer");
       formNote.textContent = liveStageDemoMode ? liveStageCopy("Submission received — it is waiting in the review queue.", "تم استلام المشاركة — وهي الآن بانتظار المراجعة.") : t("imageSent");
       formNote.className = "form-note is-success";
       if (liveStageDemoMode) {
@@ -3637,10 +3640,11 @@
             <span>${escapeHTML(vision.team)} · ${escapeHTML(vision.track || "")}</span>
             <span>${escapeHTML(vision.prompt)}</span>
             ${vision.impact ? `<span>${escapeHTML(t("impactLabel"))}: ${escapeHTML(vision.impact)}</span>` : ""}
+            ${action === "publish" ? `<span class="review-awaiting">${t("imageAwaitingOrganizer")}</span>` : ""}
           </div>
           <div class="review-actions">
-            ${action === "publish" ? `<button class="review-action approve" type="button" data-review-action="publish" data-review-id="${escapeHTML(vision.id)}">${t("approve")}</button>` : ""}
-            <button class="review-action delete" type="button" data-review-action="${action}" data-review-id="${escapeHTML(vision.id)}">${t("delete")}</button>
+            ${action === "publish" ? `<button class="review-action approve" type="button" data-review-action="publish" data-review-id="${escapeHTML(vision.id)}">${t("approveAndGenerate")}</button>` : ""}
+            <button class="review-action delete" type="button" data-review-action="${action}" data-review-id="${escapeHTML(vision.id)}">${action === "delete" ? t("decline") : t("delete")}</button>
           </div>
         </div>`
       ).join("");
@@ -3725,8 +3729,11 @@
     }
 
     async function moderateSubmission(id, action) {
-      if (["delete", "deletePublished"].includes(action) && !confirm(t("confirmDelete"))) return;
+      const isDecline = action === "delete";
+      if ((isDecline || action === "deletePublished") && !confirm(isDecline ? t("confirmDecline") : t("confirmDelete"))) return;
       try {
+        organizerStatus.classList.remove("is-error");
+        organizerStatus.textContent = action === "publish" ? t("reviewGenerating") : t("organizerLoading");
         if (liveStageDemoMode) {
           if (action === "deletePublished") {
             const publishedIndex = liveStageDemoRecords.findIndex((vision) => vision.id === id);
@@ -3735,13 +3742,14 @@
             const pendingIndex = demoPendingRecords.findIndex((vision) => vision.id === id);
             if (pendingIndex === -1) return;
             const [vision] = demoPendingRecords.splice(pendingIndex, 1);
-            if (action === "publish") liveStageDemoRecords.unshift({ ...vision, status: "published", publishedAt: new Date().toISOString() });
+            if (action === "publish") liveStageDemoRecords.unshift({ ...vision, status: "published", imageSource: "demo-preview", publishedAt: new Date().toISOString() });
           }
           renderDemoSurfaces();
+          organizerStatus.textContent = action === "publish" ? t("reviewApproved") : t("reviewDeclined");
           return;
         }
         if (GOOGLE_APPS_SCRIPT_URL) {
-          await adminRequest(action, { visionId: id });
+          await adminRequest(action, { visionId: id }, "", action === "publish" ? { timeout: 300000 } : {});
         } else if (action === "deletePublished") {
           const publishedIndex = localPublishedVisions.findIndex((vision) => vision.id === id);
           if (publishedIndex !== -1) localPublishedVisions.splice(publishedIndex, 1);
@@ -3750,13 +3758,15 @@
           const pendingIndex = pendingVisions.findIndex((vision) => vision.id === id);
           if (pendingIndex === -1) return;
           const [vision] = pendingVisions.splice(pendingIndex, 1);
-          if (action === "publish") localPublishedVisions.push({ ...vision, status: "published" });
+          if (action === "publish") localPublishedVisions.push({ ...vision, status: "published", imageSource: "generated" });
           persistLocalCollections();
         }
         await loadReviewQueue();
         await syncGallery();
+        organizerStatus.textContent = action === "publish" ? t("reviewApproved") : t("reviewDeclined");
       } catch (error) {
-        alert(t("reviewError"));
+        organizerStatus.textContent = error?.message || (action === "publish" ? t("reviewGenerationError") : t("reviewError"));
+        organizerStatus.classList.add("is-error");
         console.error("Moderation action failed:", error);
       }
     }
