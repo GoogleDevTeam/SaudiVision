@@ -560,6 +560,15 @@ Before coding, inspect the latest `main` branch and the live deployment state. T
 - Security test commit: 4167d67ee07c0cb420e20dc2a10c6ed13448e12c.
 - Workflow test commit: bc639d4c5036b94fec8408786ceeff57e562caa8.
 - Local workflow tests and security regression tests passed; live read-only API smoke checks passed.
+### Browser identity persistence repair — 2026-09-21
+
+- **Issue #4:** the frontend used undefined window.safeLocal* helpers while reading and writing the browser's anonymous voter identity. That prevented reliable identity persistence and could break vote state across reloads.
+- Fixed the storage wrappers in index.html to call window.localStorage.getItem, setItem, and removeItem directly while retaining the existing fallback behavior.
+- Added positive regression coverage for storage fallback, set, read, and remove behavior in workflow-tests.mjs.
+- Frontend fix commit: d53b5a1487efcdd7680a74276cb7dc7257ae87e4.
+- Regression coverage commit: a4e7dfc4628b155f458a0d2762dd90247eeeb098.
+- GitHub Pages deployment completed successfully in run 35632253514; the fix is live on the frontend. Issue #4 is ready for closure.
+
 ### Next recommended step
 
 Run workflow-tests.mjs in the repository's normal CI or deployment check, then exercise one real vote/unvote cycle from a fresh browser session while monitoring the Apps Script response and Google Sheets audit rows.
