@@ -98,8 +98,6 @@ const CLOUDFLARE_IMAGE_MODEL = "@cf/black-forest-labs/flux-1-schnell";
 const CLOUDFLARE_API_BASE_URL = "https://api.cloudflare.com/client/v4";
 const GEMINI_IMAGE_MODEL = "gemini-3.1-flash-image";
 const GEMINI_API_ENDPOINT = "https://generativelanguage.googleapis.com/v1beta/interactions";
-const GEMINI_USAGE_PROPERTY_ = "IMAGINE_SAUDI_GEMINI_USAGE_V1";
-const GEMINI_DEFAULT_DAILY_LIMIT_ = 20;
 const DRIVE_IMAGE_THUMBNAIL_SIZE = "w1600";
 const THEME = {
   darkGreen: "#073B35",
@@ -254,64 +252,15 @@ function cloudflareConfig_() {
   return { apiToken: apiToken, accountId: accountId, model: model, endpoint: endpoint };
 }
 
-function geminiUsageDate_() {
-  const timezone = Session.getScriptTimeZone() || "Asia/Riyadh";
-  return Utilities.formatDate(new Date(), timezone, "yyyy-MM-dd");
-}
-
-function geminiDailyLimit_() {
-  const configured = Number(PropertiesService.getScriptProperties().getProperty("GEMINI_DAILY_LIMIT"));
-  return Number.isFinite(configured) && configured > 0 ? Math.max(1, Math.floor(configured)) : GEMINI_DEFAULT_DAILY_LIMIT_;
-}
-
-function readGeminiUsage_() {
-  const today = geminiUsageDate_();
-  let state = {};
-  try {
-    state = JSON.parse(PropertiesService.getScriptProperties().getProperty(GEMINI_USAGE_PROPERTY_) || "{}");
-  } catch (ignored) {}
-  if (state.date !== today) return { date: today, requests: 0 };
-  return { date: today, requests: Math.max(0, Number(state.requests) || 0) };
-}
-
-function geminiUsageStatus_() {
-  const state = readGeminiUsage_();
-  const limit = geminiDailyLimit_();
-  const ratio = state.requests / limit;
-  return {
-    enabled: Boolean(geminiConfig_().apiKey),
-    date: state.date,
-    requests: state.requests,
-    limit: limit,
-    remaining: Math.max(0, limit - state.requests),
-    percent: Math.min(100, Math.round(ratio * 100)),
-    state: ratio >= 1 ? "limit" : ratio >= 0.8 ? "warning" : ratio >= 0.6 ? "watch" : "healthy",
-    estimated: true
-  };
-}
-
-function reserveGeminiRequest_() {
-  return withLock_(function() {
-    const state = readGeminiUsage_();
-    const limit = geminiDailyLimit_();
-    if (state.requests >= limit) return false;
-    state.requests += 1;
-    PropertiesService.getScriptProperties().setProperty(GEMINI_USAGE_PROPERTY_, JSON.stringify(state));
-    return true;
-  });
-}
-
 function imageGenerationModel_() {
   const gemini = geminiConfig_();
-  const usage = geminiUsageStatus_();
-  return gemini.apiKey && usage.remaining > 0 ? gemini.model : cloudflareConfig_().model;
+  return gemini.apiKey ? gemini.model : cloudflareConfig_().model;
 }
 
 function cloudflareStatus_() {
   const gemini = geminiConfig_();
-  const usage = geminiUsageStatus_();
   const cloudflare = cloudflareConfig_();
-  const geminiAvailable = Boolean(gemini.apiKey && usage.remaining > 0);
+  const geminiAvailable = Boolean(gemini.apiKey);
   const cloudflareAvailable = Boolean(cloudflare.apiToken && cloudflare.endpoint);
   return {
     configured: Boolean(geminiAvailable || cloudflareAvailable),
@@ -320,7 +269,7 @@ function cloudflareStatus_() {
     model: geminiAvailable ? gemini.model : cloudflare.model,
     primaryProvider: "Google Gemini",
     fallbackProvider: cloudflareAvailable ? "Cloudflare Workers AI" : "not_configured",
-    usage: usage
+    fallbackConfigured: cloudflareAvailable
   };
 }
 
@@ -1357,8 +1306,7 @@ function generateVisionImage_(submissionId, team, track, prompt, details) {
     "Beneficiaries: " + String(details.beneficiaries || ""),
     "=== END PARTICIPANT IDEA ===",
   ].join("\n");
-  const usage = geminiUsageStatus_();
-  if (gemini.apiKey && usage.remaining > 0 && reserveGeminiRequest_()) {
+  if (gemini.apiKey) {
     try {
       return generateGeminiVisionImage_(submissionId, imagePrompt, gemini);
     } catch (error) {
@@ -1366,7 +1314,6 @@ function generateVisionImage_(submissionId, team, track, prompt, details) {
     }
   }
   if (!config.apiToken || !config.endpoint) {
-    if (gemini.apiKey && usage.remaining <= 0) throw new Error("Gemini daily limit reached. Add or configure the Cloudflare fallback, or raise GEMINI_DAILY_LIMIT.");
     throw new Error("Live AI is not configured. Add GEMINI_API_KEY or the Cloudflare settings in Apps Script Project Settings.");
   }
   const response = UrlFetchApp.fetch(config.endpoint, {
