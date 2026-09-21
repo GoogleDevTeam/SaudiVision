@@ -1963,25 +1963,52 @@
     const reviewRefresh = document.getElementById("review-refresh");
     const reviewQueue = document.getElementById("review-queue");
     const publishedQueue = document.getElementById("published-queue");
+    function safeLocalGet(key, fallback = "") {
+      try {
+        const value = window.safeLocalGet(key);
+        return value === null ? fallback : value;
+      } catch (error) {
+        return fallback;
+      }
+    }
+
+    function safeLocalSet(key, value) {
+      try {
+        window.safeLocalSet(key, value);
+        return true;
+      } catch (error) {
+        return false;
+      }
+    }
+
+    function safeLocalRemove(key) {
+      try {
+        window.safeLocalRemove(key);
+        return true;
+      } catch (error) {
+        return false;
+      }
+    }
+
     const settings = {
-      submissionsOpen: localStorage.getItem("imagineSaudiSubmissions") !== "false",
-      votingOpen: localStorage.getItem("imagineSaudiVoting") !== "false",
-      submissionDeadline: localStorage.getItem("imagineSaudiSubmissionDeadline") || "",
-      votingDeadline: localStorage.getItem("imagineSaudiVotingDeadline") || "",
-      submissionRound: localStorage.getItem("imagineSaudiSubmissionRound") || "1",
+      submissionsOpen: safeLocalGet("imagineSaudiSubmissions") !== "false",
+      votingOpen: safeLocalGet("imagineSaudiVoting") !== "false",
+      submissionDeadline: safeLocalGet("imagineSaudiSubmissionDeadline") || "",
+      votingDeadline: safeLocalGet("imagineSaudiVotingDeadline") || "",
+      submissionRound: safeLocalGet("imagineSaudiSubmissionRound") || "1",
        winnerVisionId: "",
        winnerDeclaredAt: ""
     };
-    const voterId = localStorage.getItem("imagineSaudiVoterId") ||
+    const voterId = safeLocalGet("imagineSaudiVoterId") ||
       (window.crypto && typeof window.crypto.randomUUID === "function"
         ? window.crypto.randomUUID()
         : `voter-${Date.now()}-${Math.random().toString(36).slice(2)}`);
-    localStorage.setItem("imagineSaudiVoterId", voterId);
-    const participantId = localStorage.getItem("imagineSaudiParticipantId") ||
+    safeLocalSet("imagineSaudiVoterId", voterId);
+    const participantId = safeLocalGet("imagineSaudiParticipantId") ||
       (window.crypto && typeof window.crypto.randomUUID === "function"
         ? window.crypto.randomUUID()
         : "participant-" + Date.now() + "-" + Math.random().toString(36).slice(2));
-    localStorage.setItem("imagineSaudiParticipantId", participantId);
+    safeLocalSet("imagineSaudiParticipantId", participantId);
     function getDeviceMetadata() {
       const userAgent = String(navigator.userAgent || "");
       const platform = String((navigator.userAgentData && navigator.userAgentData.platform) || navigator.platform || "Unknown");
@@ -2038,7 +2065,7 @@
     function safeSessionRemove(key) {
       try { window.sessionStorage.removeItem(key); } catch (error) { /* Private browsing/storage limits are non-fatal. */ }
     }
-    let currentLanguage = localStorage.getItem("imagineSaudiLanguage") || "ar";
+    let currentLanguage = safeLocalGet("imagineSaudiLanguage") || "ar";
     let organizerKey = safeSessionGet("imagineSaudiOrganizerKey");
     let organizerUnlocked = false;
     let pendingOrganizerRecords = [];
@@ -2054,11 +2081,11 @@
     let organizerHasLoadedData = false;
     function readLocalArray(key) {
       try {
-        const value = JSON.parse(localStorage.getItem(key) || "[]");
+        const value = JSON.parse(safeLocalGet(key) || "[]");
         return Array.isArray(value) ? value : [];
       } catch (error) {
         console.warn(`Could not read local collection "${key}". Resetting it.`, error);
-        localStorage.removeItem(key);
+        safeLocalRemove(key);
         return [];
       }
     }
@@ -2381,9 +2408,13 @@
       }[character]));
     }
 
-    function safeImageUrl(value) {
+    function safeImageUrl(value, options = {}) {
       const raw = String(value || "").trim();
       if (!raw || raw === placeholderImage) return placeholderImage;
+      const allowDemoSvg = options.allowDemoSvg === true &&
+        raw.startsWith("data:image/svg+xml;charset=UTF-8,") &&
+        !/%3C\/?script|%3Con[a-z]+%3D|javascript%3A/i.test(raw);
+      if (allowDemoSvg) return raw;
       try {
         const url = new URL(raw, window.location.href);
         return url.protocol === "https:" ? url.href : placeholderImage;
@@ -2429,12 +2460,12 @@
     }
 
     function isSubmissionLocked() {
-      return localStorage.getItem("imagineSaudiSubmittedRound") === String(settings.submissionRound || "1");
+      return safeLocalGet("imagineSaudiSubmittedRound") === String(settings.submissionRound || "1");
     }
 
     function applyLanguage(language) {
       currentLanguage = language === "en" ? "en" : "ar";
-      localStorage.setItem("imagineSaudiLanguage", currentLanguage);
+      safeLocalSet("imagineSaudiLanguage", currentLanguage);
       document.documentElement.lang = currentLanguage;
       document.documentElement.dir = currentLanguage === "ar" ? "rtl" : "ltr";
       document.title = currentLanguage === "ar"
@@ -2472,7 +2503,7 @@
 
     function applyRemoteVoteStatus(voteStatus, visions) {
       if (!voteStatus || voteStatus.ok === false) return false;
-      const before = localStorage.getItem("imagineSaudiVote");
+      const before = safeLocalGet("imagineSaudiVote");
       const status = String(voteStatus.status || "").toLowerCase();
       const hasVote = status === "voted" || voteStatus.voted === true;
       const hasNoVote = status === "not_voted" || voteStatus.voted === false;
@@ -2481,11 +2512,11 @@
         const matchingVision = visions.find((vision) =>
           visionKey(vision) === remoteVisionId || String(vision.team || "") === remoteVisionId
         );
-        localStorage.setItem("imagineSaudiVote", matchingVision ? visionKey(matchingVision) : remoteVisionId);
+        safeLocalSet("imagineSaudiVote", matchingVision ? visionKey(matchingVision) : remoteVisionId);
       } else if (hasNoVote) {
-        localStorage.removeItem("imagineSaudiVote");
+        safeLocalRemove("imagineSaudiVote");
       }
-      return before !== localStorage.getItem("imagineSaudiVote");
+      return before !== safeLocalGet("imagineSaudiVote");
     }
 
     function safeImageHeight(value) {
@@ -2554,7 +2585,7 @@
       let winnerMarkup = '<div class="public-winner-pending"><strong>' + t("winnerNoWinner") + '</strong></div>';
       const winner = publicWinner && publicWinner.vision;
       if (publicWinner && publicWinner.status === "declared" && winner) {
-        const safeImage = escapeHTML(safeImageUrl(winner.image || placeholderImage));
+        const safeImage = escapeHTML(safeImageUrl(winner.image || placeholderImage, { allowDemoSvg: String(winner.imageSource || "").toLowerCase() === "demo-preview" }));
         const safeFallback = escapeHTML(safeImageUrl(driveImageFallbackUrl(winner)));
         winnerMarkup = '<article class="public-winner">' +
           '<div class="public-winner-copy"><span class="public-winner-eyebrow">' + t("winnerFinal") + '</span>' +
@@ -2599,8 +2630,8 @@
     }
 
     function persistLocalCollections() {
-      localStorage.setItem("imagineSaudiPending", JSON.stringify(pendingVisions));
-      localStorage.setItem("imagineSaudiPublished", JSON.stringify(localPublishedVisions));
+      safeLocalSet("imagineSaudiPending", JSON.stringify(pendingVisions));
+      safeLocalSet("imagineSaudiPublished", JSON.stringify(localPublishedVisions));
     }
 
     function driveImageFallbackUrl(vision) {
@@ -2616,14 +2647,14 @@
     }
 
     function visionCard(vision, index) {
-      const safeImage = escapeHTML(safeImageUrl(vision.image || placeholderImage));
+      const imageSource = String(vision.imageSource || "").toLowerCase();
+      const safeImage = escapeHTML(safeImageUrl(vision.image || placeholderImage, { allowDemoSvg: imageSource === "demo-preview" }));
       const safeImageFallback = escapeHTML(safeImageUrl(driveImageFallbackUrl(vision)));
-      const selectedVision = localStorage.getItem("imagineSaudiVote");
+      const selectedVision = safeLocalGet("imagineSaudiVote");
       const isVoted = selectedVision === visionKey(vision) || selectedVision === vision.team;
       const anotherVisionVoted = Boolean(selectedVision && !isVoted);
       const votingClosed = !votingCurrentlyOpen();
       const voteDisabled = votingClosed || anotherVisionVoted;
-      const imageSource = String(vision.imageSource || "").toLowerCase();
       const isDemoPreview = imageSource === "demo-preview";
       const isGeneratedImage = imageSource === "generated";
       const isStockImage = imageSource === "stock";
@@ -2772,7 +2803,7 @@
       if (hasSetting("submissionRound")) settings.submissionRound = String(nextSettings.submissionRound || settings.submissionRound || "1");
       if (hasSetting("winnerVisionId")) settings.winnerVisionId = String(nextSettings.winnerVisionId || "");
       if (hasSetting("winnerDeclaredAt")) settings.winnerDeclaredAt = String(nextSettings.winnerDeclaredAt || "");
-      try { localStorage.setItem("imagineSaudiSubmissionRound", settings.submissionRound); } catch (error) { /* Storage limits must not block dashboard rendering. */ }
+      try { safeLocalSet("imagineSaudiSubmissionRound", settings.submissionRound); } catch (error) { /* Storage limits must not block dashboard rendering. */ }
       syncDeadlineInputs();
       syncControlInputs();
       updateCompetitionMode(false);
@@ -3038,7 +3069,7 @@
       publicSyncInFlight = (async () => {
         syncState.textContent = t("receiving");
         try {
-          const selectedVisionBeforeSync = localStorage.getItem("imagineSaudiVote");
+          const selectedVisionBeforeSync = safeLocalGet("imagineSaudiVote");
           const visions = await fetchVisionBatch();
           let voteStatus = null;
           if (GOOGLE_APPS_SCRIPT_URL && !liveStageDemoMode) {
@@ -3052,13 +3083,13 @@
           const remoteVoteChanged = applyRemoteVoteStatus(voteStatus, visions);
           activeVisions = visions;
           hasRemoteSync = true;
-          const selectedVision = localStorage.getItem("imagineSaudiVote");
+          const selectedVision = safeLocalGet("imagineSaudiVote");
           if (selectedVision && !visions.some((vision) => visionKey(vision) === selectedVision || vision.team === selectedVision)) {
-            localStorage.removeItem("imagineSaudiVote");
+            safeLocalRemove("imagineSaudiVote");
           }
           const nextSignature = publicDataSignature(visions);
           const dataChanged = nextSignature !== lastGalleryDataSignature;
-          const voteStateChanged = remoteVoteChanged || selectedVisionBeforeSync !== localStorage.getItem("imagineSaudiVote");
+          const voteStateChanged = remoteVoteChanged || selectedVisionBeforeSync !== safeLocalGet("imagineSaudiVote");
           updatePublicCompetitionState(dataChanged);
           if (dataChanged || voteStateChanged) {
             lastGalleryDataSignature = nextSignature;
@@ -3086,7 +3117,7 @@
     async function voteForVision(index) {
       const vision = activeVisions[index];
       const voteButton = document.getElementById("vote-" + index);
-      const selectedVision = localStorage.getItem("imagineSaudiVote");
+      const selectedVision = safeLocalGet("imagineSaudiVote");
       const selectedVisionKey = vision ? visionKey(vision) : "";
       const isSelected = Boolean(vision) && (selectedVision === selectedVisionKey || selectedVision === vision.team);
       if (voteInFlight || Date.now() < voteCooldownUntil || !votingCurrentlyOpen() || !vision || (selectedVision && !isSelected)) return;
@@ -3099,8 +3130,8 @@
           await googleRequest(action, { visionId: vision.id || vision.team, voterId }, { timeout: 15000, retries: 1 });
         }
         vision.votes = Math.max(0, (vision.votes || 0) + (action === "vote" ? 1 : -1));
-        if (action === "vote") localStorage.setItem("imagineSaudiVote", selectedVisionKey);
-        else localStorage.removeItem("imagineSaudiVote");
+        if (action === "vote") safeLocalSet("imagineSaudiVote", selectedVisionKey);
+        else safeLocalRemove("imagineSaudiVote");
         if (liveStageDemoMode) renderDemoSurfaces();
         else await syncGallery();
         setInteractionStatus(action === "vote" ? t("voteSent") : t("voteRemoved"), "success");
@@ -3235,7 +3266,7 @@
         return;
       }
 
-      if (!liveStageDemoMode) localStorage.setItem("imagineSaudiSubmittedRound", String(settings.submissionRound || "1"));
+      if (!liveStageDemoMode) safeLocalSet("imagineSaudiSubmittedRound", String(settings.submissionRound || "1"));
       form.reset();
       updateTrackEnhancer();
       const submissionComplete = !liveStageDemoMode;
@@ -3308,7 +3339,7 @@
       const totalVotes = ranked.reduce((sum, vision) => sum + (Number(vision.votes) || 0), 0);
       const feature = ranked[0];
       const featureKey = liveStageKey(feature);
-      const featureImage = safeImageUrl(feature.image || driveImageFallbackUrl(feature));
+      const featureImage = safeImageUrl(feature.image || driveImageFallbackUrl(feature), { allowDemoSvg: liveStageDemoMode && String(feature.imageSource || "").toLowerCase() === "demo-preview" });
       const featureFallback = safeImageUrl(driveImageFallbackUrl(feature));
       liveStageFeatureImage.src = featureImage;
       liveStageFeatureImage.alt = String(feature.title || feature.team || "");
@@ -3917,12 +3948,12 @@
         updateCompetitionMode(false);
         return;
       }
-      localStorage.setItem(storageKey, settings[key]);
+      safeLocalSet(storageKey, settings[key]);
       try {
         await saveRemoteSettings();
       } catch (error) {
         settings[key] = previous;
-        localStorage.setItem(storageKey, previous);
+        safeLocalSet(storageKey, previous);
         syncDeadlineInputs();
         showOrganizerError(error);
         return;
@@ -3938,12 +3969,12 @@
         updateCompetitionMode(false);
         return;
       }
-      localStorage.setItem("imagineSaudiSubmissions", String(settings.submissionsOpen));
+      safeLocalSet("imagineSaudiSubmissions", String(settings.submissionsOpen));
       try {
         await saveRemoteSettings();
       } catch (error) {
         settings.submissionsOpen = previous;
-        localStorage.setItem("imagineSaudiSubmissions", String(previous));
+        safeLocalSet("imagineSaudiSubmissions", String(previous));
         updateCompetitionMode(false);
         showOrganizerError(error);
         return;
@@ -3959,12 +3990,12 @@
         updateCompetitionMode(false);
         return;
       }
-      localStorage.setItem("imagineSaudiVoting", String(settings.votingOpen));
+      safeLocalSet("imagineSaudiVoting", String(settings.votingOpen));
       try {
         await saveRemoteSettings();
       } catch (error) {
         settings.votingOpen = previous;
-        localStorage.setItem("imagineSaudiVoting", String(previous));
+        safeLocalSet("imagineSaudiVoting", String(previous));
         updateCompetitionMode(false);
         showOrganizerError(error);
         return;
@@ -3991,9 +4022,9 @@
           applyPublicSettings(result.settings || { submissionRound: result.submissionRound });
         } else {
           settings.submissionRound = String((Number(settings.submissionRound) || 1) + 1);
-          localStorage.setItem("imagineSaudiSubmissionRound", settings.submissionRound);
+          safeLocalSet("imagineSaudiSubmissionRound", settings.submissionRound);
         }
-        localStorage.removeItem("imagineSaudiSubmittedRound");
+        safeLocalRemove("imagineSaudiSubmittedRound");
         organizerStatus.textContent = t("submissionReset");
         organizerStatus.classList.remove("is-error");
         updateCompetitionMode(false);
