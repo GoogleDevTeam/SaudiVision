@@ -99,6 +99,7 @@ const CLOUDFLARE_API_BASE_URL = "https://api.cloudflare.com/client/v4";
 const GEMINI_IMAGE_MODEL = "gemini-3.1-flash-image";
 const GEMINI_API_ENDPOINT = "https://generativelanguage.googleapis.com/v1beta/interactions";
 const ACTIVE_AI_PROVIDER_PROPERTY_ = "IMAGINE_SAUDI_ACTIVE_AI_PROVIDER_V1";
+const ACTIVE_AI_PROVIDER_ERROR_PROPERTY_ = "IMAGINE_SAUDI_ACTIVE_AI_PROVIDER_ERROR_V1";
 const DRIVE_IMAGE_THUMBNAIL_SIZE = "w1600";
 const THEME = {
   darkGreen: "#073B35",
@@ -258,8 +259,22 @@ function imageGenerationModel_() {
   return gemini.apiKey ? gemini.model : cloudflareConfig_().model;
 }
 
-function setActiveAiProvider_(provider) {
-  PropertiesService.getScriptProperties().setProperty(ACTIVE_AI_PROVIDER_PROPERTY_, String(provider || ""));
+function providerErrorMessage_(error) {
+  return safeErrorMessage_(error)
+    .replace(/AIza[0-9A-Za-z_-]+/g, "[redacted]")
+    .replace(/Bearer\s+[^\s]+/gi, "Bearer [redacted]")
+    .slice(0, 240);
+}
+
+function setActiveAiProvider_(provider, error) {
+  const properties = PropertiesService.getScriptProperties();
+  const normalizedProvider = String(provider || "");
+  properties.setProperty(ACTIVE_AI_PROVIDER_PROPERTY_, normalizedProvider);
+  if (normalizedProvider === "Cloudflare Workers AI" && error) {
+    properties.setProperty(ACTIVE_AI_PROVIDER_ERROR_PROPERTY_, providerErrorMessage_(error));
+  } else {
+    properties.deleteProperty(ACTIVE_AI_PROVIDER_ERROR_PROPERTY_);
+  }
 }
 
 function cloudflareStatus_() {
@@ -281,6 +296,14 @@ function cloudflareStatus_() {
     fallbackProvider: cloudflareAvailable ? "Cloudflare Workers AI" : "not_configured",
     fallbackConfigured: cloudflareAvailable
   };
+}
+
+function organizerAiStatus_() {
+  const status = cloudflareStatus_();
+  status.lastFallbackError = status.activeProvider === "Cloudflare Workers AI"
+    ? String(PropertiesService.getScriptProperties().getProperty(ACTIVE_AI_PROVIDER_ERROR_PROPERTY_) || "")
+    : "";
+  return status;
 }
 
 function route_(action, payload) {
@@ -1322,13 +1345,13 @@ function generateVisionImage_(submissionId, team, track, prompt, details) {
       return generateGeminiVisionImage_(submissionId, imagePrompt, gemini);
     } catch (error) {
       if (!config.apiToken || !config.endpoint) throw error;
-      setActiveAiProvider_("Cloudflare Workers AI");
+      setActiveAiProvider_("Cloudflare Workers AI", error);
     }
   }
   if (!config.apiToken || !config.endpoint) {
     throw new Error("Live AI is not configured. Add GEMINI_API_KEY or the Cloudflare settings in Apps Script Project Settings.");
   }
-  if (!gemini.apiKey) setActiveAiProvider_("Cloudflare Workers AI");
+  if (!gemini.apiKey) setActiveAiProvider_("Cloudflare Workers AI", null);
   const response = UrlFetchApp.fetch(config.endpoint, {
     method: "post",
     contentType: "application/json",
@@ -1391,7 +1414,7 @@ function getOrganizerSnapshot_() {
     published: published,
     winner: buildWinnerState_(published, settings),
     analytics: getCompetitionAnalytics_(pending, published),
-    ai: cloudflareStatus_()
+    ai: organizerAiStatus_()
   };
 }
 
