@@ -374,6 +374,14 @@
     .organizer-ai-provider strong { color: var(--green); font-size: .76rem; }
     .organizer-ai-provider small { display: block; margin-top: 3px; color: var(--dim); font-family: "Cairo", sans-serif; font-size: .64rem; }
     .organizer-ai-provider[data-provider="cloudflare"] strong { color: #D6AA62; }
+    .organizer-details, .organizer-panel, .control-card, .organizer-ai-provider, .organizer-results, .review-panel { min-width: 0; }
+    .organizer-panel { width: 100%; }
+    .control-card > div:first-child, .organizer-ai-provider > div { min-width: 0; flex: 1 1 auto; }
+    .control-card strong, .control-card small, .organizer-ai-provider strong, .organizer-ai-provider small { overflow-wrap: anywhere; }
+    .organizer-ai-provider { flex-wrap: wrap; }
+    .organizer-ai-provider > div { flex-basis: 180px; }
+    .deadline-input { min-width: 0; max-width: 100%; }
+    .organizer-action { min-width: 0; max-width: 100%; white-space: normal; overflow-wrap: anywhere; touch-action: manipulation; }
 
     body.live-stage-active { overflow: hidden; }
     .live-stage[hidden] { display: none !important; }
@@ -1357,6 +1365,17 @@
     .review-tools select { flex: 0 1 180px; }
     @media (max-width: 860px) { .organizer-summary { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
     @media (max-width: 700px) { .organizer-summary { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+    @media (max-width: 700px) {
+      .control-card { align-items: flex-start; flex-wrap: wrap; gap: 11px; }
+      .control-card .deadline-input { flex: 1 1 180px; width: 100%; }
+      .organizer-ai-provider { align-items: flex-start; }
+      .review-header { align-items: flex-start; flex-direction: column; }
+      .review-refresh { width: 100%; }
+    }
+    @media (max-width: 520px) {
+      .organizer-panel { padding: 12px; gap: 10px; }
+      .organizer-actions { grid-template-columns: 1fr; }
+    }
   </style>
 
 </head>
@@ -1366,7 +1385,7 @@
 
     <header class="topline">
       <div class="brand-lockup">
-        <div class="google-dev-logo organizer-access" id="organizer-access" aria-hidden="true">
+        <div class="google-dev-logo organizer-access" id="organizer-access" role="button" tabindex="0" aria-label="Organizer controls">
           <img src="google-developers-logo.png" alt="" width="32" height="24" decoding="async" />
         </div>
         <div class="brand-copy">
@@ -3817,6 +3836,12 @@
     }
 
     organizerResetSubmissions.addEventListener("click", resetParticipantSubmissions);
+
+    organizerAccess.addEventListener("keydown", (event) => {
+      if (event.key !== "Enter" && event.key !== " ") return;
+      event.preventDefault();
+      organizerAccess.click();
+    });
 
     organizerAccess.addEventListener("click", async () => {
       if (organizerUnlocked) {
