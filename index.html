@@ -1497,6 +1497,7 @@
            <button class="organizer-action" id="organizer-demo-mode" type="button" data-en="▶ Start client demo" data-ar="▶ بدء العرض التجريبي المحلي">▶ Start client demo</button>
            <button class="organizer-action" id="organizer-refresh" type="button" data-en="↻ Refresh all" data-ar="↻ تحديث الكل">↻ Refresh all</button>
            <button class="organizer-action" id="organizer-reset-submissions" type="button" data-en="Reset participant submissions" data-ar="إعادة فتح مشاركات المشاركين">Reset participant submissions</button>
+           <button class="organizer-action danger" id="organizer-reset-votes" type="button" data-en="Reset all votes" data-ar="إعادة ضبط جميع الأصوات">Reset all votes</button>
            <button class="organizer-action" id="organizer-export" type="button" data-en="↓ Export CSV" data-ar="↓ تصدير CSV">↓ Export CSV</button>
            <button class="organizer-action" id="organizer-export-json" type="button" data-en="{ } Export JSON" data-ar="{ } تصدير JSON">{ } Export JSON</button>
            <button class="organizer-action danger" id="organizer-lock" type="button" data-en="Lock organizer panel" data-ar="قفل لوحة المنظم">Lock organizer panel</button>
@@ -1931,6 +1932,7 @@
     const winnerControls = document.getElementById("winner-controls");
     const organizerRefresh = document.getElementById("organizer-refresh");
     const organizerResetSubmissions = document.getElementById("organizer-reset-submissions");
+    const organizerResetVotes = document.getElementById("organizer-reset-votes");
     const organizerExport = document.getElementById("organizer-export");
     const organizerExportJson = document.getElementById("organizer-export-json");
     const organizerLock = document.getElementById("organizer-lock");
@@ -2191,7 +2193,9 @@
          submissionAlreadyUsed: "You already submitted once in this round. Please wait for the next round.",
          resetSubmissions: "Reset participant submissions",
          resetSubmissionsConfirm: "Start a new submission round? Existing submissions will stay safe, and each participant can submit once again.",
+         resetVotesConfirm: "Reset all active votes? Every published vision will return to zero votes. This cannot be undone.",
          submissionReset: "Submission round reset. Participants can submit once again.",
+         votesReset: "All active votes were reset.",
          imageGeneratingButton: "Sending to organizer...",
          imageAdded: "Your vision was published to the gallery.",
         imageQueued: "Your vision was received successfully and is ready for review.",
@@ -2314,7 +2318,9 @@
          submissionAlreadyUsed: "لقد أرسلتم مشاركة واحدة في هذه الجولة. انتظروا الجولة القادمة.",
          resetSubmissions: "إعادة فتح مشاركات المشاركين",
          resetSubmissionsConfirm: "بدء جولة تقديم جديدة؟ ستبقى المشاركات الحالية محفوظة، وسيتمكن كل مشارك من الإرسال مرة أخرى.",
+         resetVotesConfirm: "إعادة ضبط جميع الأصوات النشطة؟ ستعود كل رؤية منشورة إلى صفر أصوات. لا يمكن التراجع عن ذلك.",
          submissionReset: "تمت إعادة فتح جولة التقديم. يمكن للمشاركين الإرسال مرة أخرى.",
+         votesReset: "تمت إعادة ضبط جميع الأصوات النشطة.",
          imageGeneratingButton: "جارٍ الإرسال إلى المنظم...",
          imageAdded: "تم نشر رؤيتكم في المعرض.",
         imageQueued: "تم استلام رؤيتكم بنجاح وأصبحت جاهزة للمراجعة.",
@@ -4077,7 +4083,33 @@
       }
     }
 
+    async function resetAllVotes() {
+      if (!window.confirm(t("resetVotesConfirm"))) return;
+      organizerResetVotes.disabled = true;
+      try {
+        if (liveStageDemoMode) {
+          liveStageDemoRecords = liveStageDemoRecords.map((record) => ({ ...record, votes: 0 }));
+          publishedOrganizerRecords = publishedOrganizerRecords.map((record) => ({ ...record, votes: 0 }));
+          renderDemoSurfaces();
+        } else if (GOOGLE_APPS_SCRIPT_URL) {
+          const result = await adminRequest("resetVotes", {});
+          applyPublicSettings(result.settings || {});
+          publicWinner = result.winner || null;
+          await loadReviewQueue();
+          await syncGallery();
+        }
+        safeLocalRemove("imagineSaudiVote");
+        organizerStatus.textContent = t("votesReset");
+        organizerStatus.classList.remove("is-error");
+      } catch (error) {
+        showOrganizerError(error);
+      } finally {
+        organizerResetVotes.disabled = false;
+      }
+    }
+
     organizerResetSubmissions.addEventListener("click", resetParticipantSubmissions);
+    organizerResetVotes.addEventListener("click", resetAllVotes);
 
     organizerAccess.addEventListener("keydown", (event) => {
       if (event.key !== "Enter" && event.key !== " ") return;
