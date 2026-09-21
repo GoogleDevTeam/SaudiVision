@@ -270,9 +270,7 @@ function cloudflareStatus_() {
 
 function organizerAiStatus_() {
   const status = cloudflareStatus_();
-  status.lastFallbackError = status.activeProvider === "Cloudflare Workers AI"
-    ? String(PropertiesService.getScriptProperties().getProperty(ACTIVE_AI_PROVIDER_ERROR_PROPERTY_) || "")
-    : "";
+  status.lastFallbackError = "";
   return status;
 }
 
