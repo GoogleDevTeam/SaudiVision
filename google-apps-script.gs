@@ -10,12 +10,14 @@
      add a Script Property named SPREADSHEET_ID with the Sheet ID.
    3. In Apps Script, open Project Settings → Script properties and add:
          ADMIN_KEY = a long private organizer password
-         CLOUDFLARE_API_TOKEN = a private Cloudflare API token with Workers AI run permission
-         CLOUDFLARE_ACCOUNT_ID = your Cloudflare account ID
-         CLOUDFLARE_IMAGE_MODEL = optional model path; defaults to @cf/black-forest-labs/flux-1-schnell
-         CLOUDFLARE_AI_ENDPOINT = optional full endpoint; otherwise it is built from the account ID and model.
-       Do not put ADMIN_KEY or Cloudflare credentials in index.html. The browser asks for
-       the organizer key only when needed; Cloudflare Workers AI is called server-side by this script.
+         OPENROUTER_API_KEY = a private OpenRouter API key
+         OPENROUTER_IMAGE_MODEL = optional model slug; defaults to google/gemini-3.1-flash-lite-image (Nano Banana 2 Lite)
+         CLOUDFLARE_API_TOKEN = a private Cloudflare API token with Workers AI run permission (backup)
+         CLOUDFLARE_ACCOUNT_ID = your Cloudflare account ID (backup)
+         CLOUDFLARE_IMAGE_MODEL = optional backup model path; defaults to @cf/black-forest-labs/flux-2-dev
+         CLOUDFLARE_AI_ENDPOINT = optional full backup endpoint; otherwise it is built from the account ID and model.
+       Do not put ADMIN_KEY, OpenRouter, or Cloudflare credentials in index.html. The browser asks for
+       the organizer key only when needed; image providers are called server-side by this script.
   4. Deploy → New deployment → Web app:
         Execute as: Me
         Who has access: Anyone
@@ -28,10 +30,10 @@
      status, setting, deployment step, and test procedure without requiring
      this source file to be understood first.
 
-  This backend calls Cloudflare Workers AI image generation server-side for every submission.
-  The generated PNG is stored in Google Drive with link viewing enabled, and
-  only the public image URL is written to Sheets. Never expose CLOUDFLARE_API_TOKEN
-  in the static frontend.
+  This backend tries OpenRouter's Nano Banana 2 Lite image model first and uses
+  Cloudflare Workers AI as the backup. The generated image is stored in Google Drive
+  with link viewing enabled, and only the public image URL is written to Sheets.
+  Never expose OPENROUTER_API_KEY or CLOUDFLARE_API_TOKEN in the static frontend.
 
   Optional Firebase path
   ----------------------
@@ -42,7 +44,7 @@
     3. Send the signed-in user's ID token to a trusted backend/Cloud Function.
     4. Keep moderation and vote writes server-side, protected by Firestore
        Security Rules, App Check, and organizer authorization.
-  Do not put ADMIN_KEY, Cloudflare Workers AI keys, or service-account credentials in the
+  Do not put ADMIN_KEY, OpenRouter or Cloudflare Workers AI keys, or service-account credentials in the
   frontend. Firebase Auth improves identity, but does not by itself authorize
   organizer actions.
 
@@ -84,8 +86,8 @@ const SHEETS = {
 
 const GUIDE_SHEET_NAME = "START HERE";
 const WORKBOOK_FORMAT_VERSION = "2026-09-20-v9";
-const IMAGE_PROMPT_VERSION = "2026-09-21-v10-cloudflare";
-const GENERATION_SLOT_KEY = "IMAGINE_SAUDI_CLOUDFLARE_GENERATION_SLOT";
+const IMAGE_PROMPT_VERSION = "2026-09-21-v11-openrouter-cloudflare";
+const GENERATION_SLOT_KEY = "IMAGINE_SAUDI_IMAGE_GENERATION_SLOT";
 const PUBLIC_RESPONSE_CACHE_KEY_ = "IMAGINE_SAUDI_PUBLIC_RESPONSE_V1";
 const PUBLIC_RESPONSE_CACHE_TTL_SECONDS_ = 5;
 const PUBLIC_RESPONSE_CACHE_MAX_BYTES_ = 45000;
@@ -97,6 +99,8 @@ const ABUSE_RATE_LIMITS_ = {
 const CLOUDFLARE_IMAGE_MODEL = "@cf/black-forest-labs/flux-2-dev";
 const LEGACY_CLOUDFLARE_IMAGE_MODEL_ = "@cf/black-forest-labs/flux-1-schnell";
 const CLOUDFLARE_API_BASE_URL = "https://api.cloudflare.com/client/v4";
+const OPENROUTER_IMAGE_MODEL = "google/gemini-3.1-flash-lite-image";
+const OPENROUTER_API_BASE_URL = "https://openrouter.ai/api/v1";
 
 const DRIVE_IMAGE_THUMBNAIL_SIZE = "w1600";
 const THEME = {
@@ -125,12 +129,12 @@ const FIELD_NOTES = {
   image: "Preview or generated image URL/data URI.",
   imageSource: "Image origin: demo-preview, generated, uploaded, or curated.",
   generationStatus: "Image workflow state: queued, generating, generated, or failed.",
-  generationStartedAt: "When Cloudflare Workers AI image generation started.",
-  generationCompletedAt: "When Cloudflare Workers AI image generation finished or failed.",
-  generationAttempts: "Number of Cloudflare Workers AI attempts used for this submission.",
+  generationStartedAt: "When image generation started.",
+  generationCompletedAt: "When image generation finished or failed.",
+  generationAttempts: "Number of image-generation attempts used for this submission.",
   generationError: "Last safe error message when image generation failed.",
   promptVersion: "Version of the server-side image prompt used.",
-  imageModel: "Cloudflare Workers AI image model used for generation.",
+  imageModel: "Configured image model used for generation.",
   imageMimeType: "Generated image MIME type, such as image/png.",
   driveFileId: "Google Drive file ID for the generated image.",
   reviewedAt: "When an organizer approved or deleted the submission.",
@@ -252,7 +256,32 @@ function imageGenerationModel_() {
   return cloudflareConfig_().model;
 }
 
-function cloudflareStatus_() {
+function openrouterConfig_() {
+  const properties = PropertiesService.getScriptProperties();
+  const apiKey = String(properties.getProperty("OPENROUTER_API_KEY") || "").trim();
+  const configuredModel = String(properties.getProperty("OPENROUTER_IMAGE_MODEL") || "").trim();
+  return { apiKey: apiKey, model: configuredModel || OPENROUTER_IMAGE_MODEL, endpoint: OPENROUTER_API_BASE_URL + "/images" };
+}
+
+function imageGenerationStatus_() {
+  const openrouter = openrouterConfig_();
+  const cloudflare = cloudflareConfig_();
+  const openrouterConfigured = Boolean(openrouter.apiKey);
+  const cloudflareConfigured = Boolean(cloudflare.apiToken && cloudflare.endpoint);
+  const activeProvider = openrouterConfigured ? "OpenRouter — Nano Banana 2 Lite" : (cloudflareConfigured ? "Cloudflare Workers AI" : "none");
+  return {
+    configured: Boolean(openrouterConfigured || cloudflareConfigured),
+    status: activeProvider === "none" ? "needs_image_provider_settings" : "ready",
+    provider: activeProvider,
+    activeProvider: activeProvider,
+    model: openrouterConfigured ? openrouter.model : cloudflare.model,
+    primaryProvider: "OpenRouter",
+    fallbackProvider: "Cloudflare Workers AI",
+    fallbackConfigured: cloudflareConfigured
+  };
+}
+
+function imageGenerationStatus_() {
   const cloudflare = cloudflareConfig_();
   const configured = Boolean(cloudflare.apiToken && cloudflare.endpoint);
   const provider = configured ? "Cloudflare Workers AI" : "none";
@@ -269,7 +298,7 @@ function cloudflareStatus_() {
 }
 
 function organizerAiStatus_() {
-  const status = cloudflareStatus_();
+  const status = imageGenerationStatus_();
   status.lastFallbackError = "";
   return status;
 }
@@ -299,7 +328,7 @@ function route_(action, payload) {
         status: "ready"
       };
     case "aiStatus":
-      return { ok: true, service: "Imagine Saudi 2050", imageGeneration: cloudflareStatus_() };
+      return { ok: true, service: "Imagine Saudi 2050", imageGeneration: imageGenerationStatus_() };
     case "aiDiagnostics":
       requireAdmin_(payload);
       return getAiDiagnostics_();
@@ -445,7 +474,7 @@ function buildGuideSheet_(sheet) {
     ["votingOpen", "Settings tab", "true allows vote/unvote; false closes voting.", "Close voting before announcing results."],
     ["submissionDeadline", "Settings tab", "Optional ISO timestamp for the public submission countdown.", "Leave blank to hide the countdown."],
     ["votingDeadline", "Settings tab", "Optional ISO timestamp for the public voting countdown.", "Leave blank to hide the countdown."],
-    ["imageSource", "Visions / Submissions", "demo-preview, generated, uploaded, or curated.", "New submissions are generated by Cloudflare Workers AI and remain pending until approved."],
+    ["imageSource", "Visions / Submissions", "demo-preview, generated, uploaded, or curated.", "New submissions use OpenRouter Nano Banana 2 Lite first, with Cloudflare Workers AI as backup, and remain pending until approved."],
     ["", "", "", ""],
     ["SHEET MAP", "", "", ""],
     ["Sheet", "What it stores", "Important fields", "Organizer guidance"],
@@ -1254,8 +1283,8 @@ function generateVisionImageWithRetry_(submissionId, team, track, prompt, detail
 
 function generateVisionImage_(submissionId, team, track, prompt, details) {
   details = details || {};
-  const config = cloudflareConfig_();
-  const cloudflareAvailable = Boolean(config.apiToken && config.endpoint);
+  const openrouter = openrouterConfig_();
+  const cloudflare = cloudflareConfig_();
   const imagePrompt = [
     "Create ONE polished wide editorial concept image for the participant's idea below.",
     "PRIMARY RULE: depict the participant idea literally and specifically. The participant idea is the source of truth.",
@@ -1275,66 +1304,76 @@ function generateVisionImage_(submissionId, team, track, prompt, details) {
     "Selected track: " + String(track || "Other"),
     "Prompt enhancer: " + trackPromptEnhancer_(track),
     "Use the prompt enhancer only as broad context. Never replace, narrow, or contradict the participant idea.",
-    "=== END PARTICIPANT IDEA ===",
+    "=== END PARTICIPANT IDEA ==="
   ].join("\n");
-  if (!cloudflareAvailable) {
-    throw new Error("Cloudflare Workers AI is not configured. Add CLOUDFLARE_API_TOKEN and CLOUDFLARE_ACCOUNT_ID in Apps Script Project Settings.");
+  let primaryError = null;
+  if (openrouter.apiKey) {
+    try { return storeGeneratedImage_(submissionId, generateOpenRouterImage_(openrouter, imagePrompt, submissionId)); }
+    catch (error) { primaryError = error; }
   }
-  const multipart = cloudflareMultipartPayload_({
-    prompt: imagePrompt,
-    width: "1024",
-    height: "576",
-    steps: "28"
-  });
+  if (cloudflare.apiToken && cloudflare.endpoint) {
+    try { return storeGeneratedImage_(submissionId, generateCloudflareImage_(cloudflare, imagePrompt, submissionId)); }
+    catch (error) {
+      if (primaryError) throw new Error("OpenRouter failed, and Cloudflare Workers AI backup also failed: " + safeErrorMessage_(error));
+      throw error;
+    }
+  }
+  if (primaryError) throw new Error("OpenRouter image generation failed, and Cloudflare Workers AI backup is not configured: " + safeErrorMessage_(primaryError));
+  throw new Error("Image generation is not configured. Add OPENROUTER_API_KEY, or configure Cloudflare Workers AI as the backup, in Apps Script Project Settings.");
+}
+
+function generateOpenRouterImage_(config, imagePrompt, submissionId) {
   const response = UrlFetchApp.fetch(config.endpoint, {
-    method: "post",
-    contentType: multipart.contentType,
-    headers: { Authorization: "Bearer " + config.apiToken, Accept: "application/json" },
-    payload: multipart.payload,
-    muteHttpExceptions: true
+    method: "post", contentType: "application/json",
+    headers: { Authorization: "Bearer " + config.apiKey, "HTTP-Referer": "https://github.com/GoogleDevTeam/SaudiVision", "X-Title": "Imagine Saudi 2050" },
+    payload: JSON.stringify({ model: config.model, prompt: imagePrompt, aspect_ratio: "16:9" }), muteHttpExceptions: true
   });
+  const status = response.getResponseCode();
+  if (status < 200 || status >= 300) {
+    let detail = "OpenRouter image generation failed.";
+    try { const errorBody = JSON.parse(response.getContentText()); detail = (errorBody.error && (errorBody.error.message || errorBody.error.code)) || detail; } catch (ignored) {}
+    throw new Error(String(detail).slice(0, 240));
+  }
+  let result; try { result = JSON.parse(response.getContentText()); } catch (error) { throw new Error("OpenRouter returned an invalid image response."); }
+  const item = result && Array.isArray(result.data) ? result.data[0] : null;
+  const encodedImage = item && (item.b64_json || item.image);
+  if (!encodedImage) throw new Error("OpenRouter did not return an image. Try a shorter vision description.");
+  const mimeType = String((item && item.media_type) || "image/png");
+  const encoded = String(encodedImage).replace(/^data:[^;]+;base64,/, "");
+  return { blob: Utilities.newBlob(Utilities.base64Decode(encoded), mimeType, "saudi-vision-" + submissionId + ".png"), mimeType: mimeType };
+}
+
+function generateCloudflareImage_(config, imagePrompt, submissionId) {
+  const multipart = cloudflareMultipartPayload_({ prompt: imagePrompt, width: "1024", height: "576", steps: "28" });
+  const response = UrlFetchApp.fetch(config.endpoint, { method: "post", contentType: multipart.contentType, headers: { Authorization: "Bearer " + config.apiToken, Accept: "application/json" }, payload: multipart.payload, muteHttpExceptions: true });
   const status = response.getResponseCode();
   const headers = response.getHeaders();
   const contentType = String(headers["Content-Type"] || headers["content-type"] || "").split(";")[0].toLowerCase();
   if (status < 200 || status >= 300) {
-    let detail = "Cloudflare Workers AI image generation failed.";
-    try {
-      const errorBody = JSON.parse(response.getContentText());
-      const firstError = Array.isArray(errorBody.errors) ? errorBody.errors[0] : null;
-      detail = (firstError && (firstError.message || firstError.code)) ||
-        (errorBody.error && (errorBody.error.message || errorBody.error)) || detail;
-    } catch (ignored) {}
+    let detail = "Cloudflare Workers AI backup image generation failed.";
+    try { const errorBody = JSON.parse(response.getContentText()); const firstError = Array.isArray(errorBody.errors) ? errorBody.errors[0] : null; detail = (firstError && (firstError.message || firstError.code)) || (errorBody.error && (errorBody.error.message || errorBody.error)) || detail; } catch (ignored) {}
     throw new Error(String(detail).slice(0, 240));
   }
-
-  let blob;
-  let mimeType = contentType || "image/png";
+  let blob; let mimeType = contentType || "image/png";
   if (contentType.indexOf("json") !== -1) {
-    let result;
-    try { result = JSON.parse(response.getContentText()); }
-    catch (error) { throw new Error("Cloudflare returned an invalid image response."); }
+    let result; try { result = JSON.parse(response.getContentText()); } catch (error) { throw new Error("Cloudflare returned an invalid image response."); }
     const resultBody = result.result || result;
-    const encodedImage = resultBody.image || resultBody.data || resultBody.base64 ||
-      (Array.isArray(resultBody.images) ? resultBody.images[0] : "");
+    const encodedImage = resultBody.image || resultBody.data || resultBody.base64 || (Array.isArray(resultBody.images) ? resultBody.images[0] : "");
     if (!encodedImage) throw new Error("Cloudflare did not return an image. Try a shorter vision description.");
     const encoded = String(encodedImage).replace(/^data:[^;]+;base64,/, "");
     mimeType = String(resultBody.mime_type || resultBody.mimeType || "image/png");
     blob = Utilities.newBlob(Utilities.base64Decode(encoded), mimeType, "saudi-vision-" + submissionId + ".png");
-  } else {
-    blob = response.getBlob();
-    mimeType = blob.getContentType() || mimeType || "image/png";
-    blob.setName("saudi-vision-" + submissionId + (mimeType === "image/jpeg" ? ".jpg" : ".png"));
-  }
-  const file = DriveApp.createFile(blob);
+  } else { blob = response.getBlob(); mimeType = blob.getContentType() || mimeType || "image/png"; blob.setName("saudi-vision-" + submissionId + (mimeType === "image/jpeg" ? ".jpg" : ".png")); }
+  return { blob: blob, mimeType: mimeType };
+}
+
+function storeGeneratedImage_(submissionId, generated) {
+  const file = DriveApp.createFile(generated.blob);
   file.setSharing(DriveApp.Access.ANYONE_WITH_LINK, DriveApp.Permission.VIEW);
   const fileId = file.getId();
-  return {
-    url: driveThumbnailUrl_(fileId),
-    fallbackUrl: driveViewUrl_(fileId),
-    mimeType: mimeType,
-    fileId: fileId
-  };
+  return { url: driveThumbnailUrl_(fileId), fallbackUrl: driveViewUrl_(fileId), mimeType: generated.mimeType, fileId: fileId };
 }
+
 function getOrganizerSnapshot_() {
   const settings = getSettings_();
   const pending = getPendingSubmissions_();
@@ -1371,7 +1410,7 @@ function getAiDiagnostics_() {
     });
   return {
     ok: true,
-    imageGeneration: cloudflareStatus_(),
+    imageGeneration: imageGenerationStatus_(),
     recentFailures: failures
   };
 }
@@ -1619,7 +1658,7 @@ function requireAdmin_(payload) {
 
 /**
  * Run this once from the Apps Script editor to grant external-request permission.
- * It does not access competition data or call Cloudflare. Delete it afterward if desired.
+ * It does not access competition data or call an image provider. Delete it afterward if desired.
  */
 function authorizeExternalRequest() {
   UrlFetchApp.fetch("https://www.google.com/generate_204", {
