@@ -1695,6 +1695,7 @@
           <option value="newest" data-en="Newest first" data-ar="الأحدث أولًا">Newest first</option>
         </select>
         <p class="gallery-results" id="gallery-results" aria-live="polite"></p>
+        <p class="interaction-status" id="interaction-status" role="status" aria-live="polite"></p>
       </div>
       <div class="gallery-grid" id="gallery-grid" aria-live="polite"></div>
     </section>
@@ -1915,6 +1916,7 @@
     const galleryTrackFilter = document.getElementById("gallery-track-filter");
     const gallerySort = document.getElementById("gallery-sort");
     const galleryResults = document.getElementById("gallery-results");
+    const interactionStatus = document.getElementById("interaction-status");
     const submissionsToggle = document.getElementById("submissions-toggle");
     const votingToggle = document.getElementById("voting-toggle");
     const organizerStatus = document.getElementById("organizer-status");
@@ -3160,8 +3162,8 @@
       voteButton?.classList.add("is-processing");
       voteButton?.setAttribute("aria-busy", "true");
       voteButton?.setAttribute("disabled", "");
-      setInteractionStatus(t("voteSending"), "pending");
       try {
+        setInteractionStatus(t("voteSending"), "pending");
         let voteResult = null;
         if (GOOGLE_APPS_SCRIPT_URL && !liveStageDemoMode) {
           voteResult = await googleRequest(action, { visionId: vision.id || vision.team, voterId }, { timeout: 15000, retries: 1 });
