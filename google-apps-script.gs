@@ -272,8 +272,7 @@ function providerErrorMessage_(error) {
 }
 
 function geminiCooldownActive_() {
-  const until = Number(PropertiesService.getScriptProperties().getProperty(GEMINI_COOLDOWN_UNTIL_PROPERTY_) || 0);
-  return until > Date.now();
+  return false;
 }
 
 function setGeminiCooldown_(delayMs) {
@@ -1273,20 +1272,7 @@ function withGenerationSlot_(callback) {
 }
 
 function waitForGeminiRequestCooldown_() {
-  const cache = CacheService.getScriptCache();
-  const lock = LockService.getScriptLock();
-  let waitMs = 0;
-  if (lock.tryLock(5000)) {
-    try {
-      const nextAllowedAt = Number(cache.get("IMAGINE_SAUDI_GEMINI_NEXT_REQUEST")) || 0;
-      const now = Date.now();
-      waitMs = Math.max(0, nextAllowedAt - now);
-      cache.put("IMAGINE_SAUDI_GEMINI_NEXT_REQUEST", String(Math.max(now, nextAllowedAt) + GEMINI_REQUEST_COOLDOWN_MS_), 300);
-    } finally {
-      lock.releaseLock();
-    }
-  }
-  if (waitMs > 0) Utilities.sleep(waitMs);
+  // Deliberately do not delay requests; the caller is testing Gemini availability.
 }
 
 function geminiRetryDelayMs_(response, responseText) {
