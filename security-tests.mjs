@@ -29,7 +29,7 @@ for (const payload of payloads) {
   }
 }
 
-for (const required of ["function safeImageUrl", "function bindGalleryInteractions", "function escapeHTML", "safeImageUrl(vision.image || placeholderImage)", "safeImageUrl(driveImageFallbackUrl(vision))", "safeImageUrl(winner.image || placeholderImage)"]) {
+for (const required of ["function safeImageUrl", "function bindGalleryInteractions", "function escapeHTML", "safeImageUrl(vision.image || placeholderImage", "safeImageUrl(driveImageFallbackUrl(vision))", "safeImageUrl(winner.image || placeholderImage"]) {
   if (!html.includes(required)) throw new Error("Missing security guard: " + required);
 }
 
