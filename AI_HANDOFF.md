@@ -517,6 +517,13 @@ Before coding, inspect the latest `main` branch and the live deployment state. T
 - Direct new Function syntax checks passed for the Apps Script source and the inline frontend JavaScript; static wiring checks passed for thumbnail delivery, fallback payloads, retry handling, and first-image priority loading.
 - GitHub Pages will rebuild the frontend from the new source. The Apps Script source must be copied into Apps Script and redeployed for thumbnail URLs and fallback metadata to become active.
 
+### Cloudflare FLUX.2 request fix — 2026-09-21
+
+- Fixed the Apps Script Cloudflare FLUX.2 Dev request to use a correctly bounded `multipart/form-data` body with prompt, dimensions, and steps; the previous JSON request format was rejected by the model endpoint.
+- Added organizer-only `?action=aiDiagnostics` output with the provider status and the ten latest safe generation failures from Activity Log.
+- Backend commit: `4a96391e61dbceff1c30f3be9373abae6f035ff4`.
+- Backend source syntax validation passed. The Apps Script web app still needs the updated source copied into Apps Script and redeployed before this fix is live.
+
 ### Next recommended step
 
 Deploy the updated google-apps-script.gs once, then submit a vision with two or three related ideas and verify that the generated image loads quickly in the gallery and still follows the participant's wording while using the selected track only as a broad lens.
