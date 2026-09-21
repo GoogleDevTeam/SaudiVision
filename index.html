@@ -325,24 +325,6 @@
     }
     .control-card strong { display: block; font-size: .78rem; }
     .control-card small { display: block; margin-top: 4px; color: var(--dim); font-family: "Cairo", sans-serif; font-size: .68rem; }
-    .ai-usage-card {
-      grid-column: 1 / -1;
-      padding: 13px 15px;
-      border: 1px solid var(--line);
-      border-radius: 12px;
-      background: rgba(3, 35, 31, .58);
-    }
-    .ai-usage-head { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
-    .ai-usage-head strong { display: block; font-size: .78rem; }
-    .ai-usage-provider { display: block; margin-top: 4px; color: var(--dim); font-family: "Cairo", sans-serif; font-size: .68rem; }
-    .ai-usage-percent { color: var(--light-lavender); font-size: .78rem; font-weight: 800; }
-    .ai-usage-track { height: 8px; margin-top: 11px; overflow: hidden; border-radius: 999px; background: rgba(216, 208, 237, .12); }
-    .ai-usage-fill { display: block; width: 0; height: 100%; border-radius: inherit; background: var(--green); transition: width .45s ease, background-color .25s ease; }
-    .ai-usage-card[data-state="watch"] .ai-usage-fill { background: #d6aa62; }
-    .ai-usage-card[data-state="warning"] .ai-usage-fill { background: #e87b5d; }
-    .ai-usage-card[data-state="limit"] .ai-usage-fill { background: #d95d68; }
-    .ai-usage-card[data-state="warning"], .ai-usage-card[data-state="limit"] { border-color: rgba(232, 123, 93, .55); }
-    .ai-usage-label { margin: 8px 0 0; color: var(--dim); font-family: "Cairo", sans-serif; font-size: .68rem; }
     .toggle { position: relative; display: inline-block; flex: 0 0 auto; width: 43px; height: 24px; }
     .toggle input { width: 0; height: 0; opacity: 0; }
     .toggle-track {
@@ -1441,17 +1423,7 @@
            <div class="organizer-metric"><span data-en="Active votes" data-ar="الأصوات النشطة">Active votes</span><strong id="organizer-vote-count">—</strong></div>
            <div class="organizer-metric"><span data-en="Last refresh" data-ar="آخر تحديث">Last refresh</span><strong id="organizer-last-refresh">—</strong></div>
          </div>
-         <div class="ai-usage-card" id="ai-usage-card" data-state="healthy" aria-live="polite">
-           <div class="ai-usage-head">
-             <div>
-               <strong data-en="AI image provider" data-ar="مزود صور الذكاء الاصطناعي">AI image provider</strong>
-               <small class="ai-usage-provider" id="ai-usage-provider">—</small>
-             </div>
-             <span class="ai-usage-percent" id="ai-usage-percent">—</span>
-           </div>
-           <div class="ai-usage-track" aria-hidden="true"><span class="ai-usage-fill" id="ai-usage-fill"></span></div>
-           <p class="ai-usage-label" id="ai-usage-label">—</p>
-         </div>
+
          <div class="organizer-actions">
            <button class="organizer-action primary" id="organizer-live-stage" type="button" data-en="▶ Open live screen" data-ar="▶ فتح شاشة العرض المباشر">▶ Open live screen</button>
            <button class="organizer-action" id="organizer-demo-mode" type="button" data-en="▶ Start client demo" data-ar="▶ بدء العرض التجريبي المحلي">▶ Start client demo</button>
@@ -1881,11 +1853,6 @@
     const organizerTotalCount = document.getElementById("organizer-total-count");
     const organizerVoteCount = document.getElementById("organizer-vote-count");
     const organizerLastRefresh = document.getElementById("organizer-last-refresh");
-    const organizerAiUsageCard = document.getElementById("ai-usage-card");
-    const organizerAiUsageProvider = document.getElementById("ai-usage-provider");
-    const organizerAiUsagePercent = document.getElementById("ai-usage-percent");
-    const organizerAiUsageFill = document.getElementById("ai-usage-fill");
-    const organizerAiUsageLabel = document.getElementById("ai-usage-label");
     const organizerLeader = document.getElementById("organizer-leader");
     const resultsLeaderboard = document.getElementById("results-leaderboard");
     const winnerControls = document.getElementById("winner-controls");
@@ -2018,7 +1985,6 @@
     let pendingOrganizerRecords = [];
     let publishedOrganizerRecords = [];
     let organizerAnalytics = null;
-    let organizerAiStatus = null;
      let organizerWinner = null;
     let organizerUnlockInFlight = null;
     let organizerUnlockKey = "";
@@ -2137,13 +2103,6 @@
          organizerKeyLabel: "Organizer key",
          organizerUnlock: "Unlock",
          organizerCancel: "Cancel",
-         aiUsageEstimate: "Estimated Gemini requests today: {used}/{limit} ({percent}%).",
-         aiUsageFallback: "Cloudflare fallback is active — Gemini is at its configured limit.",
-         aiUsageHealthy: "Gemini is primary. Cloudflare is ready as backup.",
-         aiUsageWatch: "Gemini is approaching its configured limit.",
-         aiUsageWarning: "Gemini is close to its configured limit.",
-         aiUsageLimit: "Gemini limit reached. New images use Cloudflare.",
-         aiUsageNotAvailable: "Usage appears after the organizer refreshes the backend.",
          liveResults: "Live results",
          resultsDescription: "A ranked view of published visions and active votes.",
          noPublishedResults: "No published visions yet.",
@@ -2245,13 +2204,6 @@
          organizerKeyLabel: "رمز المنظم",
          organizerUnlock: "فتح",
          organizerCancel: "إلغاء",
-         aiUsageEstimate: "الاستخدام التقديري اليوم: {used}/{limit} من طلبات Gemini ({percent}٪).",
-         aiUsageFallback: "Cloudflare يعمل كخيار احتياطي — وصل Gemini إلى الحد المحدد.",
-         aiUsageHealthy: "Gemini هو المزود الأساسي، وCloudflare جاهز كخيار احتياطي.",
-         aiUsageWatch: "اقترب Gemini من الحد المحدد.",
-         aiUsageWarning: "اقترب Gemini كثيرًا من الحد المحدد.",
-         aiUsageLimit: "تم الوصول إلى حد Gemini. ستستخدم الصور الجديدة Cloudflare.",
-         aiUsageNotAvailable: "يظهر الاستخدام بعد تحديث المنظم للبيانات.",
          liveResults: "النتائج المباشرة",
          resultsDescription: "ترتيب الرؤى المنشورة والأصوات النشطة.",
          noPublishedResults: "لا توجد رؤى منشورة بعد.",
@@ -3361,30 +3313,6 @@
       if (liveStageOpen) renderLiveStage();
     }
 
-    function updateOrganizerAiUsage() {
-      if (!organizerAiUsageCard) return;
-      if (!organizerAiStatus || liveStageDemoMode) {
-        organizerAiUsageCard.dataset.state = "healthy";
-        organizerAiUsageProvider.textContent = "—";
-        organizerAiUsagePercent.textContent = "—";
-        organizerAiUsageFill.style.width = "0%";
-        organizerAiUsageLabel.textContent = t("aiUsageNotAvailable");
-        return;
-      }
-      const usage = organizerAiStatus.usage || {};
-      const percent = Math.max(0, Math.min(100, Number(usage.percent) || 0));
-      const used = Number(usage.requests) || 0;
-      const limit = Number(usage.limit) || 0;
-      const state = usage.state || "healthy";
-      organizerAiUsageCard.dataset.state = state;
-      organizerAiUsageProvider.textContent = organizerAiStatus.provider || "—";
-      organizerAiUsagePercent.textContent = percent + "%";
-      organizerAiUsageFill.style.width = percent + "%";
-      organizerAiUsageLabel.textContent = organizerAiStatus.status === "fallback_active"
-        ? t("aiUsageFallback")
-        : (t("aiUsageEstimate").replace("{used}", used).replace("{limit}", limit).replace("{percent}", percent) + " " + t(state === "limit" ? "aiUsageLimit" : state === "warning" ? "aiUsageWarning" : state === "watch" ? "aiUsageWatch" : "aiUsageHealthy"));
-    }
-
     function updateOrganizerSummary() {
       const summaryRecords = liveStageDemoMode ? liveStageDemoRecords : publishedOrganizerRecords;
       organizerPendingCount.textContent = String(pendingOrganizerRecords.length);
@@ -3392,7 +3320,6 @@
       organizerTotalCount.textContent = String(liveStageDemoMode ? pendingOrganizerRecords.length + summaryRecords.length : organizerAnalytics?.totalSubmissions ?? (pendingOrganizerRecords.length + summaryRecords.length));
       organizerVoteCount.textContent = String(liveStageDemoMode ? summaryRecords.reduce((sum, vision) => sum + (Number(vision.votes) || 0), 0) : organizerAnalytics?.activeVotes ?? summaryRecords.reduce((sum, vision) => sum + (Number(vision.votes) || 0), 0));
       organizerLastRefresh.textContent = new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
-      updateOrganizerAiUsage();
       renderResultsDashboard();
       renderLiveStage();
     }
@@ -3564,7 +3491,6 @@
           organizerWinner = data.winner || null;
           publicWinner = data.winner || publicWinner;
           organizerAnalytics = data.analytics || null;
-          organizerAiStatus = data.ai || null;
           updateReviewFilters();
           updateOrganizerSummary();
           rerenderReviewQueues();
