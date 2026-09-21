@@ -17,6 +17,8 @@ assert.match(backend, /This voter already has an active vote/);
 assert.match(backend, /requestedSubmissionId/);
 assert.match(backend, /participantHasSubmitted_\(participantId, submissionRound\)/);
 assert.match(backend, /copyRecordFields_\(Object\.assign\(\{\}, submission, generatedFields\), SHEETS\.visions\.headers\)/, "published vision must include generated fields");
+assert.match(backend, /const SOURCE_REVISION = "[^"\n]+"/);
+assert.match(backend, /case "version":/);
 assert.match(html, /googleRequest\("submit", newVision/);
 assert.match(html, /waitForSubmissionStatus\(submissionId\)/);
 assert.match(html, /function safeLocalGet/);
@@ -100,6 +102,9 @@ if (liveUrl) {
   const visions = await get("visions");
   assert.equal(visions.ok, true);
   assert.ok(Array.isArray(visions.visions));
+  const version = await get("version");
+  assert.equal(version.ok, true);
+  assert.equal(typeof version.sourceRevision, "string");
   const voterId = "workflow-audit-" + crypto.randomUUID();
   const status = await post({ action: "voteStatus", voterId });
   assert.equal(status.ok, true);
