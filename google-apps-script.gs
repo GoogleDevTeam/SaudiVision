@@ -88,7 +88,7 @@ const GUIDE_SHEET_NAME = "START HERE";
 const WORKBOOK_FORMAT_VERSION = "2026-09-20-v9";
 const IMAGE_PROMPT_VERSION = "2026-09-21-v12-organizer-approval";
 // Bump this marker whenever the Apps Script source changes, then redeploy. The parity check compares it with /version.
-const SOURCE_REVISION = "2026-09-21-parity-v1";
+const SOURCE_REVISION = "2026-09-21-vote-sheet-headers-v1";
 const GENERATION_SLOT_KEY = "IMAGINE_SAUDI_IMAGE_GENERATION_SLOT";
 const PUBLIC_RESPONSE_CACHE_KEY_ = "IMAGINE_SAUDI_PUBLIC_RESPONSE_V1";
 const PUBLIC_RESPONSE_CACHE_TTL_SECONDS_ = 5;
@@ -674,7 +674,12 @@ function formatDataSheet_(sheet, definition) {
 function getSheet_(definition) {
   const spreadsheet = getSpreadsheet_();
   const existing = spreadsheet.getSheetByName(definition.name);
-  if (existing) return existing;
+  if (existing) {
+    // Older workbooks may predate newer columns such as Visions.votes or Votes.active.
+    // Repair the header before any read or write so vote state is persisted reliably.
+    ensureHeaders_(existing, definition.headers);
+    return existing;
+  }
   const sheet = spreadsheet.insertSheet(definition.name);
   sheet.getRange(1, 1, 1, definition.headers.length).setValues([definition.headers]);
   sheet.setFrozenRows(1);
