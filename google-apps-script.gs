@@ -98,6 +98,7 @@ const CLOUDFLARE_IMAGE_MODEL = "@cf/black-forest-labs/flux-1-schnell";
 const CLOUDFLARE_API_BASE_URL = "https://api.cloudflare.com/client/v4";
 const GEMINI_IMAGE_MODEL = "gemini-3.1-flash-image";
 const GEMINI_API_ENDPOINT = "https://generativelanguage.googleapis.com/v1beta/interactions";
+const ACTIVE_AI_PROVIDER_PROPERTY_ = "IMAGINE_SAUDI_ACTIVE_AI_PROVIDER_V1";
 const DRIVE_IMAGE_THUMBNAIL_SIZE = "w1600";
 const THEME = {
   darkGreen: "#073B35",
@@ -257,16 +258,25 @@ function imageGenerationModel_() {
   return gemini.apiKey ? gemini.model : cloudflareConfig_().model;
 }
 
+function setActiveAiProvider_(provider) {
+  PropertiesService.getScriptProperties().setProperty(ACTIVE_AI_PROVIDER_PROPERTY_, String(provider || ""));
+}
+
 function cloudflareStatus_() {
   const gemini = geminiConfig_();
   const cloudflare = cloudflareConfig_();
   const geminiAvailable = Boolean(gemini.apiKey);
   const cloudflareAvailable = Boolean(cloudflare.apiToken && cloudflare.endpoint);
+  const savedProvider = String(PropertiesService.getScriptProperties().getProperty(ACTIVE_AI_PROVIDER_PROPERTY_) || "");
+  const activeProvider = savedProvider === "Cloudflare Workers AI" && cloudflareAvailable
+    ? savedProvider
+    : geminiAvailable ? "Google Gemini" : cloudflareAvailable ? "Cloudflare Workers AI" : "none";
   return {
     configured: Boolean(geminiAvailable || cloudflareAvailable),
-    status: geminiAvailable ? "ready" : (cloudflareAvailable ? "fallback_active" : "needs_gemini_or_cloudflare_settings"),
-    provider: geminiAvailable ? "Google Gemini" : (cloudflareAvailable ? "Cloudflare Workers AI" : "none"),
-    model: geminiAvailable ? gemini.model : cloudflare.model,
+    status: activeProvider === "Cloudflare Workers AI" ? "fallback_active" : activeProvider === "Google Gemini" ? "ready" : "needs_gemini_or_cloudflare_settings",
+    provider: activeProvider,
+    activeProvider: activeProvider,
+    model: activeProvider === "Google Gemini" ? gemini.model : cloudflare.model,
     primaryProvider: "Google Gemini",
     fallbackProvider: cloudflareAvailable ? "Cloudflare Workers AI" : "not_configured",
     fallbackConfigured: cloudflareAvailable
@@ -1307,15 +1317,18 @@ function generateVisionImage_(submissionId, team, track, prompt, details) {
     "=== END PARTICIPANT IDEA ===",
   ].join("\n");
   if (gemini.apiKey) {
+    setActiveAiProvider_("Google Gemini");
     try {
       return generateGeminiVisionImage_(submissionId, imagePrompt, gemini);
     } catch (error) {
       if (!config.apiToken || !config.endpoint) throw error;
+      setActiveAiProvider_("Cloudflare Workers AI");
     }
   }
   if (!config.apiToken || !config.endpoint) {
     throw new Error("Live AI is not configured. Add GEMINI_API_KEY or the Cloudflare settings in Apps Script Project Settings.");
   }
+  if (!gemini.apiKey) setActiveAiProvider_("Cloudflare Workers AI");
   const response = UrlFetchApp.fetch(config.endpoint, {
     method: "post",
     contentType: "application/json",
