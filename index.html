@@ -2657,21 +2657,30 @@
     }
 
     async function requestOrganizerSnapshot(keyOverride = "") {
+      const loadSnapshot = async () => {
+        try {
+          return await adminRequest("organizerSnapshot", {}, keyOverride, { timeout: 30000 });
+        } catch (error) {
+          if (!/unknown action/i.test(error?.message || "")) throw error;
+          const [pendingResult, publishedResult] = await Promise.all([
+            adminRequest("pending", {}, keyOverride, { timeout: 30000 }),
+            googleRequest("visions", {}, { method: "GET", timeout: 30000 })
+          ]);
+          return {
+            settings: publishedResult?.settings || settings,
+            pending: pendingResult?.visions || [],
+            published: publishedResult?.visions || [],
+            winner: publishedResult?.winner || null,
+            analytics: null
+          };
+        }
+      };
       try {
-        return await adminRequest("organizerSnapshot", {}, keyOverride);
+        return await loadSnapshot();
       } catch (error) {
-        if (!/unknown action/i.test(error?.message || "")) throw error;
-        const [pendingResult, publishedResult] = await Promise.all([
-          adminRequest("pending", {}, keyOverride),
-          googleRequest("visions", {}, { method: "GET" })
-        ]);
-        return {
-          settings: publishedResult?.settings || settings,
-          pending: pendingResult?.visions || [],
-          published: publishedResult?.visions || [],
-          winner: publishedResult?.winner || null,
-          analytics: null
-        };
+        if (!/timeout|backend unavailable|502|503|504/i.test(error?.message || "")) throw error;
+        await new Promise((resolve) => window.setTimeout(resolve, 800));
+        return loadSnapshot();
       }
     }
 
@@ -2810,10 +2819,10 @@
       return key;
     }
 
-    async function adminRequest(action, payload = {}, keyOverride = "") {
+    async function adminRequest(action, payload = {}, keyOverride = "", options = {}) {
       const key = ensureOrganizerKey(keyOverride);
       try {
-        return await googleRequest(action, { ...payload, adminKey: key });
+        return await googleRequest(action, { ...payload, adminKey: key }, options);
       } catch (error) {
         if (/unauthorized|invalid organizer key|admin key|organizer/i.test(error.message || "")) {
           if (!keyOverride || key === organizerKey) organizerKey = "";
@@ -3571,6 +3580,12 @@
           const data = snapshot || (GOOGLE_APPS_SCRIPT_URL
             ? await requestOrganizerSnapshot()
             : { settings, pending: pendingVisions, published: [...sourceVisions, ...localPublishedVisions], analytics: null });
+          if (!data.ai && GOOGLE_APPS_SCRIPT_URL) {
+            try {
+              const aiStatus = await googleRequest("aiStatus", {}, { method: "GET", timeout: 8000 });
+              data.ai = aiStatus?.imageGeneration || null;
+            } catch (ignored) { /* Provider status is supplementary to the organizer data. */ }
+          }
           applyPublicSettings(data.settings);
           pendingOrganizerRecords = data.pending || [];
           publishedOrganizerRecords = data.published || [];
