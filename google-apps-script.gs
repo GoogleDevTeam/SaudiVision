@@ -103,6 +103,8 @@ const GEMINI_DEFAULT_RETRY_DELAY_MS_ = 15000;
 const GEMINI_MAX_RETRY_DELAY_MS_ = 120000;
 const ACTIVE_AI_PROVIDER_PROPERTY_ = "IMAGINE_SAUDI_ACTIVE_AI_PROVIDER_V1";
 const ACTIVE_AI_PROVIDER_ERROR_PROPERTY_ = "IMAGINE_SAUDI_ACTIVE_AI_PROVIDER_ERROR_V1";
+const GEMINI_COOLDOWN_UNTIL_PROPERTY_ = "IMAGINE_SAUDI_GEMINI_COOLDOWN_UNTIL_V1";
+const GEMINI_429_COOLDOWN_MS_ = 120000;
 const DRIVE_IMAGE_THUMBNAIL_SIZE = "w1600";
 const THEME = {
   darkGreen: "#073B35",
@@ -267,6 +269,23 @@ function providerErrorMessage_(error) {
     .replace(/AIza[0-9A-Za-z_-]+/g, "[redacted]")
     .replace(/Bearer\s+[^\s]+/gi, "Bearer [redacted]")
     .slice(0, 240);
+}
+
+function geminiCooldownActive_() {
+  const until = Number(PropertiesService.getScriptProperties().getProperty(GEMINI_COOLDOWN_UNTIL_PROPERTY_) || 0);
+  return until > Date.now();
+}
+
+function setGeminiCooldown_(delayMs) {
+  const delay = Math.max(GEMINI_429_COOLDOWN_MS_, Number(delayMs) || 0);
+  PropertiesService.getScriptProperties().setProperty(
+    GEMINI_COOLDOWN_UNTIL_PROPERTY_,
+    String(Date.now() + delay)
+  );
+}
+
+function clearGeminiCooldown_() {
+  PropertiesService.getScriptProperties().deleteProperty(GEMINI_COOLDOWN_UNTIL_PROPERTY_);
 }
 
 function setActiveAiProvider_(provider, error) {
@@ -1381,19 +1400,28 @@ function generateVisionImage_(submissionId, team, track, prompt, details) {
     "Beneficiaries: " + String(details.beneficiaries || ""),
     "=== END PARTICIPANT IDEA ===",
   ].join("\n");
-  if (gemini.apiKey) {
+  const cloudflareAvailable = Boolean(config.apiToken && config.endpoint);
+  const geminiCoolingDown = cloudflareAvailable && geminiCooldownActive_();
+  if (gemini.apiKey && !geminiCoolingDown) {
     setActiveAiProvider_("Google Gemini");
     try {
-      return generateGeminiVisionImage_(submissionId, imagePrompt, gemini);
+      const generated = generateGeminiVisionImage_(submissionId, imagePrompt, gemini);
+      clearGeminiCooldown_();
+      return generated;
     } catch (error) {
-      if (!config.apiToken || !config.endpoint) throw error;
+      if (!cloudflareAvailable) throw error;
+      if (Number(error.httpStatus) === 429) {
+        setGeminiCooldown_(Number(error.retryAfterMs) || GEMINI_429_COOLDOWN_MS_);
+      }
       setActiveAiProvider_("Cloudflare Workers AI", error);
     }
   }
-  if (!config.apiToken || !config.endpoint) {
+  if (!cloudflareAvailable) {
     throw new Error("Live AI is not configured. Add GEMINI_API_KEY or the Cloudflare settings in Apps Script Project Settings.");
   }
-  if (!gemini.apiKey) setActiveAiProvider_("Cloudflare Workers AI", null);
+  if (!gemini.apiKey || geminiCoolingDown) {
+    setActiveAiProvider_("Cloudflare Workers AI", geminiCoolingDown ? new Error("Gemini is temporarily paused after a rate-limit response.") : null);
+  }
   const response = UrlFetchApp.fetch(config.endpoint, {
     method: "post",
     contentType: "application/json",
