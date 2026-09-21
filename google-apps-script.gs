@@ -98,6 +98,9 @@ const CLOUDFLARE_IMAGE_MODEL = "@cf/black-forest-labs/flux-1-schnell";
 const CLOUDFLARE_API_BASE_URL = "https://api.cloudflare.com/client/v4";
 const GEMINI_IMAGE_MODEL = "gemini-3.1-flash-image";
 const GEMINI_API_ENDPOINT = "https://generativelanguage.googleapis.com/v1beta/interactions";
+const GEMINI_REQUEST_COOLDOWN_MS_ = 12000;
+const GEMINI_DEFAULT_RETRY_DELAY_MS_ = 15000;
+const GEMINI_MAX_RETRY_DELAY_MS_ = 120000;
 const ACTIVE_AI_PROVIDER_PROPERTY_ = "IMAGINE_SAUDI_ACTIVE_AI_PROVIDER_V1";
 const ACTIVE_AI_PROVIDER_ERROR_PROPERTY_ = "IMAGINE_SAUDI_ACTIVE_AI_PROVIDER_ERROR_V1";
 const DRIVE_IMAGE_THUMBNAIL_SIZE = "w1600";
@@ -1250,6 +1253,37 @@ function withGenerationSlot_(callback) {
   throw new Error("Image generation is busy. The submission was recorded; try again shortly.");
 }
 
+function waitForGeminiRequestCooldown_() {
+  const cache = CacheService.getScriptCache();
+  const lock = LockService.getScriptLock();
+  let waitMs = 0;
+  if (lock.tryLock(5000)) {
+    try {
+      const nextAllowedAt = Number(cache.get("IMAGINE_SAUDI_GEMINI_NEXT_REQUEST")) || 0;
+      const now = Date.now();
+      waitMs = Math.max(0, nextAllowedAt - now);
+      cache.put("IMAGINE_SAUDI_GEMINI_NEXT_REQUEST", String(Math.max(now, nextAllowedAt) + GEMINI_REQUEST_COOLDOWN_MS_), 300);
+    } finally {
+      lock.releaseLock();
+    }
+  }
+  if (waitMs > 0) Utilities.sleep(waitMs);
+}
+
+function geminiRetryDelayMs_(response, responseText) {
+  const headers = response.getHeaders() || {};
+  const retryAfter = headers["Retry-After"] || headers["retry-after"];
+  const retryAfterSeconds = Number(retryAfter);
+  if (isFinite(retryAfterSeconds) && retryAfterSeconds > 0) {
+    return Math.min(GEMINI_MAX_RETRY_DELAY_MS_, Math.max(1000, retryAfterSeconds * 1000));
+  }
+  const retryDelayMatch = String(responseText || "").match(/(?:retryDelay|retry in)\D+(\d+(?:\.\d+)?)s/i);
+  if (retryDelayMatch) {
+    return Math.min(GEMINI_MAX_RETRY_DELAY_MS_, Math.max(1000, Number(retryDelayMatch[1]) * 1000));
+  }
+  return GEMINI_DEFAULT_RETRY_DELAY_MS_;
+}
+
 function generateVisionImageWithRetry_(submissionId, team, track, prompt, details) {
   let lastError = null;
   for (let attempt = 1; attempt <= 3; attempt += 1) {
@@ -1260,13 +1294,15 @@ function generateVisionImageWithRetry_(submissionId, team, track, prompt, detail
       lastError = error;
       error.generationAttempts = attempt;
       if (!isRetryableGenerationError_(error) || attempt === 3) throw error;
-      Utilities.sleep(1000 * Math.pow(2, attempt - 1));
+      const retryDelayMs = Number(error.retryAfterMs) || GEMINI_DEFAULT_RETRY_DELAY_MS_;
+      Utilities.sleep(Math.min(GEMINI_MAX_RETRY_DELAY_MS_, Math.max(1000, retryDelayMs)));
     }
   }
   throw lastError || new Error("Image generation failed.");
 }
 
 function generateGeminiVisionImage_(submissionId, imagePrompt, config) {
+  waitForGeminiRequestCooldown_();
   const response = UrlFetchApp.fetch(config.endpoint, {
     method: "post",
     contentType: "application/json",
@@ -1279,12 +1315,18 @@ function generateGeminiVisionImage_(submissionId, imagePrompt, config) {
   });
   const status = response.getResponseCode();
   if (status < 200 || status >= 300) {
+    const responseText = response.getContentText();
     let detail = "Google Gemini image generation failed.";
     try {
-      const errorBody = JSON.parse(response.getContentText());
+      const errorBody = JSON.parse(responseText);
       detail = errorBody.error?.message || errorBody.message || detail;
     } catch (ignored) {}
-    throw new Error(String(detail).slice(0, 240));
+    const error = new Error(status === 429
+      ? "Google Gemini is rate-limiting image generation. Please retry shortly."
+      : String(detail).slice(0, 240));
+    error.httpStatus = status;
+    if (status === 429) error.retryAfterMs = geminiRetryDelayMs_(response, responseText);
+    throw error;
   }
   let result;
   try {
