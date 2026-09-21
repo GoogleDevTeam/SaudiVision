@@ -306,7 +306,7 @@
     .organizer-details[open] summary, .organizer-details summary:hover { border-color: rgba(216, 208, 237, .45); color: var(--ink); }
     .organizer-panel {
       display: grid;
-      grid-template-columns: repeat(2, minmax(0, 1fr));
+      grid-template-columns: repeat(auto-fit, minmax(min(100%, 320px), 1fr));
       gap: 12px;
       margin-top: 10px;
       padding: 15px;
@@ -323,9 +323,10 @@
       border: 1px solid var(--line);
       border-radius: 12px;
     }
-    .control-card strong { display: block; font-size: .78rem; }
-    .control-card small { display: block; margin-top: 4px; color: var(--dim); font-family: "Cairo", sans-serif; font-size: .68rem; }
-    .toggle { position: relative; display: inline-block; flex: 0 0 auto; width: 43px; height: 24px; }
+    .control-card > div { min-width: 0; flex: 1 1 auto; }
+    .control-card strong { display: block; font-size: .78rem; overflow-wrap: anywhere; }
+    .control-card small { display: block; margin-top: 4px; color: var(--dim); font-family: "Cairo", sans-serif; font-size: .68rem; overflow-wrap: anywhere; }
+    .toggle { position: relative; display: inline-block; flex: 0 0 43px; width: 43px; min-width: 43px; height: 24px; }
     .toggle input { width: 0; height: 0; opacity: 0; }
     .toggle-track {
       position: absolute;
@@ -1371,6 +1372,7 @@
     @media (max-width: 700px) { .organizer-summary { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
     @media (max-width: 700px) {
       .control-card { align-items: flex-start; flex-wrap: wrap; gap: 11px; }
+      .control-card:not(.deadline-control) { align-items: center; flex-wrap: nowrap; }
       .control-card .deadline-input { flex: 1 1 180px; width: 100%; }
       .organizer-ai-provider { align-items: flex-start; }
       .review-header { align-items: flex-start; flex-direction: column; }
@@ -1875,6 +1877,7 @@
     let hasRemoteSync = false;
     let publicSyncTimer = 0;
     let lastPublicPhase = "";
+    let voteStatusInitialized = false;
      let publicWinner = null;
 
     const gallery = document.getElementById("gallery-grid");
@@ -3070,16 +3073,21 @@
         syncState.textContent = t("receiving");
         try {
           const selectedVisionBeforeSync = safeLocalGet("imagineSaudiVote");
-          const visions = await fetchVisionBatch();
-          let voteStatus = null;
-          if (GOOGLE_APPS_SCRIPT_URL && !liveStageDemoMode) {
-            try {
-              voteStatus = await googleRequest("voteStatus", { voterId }, { timeout: 12000, retries: 1 });
-            } catch (error) {
-              // Older deployed Apps Script versions may not have voteStatus yet.
-              console.warn("Vote status sync unavailable:", error);
-            }
+          const visionsPromise = fetchVisionBatch();
+          let voteStatusPromise = Promise.resolve(null);
+          if (GOOGLE_APPS_SCRIPT_URL && !liveStageDemoMode && !voteStatusInitialized) {
+            voteStatusPromise = googleRequest("voteStatus", { voterId }, { timeout: 12000, retries: 1 })
+              .then((result) => {
+                voteStatusInitialized = true;
+                return result;
+              })
+              .catch((error) => {
+                // Older deployed Apps Script versions may not have voteStatus yet.
+                console.warn("Vote status sync unavailable:", error);
+                return null;
+              });
           }
+          const [visions, voteStatus] = await Promise.all([visionsPromise, voteStatusPromise]);
           const remoteVoteChanged = applyRemoteVoteStatus(voteStatus, visions);
           activeVisions = visions;
           hasRemoteSync = true;
@@ -3133,7 +3141,11 @@
         if (action === "vote") safeLocalSet("imagineSaudiVote", selectedVisionKey);
         else safeLocalRemove("imagineSaudiVote");
         if (liveStageDemoMode) renderDemoSurfaces();
-        else await syncGallery();
+        else {
+          renderGallery();
+          // The vote is already confirmed by the backend; refresh public data in the background.
+          syncGallery();
+        }
         setInteractionStatus(action === "vote" ? t("voteSent") : t("voteRemoved"), "success");
       } catch (error) {
         voteButton?.classList.add("is-rejected");
