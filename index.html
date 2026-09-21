@@ -1965,7 +1965,7 @@
     const publishedQueue = document.getElementById("published-queue");
     function safeLocalGet(key, fallback = "") {
       try {
-        const value = window.safeLocalGet(key);
+        const value = window.localStorage.getItem(key);
         return value === null ? fallback : value;
       } catch (error) {
         return fallback;
@@ -1974,7 +1974,7 @@
 
     function safeLocalSet(key, value) {
       try {
-        window.safeLocalSet(key, value);
+        window.localStorage.setItem(key, value);
         return true;
       } catch (error) {
         return false;
@@ -1983,7 +1983,7 @@
 
     function safeLocalRemove(key) {
       try {
-        window.safeLocalRemove(key);
+        window.localStorage.removeItem(key);
         return true;
       } catch (error) {
         return false;
