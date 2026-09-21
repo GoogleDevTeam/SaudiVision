@@ -2349,9 +2349,16 @@
     }
 
     function updateTrackEnhancer() {
-      // Disabled for now: the participant's description is the only creative input.
-      trackEnhancer.textContent = "";
-      trackEnhancer.hidden = true;
+      const selectedTrack = String(trackInput.value || "");
+      if (!selectedTrack) {
+        trackEnhancer.textContent = "";
+        trackEnhancer.hidden = true;
+        return;
+      }
+      const enhancer = TRACK_PROMPT_ENHANCERS[selectedTrack] || TRACK_PROMPT_ENHANCERS.Other;
+      const text = enhancer[currentLanguage] || enhancer.en;
+      trackEnhancer.textContent = t("trackEnhancerPrefix") + text;
+      trackEnhancer.hidden = !text;
     }
 
     function isSubmissionLocked() {
@@ -3023,6 +3030,7 @@
         title,
         track,
         prompt,
+        promptEnhancer: ((TRACK_PROMPT_ENHANCERS[track] || TRACK_PROMPT_ENHANCERS.Other)[currentLanguage] || (TRACK_PROMPT_ENHANCERS[track] || TRACK_PROMPT_ENHANCERS.Other).en),
         participantId,
         submissionRound: settings.submissionRound,
         ...deviceMetadata,
