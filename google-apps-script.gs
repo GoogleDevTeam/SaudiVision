@@ -265,7 +265,8 @@ function cloudflareConfig_() {
 
 function imageGenerationModel_() {
   const gemini = geminiConfig_();
-  return gemini.apiKey ? gemini.model : cloudflareConfig_().model;
+  const cloudflare = cloudflareConfig_();
+  return cloudflare.apiToken && cloudflare.endpoint ? cloudflare.model : gemini.model;
 }
 
 function providerErrorMessage_(error) {
@@ -1397,7 +1398,7 @@ function generateVisionImage_(submissionId, team, track, prompt, details) {
   ].join("\n");
   const cloudflareAvailable = Boolean(config.apiToken && config.endpoint);
   const geminiCoolingDown = cloudflareAvailable && geminiCooldownActive_();
-  if (gemini.apiKey && !geminiCoolingDown) {
+  if (gemini.apiKey && !geminiCoolingDown && !cloudflareAvailable) {
     setActiveAiProvider_("Google Gemini");
     try {
       const generated = generateGeminiVisionImage_(submissionId, imagePrompt, gemini);
@@ -1414,7 +1415,7 @@ function generateVisionImage_(submissionId, team, track, prompt, details) {
   if (!cloudflareAvailable) {
     throw new Error("Live AI is not configured. Add GEMINI_API_KEY or the Cloudflare settings in Apps Script Project Settings.");
   }
-  if (!gemini.apiKey || geminiCoolingDown) {
+  if (!gemini.apiKey || geminiCoolingDown || cloudflareAvailable) {
     setActiveAiProvider_("Cloudflare Workers AI", geminiCoolingDown ? new Error("Gemini is temporarily paused after a rate-limit response.") : null);
   }
   const response = UrlFetchApp.fetch(config.endpoint, {
