@@ -539,6 +539,19 @@ Before coding, inspect the latest `main` branch and the live deployment state. T
 - Added a 30-second organizer snapshot/fallback timeout, one retry for timeout/5xx failures, and a public `aiStatus` fallback when an older backend snapshot omits AI status.
 - Frontend JavaScript syntax validation passed. Commit: `168e92abd821369226482abe8750fff86cfaa3ab`.
 
-### Vote status repair — 2026-09-21\n\n- Added a public server-side voteStatus action that resolves the browser voter ID to its active vision without exposing voter data.\n- Updated the frontend to reconcile local browser state with the backend, recover vote state across reloads or devices using the same voter ID, and re-render cards when the selected vote changes.\n- Older Apps Script deployments fail soft: the frontend keeps local vote behavior while the backend is being redeployed.\n- Files changed: index.html, google-apps-script.gs.\n- Backend commit: 2957d77ee0adb2a7df91a94f02382a3da4cea1a0.\n- Frontend commit: e13de63aaf86ae2db9ac43e17e707fb37b547752.\n- Frontend and Apps Script source syntax validation passed. GitHub Pages will rebuild the frontend; the Apps Script source must be copied into Apps Script and redeployed for server-side vote status to become live.\n\n### Next recommended step\n\nDeploy the updated google-apps-script.gs in Apps Script, then verify voting from a fresh browser session: cast one vote, reload, confirm the selected card remains marked, unvote it, and confirm the gallery returns to an available-to-vote state.\n
+### Vote status repair — 2026-09-21
+
+- Added a public server-side voteStatus action that resolves the browser voter ID to its active vision without exposing voter data.
+- Updated the frontend to reconcile local browser state with the backend, recover vote state across reloads or devices using the same voter ID, and re-render cards when the selected vote changes.
+- Older Apps Script deployments fail soft: the frontend keeps local vote behavior while the backend is being redeployed.
+- Files changed: index.html, google-apps-script.gs.
+- Backend commit: 2957d77ee0adb2a7df91a94f02382a3da4cea1a0.
+- Frontend commit: e13de63aaf86ae2db9ac43e17e707fb37b547752.
+- Frontend and Apps Script source syntax validation passed. GitHub Pages will rebuild the frontend; the Apps Script source must be copied into Apps Script and redeployed for server-side vote status to become live.
+
+### Next recommended step
+
+Deploy the updated google-apps-script.gs in Apps Script, then verify voting from a fresh browser session: cast one vote, reload, confirm the selected card remains marked, unvote it, and confirm the gallery returns to an available-to-vote state.
+
 
 Deploy the updated google-apps-script.gs once, then submit a vision with two or three related ideas and verify that the generated image loads quickly in the gallery and still follows the participant's wording while using the selected track only as a broad lens.
