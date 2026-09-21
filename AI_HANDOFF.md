@@ -41,7 +41,7 @@ This is an interactive future-vision competition for Google Developer Groups on 
 The flow is:
 
 1. A participant submits a group name, strategic track, and Saudi Arabia 2050 vision.
-2. The frontend asks the Apps Script backend for one server-generated concept image, then keeps the submission pending until organizer approval. Local demo mode remains available when the backend URL is empty.
+2. The frontend sends the participant idea to the Apps Script backend without generating an image; the organizer approval action is the only path that calls the image API and publishes the result. Local demo mode remains available when the backend URL is empty.
 3. Every new submission enters `pending`.
 4. Organizers review pending submissions.
 5. Organizers approve/publish or permanently delete submissions.
@@ -401,7 +401,7 @@ Before coding, inspect the latest `main` branch and the live deployment state. T
 
 - Added useful generation and moderation fields to Visions and Submissions: generation status, start/completion timestamps, attempts, safe error text, prompt version, OpenRouter Nano Banana 2 Lite model, image MIME type, Drive file ID, reviewed time, and reviewer role.
 - Added an Activity Log sheet for submission received, generation succeeded/failed, and moderation events. It stores safe operational details without secrets.
-- Submission handling now reserves a row under a short script lock before calling OpenRouter Nano Banana 2 Lite, so simultaneous requests cannot duplicate the same participant or race spreadsheet writes. Image generation happens outside the sheet lock but through a server-side generation slot, so ten simultaneous requests do not burst OpenRouter Nano Banana 2 Lite calls at once. Each request gets up to three retries for transient OpenRouter Nano Banana 2 Lite/API failures.
+- Submission handling now reserves a pending row under a short script lock without calling an image provider. Organizer approval changes the row to generating, calls the image API through the server-side generation slot, and publishes only after the image is stored; organizer decline completes without any image API call.
 - Failed generations remain recorded with a retryable failed status instead of disappearing or crashing the workflow. The frontend submit request now allows normal image-generation latency.
 - Workbook format version is now v8. The health/setup path adds all new headers and formats the operational columns automatically.
 
