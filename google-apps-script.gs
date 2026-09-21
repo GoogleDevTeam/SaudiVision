@@ -87,6 +87,8 @@ const SHEETS = {
 const GUIDE_SHEET_NAME = "START HERE";
 const WORKBOOK_FORMAT_VERSION = "2026-09-20-v9";
 const IMAGE_PROMPT_VERSION = "2026-09-21-v12-organizer-approval";
+// Bump this marker whenever the Apps Script source changes, then redeploy. The parity check compares it with /version.
+const SOURCE_REVISION = "2026-09-21-parity-v1";
 const GENERATION_SLOT_KEY = "IMAGINE_SAUDI_IMAGE_GENERATION_SLOT";
 const PUBLIC_RESPONSE_CACHE_KEY_ = "IMAGINE_SAUDI_PUBLIC_RESPONSE_V1";
 const PUBLIC_RESPONSE_CACHE_TTL_SECONDS_ = 5;
@@ -311,10 +313,13 @@ function route_(action, payload) {
       return {
         ok: true,
         service: "Imagine Saudi 2050",
-        status: "ready"
+        status: "ready",
+        sourceRevision: SOURCE_REVISION
       };
     case "aiStatus":
       return { ok: true, service: "Imagine Saudi 2050", imageGeneration: imageGenerationStatus_() };
+    case "version":
+      return { ok: true, service: "Imagine Saudi 2050", sourceRevision: SOURCE_REVISION, imagePromptVersion: IMAGE_PROMPT_VERSION };
     case "aiDiagnostics":
       requireAdmin_(payload);
       return getAiDiagnostics_();
