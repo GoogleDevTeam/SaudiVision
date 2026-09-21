@@ -359,6 +359,20 @@
     .organizer-status.is-error {
       color: #F0B7C8;
     }
+    .organizer-ai-provider {
+      grid-column: 1 / -1;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      padding: 10px 12px;
+      border: 1px solid rgba(216, 208, 237, .18);
+      border-radius: 10px;
+      background: rgba(3, 35, 31, .5);
+    }
+    .organizer-ai-provider span { color: var(--dim); font-family: "Cairo", sans-serif; font-size: .68rem; }
+    .organizer-ai-provider strong { color: var(--green); font-size: .76rem; }
+    .organizer-ai-provider[data-provider="cloudflare"] strong { color: #D6AA62; }
 
     body.live-stage-active { overflow: hidden; }
     .live-stage[hidden] { display: none !important; }
@@ -1416,6 +1430,13 @@
           <input class="deadline-input" id="voting-deadline" type="datetime-local" aria-label="Voting deadline" data-aria-en="Voting deadline" data-aria-ar="موعد إغلاق التصويت" />
         </div>
         <p class="organizer-status" id="organizer-status" data-en="Competition is live. Settings are saved on this device." data-ar="المسابقة مباشرة. يتم حفظ الإعدادات على هذا الجهاز.">المسابقة مباشرة. يتم حفظ الإعدادات على هذا الجهاز.</p>
+       <div class="organizer-ai-provider" id="organizer-ai-provider" data-provider="gemini" aria-live="polite">
+         <span data-en="Active image provider" data-ar="مزود الصور النشط">Active image provider</span>
+         <div>
+           <strong id="organizer-ai-provider-name">—</strong>
+           <small id="organizer-ai-provider-detail">—</small>
+         </div>
+       </div>
          <div class="organizer-summary" aria-label="Organizer summary" data-aria-en="Organizer summary" data-aria-ar="ملخص المنظم">
            <div class="organizer-metric"><span data-en="Pending" data-ar="قيد المراجعة">Pending</span><strong id="organizer-pending-count">—</strong></div>
            <div class="organizer-metric"><span data-en="Published" data-ar="منشورة">Published</span><strong id="organizer-published-count">—</strong></div>
@@ -1848,6 +1869,9 @@
     const submissionsToggle = document.getElementById("submissions-toggle");
     const votingToggle = document.getElementById("voting-toggle");
     const organizerStatus = document.getElementById("organizer-status");
+    const organizerAiProvider = document.getElementById("organizer-ai-provider");
+    const organizerAiProviderName = document.getElementById("organizer-ai-provider-name");
+    const organizerAiProviderDetail = document.getElementById("organizer-ai-provider-detail");
     const organizerPendingCount = document.getElementById("organizer-pending-count");
     const organizerPublishedCount = document.getElementById("organizer-published-count");
     const organizerTotalCount = document.getElementById("organizer-total-count");
@@ -1985,6 +2009,7 @@
     let pendingOrganizerRecords = [];
     let publishedOrganizerRecords = [];
     let organizerAnalytics = null;
+    let organizerAiStatus = null;
      let organizerWinner = null;
     let organizerUnlockInFlight = null;
     let organizerUnlockKey = "";
@@ -2103,6 +2128,10 @@
          organizerKeyLabel: "Organizer key",
          organizerUnlock: "Unlock",
          organizerCancel: "Cancel",
+         aiProviderGemini: "Gemini is active. Cloudflare remains the fallback.",
+         aiProviderCloudflare: "Cloudflare is active because Gemini was unavailable for the latest request.",
+         aiProviderBackup: "Gemini will be tried again on the next request.",
+         aiProviderUnavailable: "Provider status is unavailable until the organizer refreshes.",
          liveResults: "Live results",
          resultsDescription: "A ranked view of published visions and active votes.",
          noPublishedResults: "No published visions yet.",
@@ -2204,6 +2233,10 @@
          organizerKeyLabel: "رمز المنظم",
          organizerUnlock: "فتح",
          organizerCancel: "إلغاء",
+         aiProviderGemini: "Gemini هو المزود النشط، وCloudflare هو الخيار الاحتياطي.",
+         aiProviderCloudflare: "Cloudflare هو المزود النشط لأن Gemini لم يكن متاحًا في آخر طلب.",
+         aiProviderBackup: "سيتم تجربة Gemini مرة أخرى في الطلب التالي.",
+         aiProviderUnavailable: "تظهر حالة المزود بعد تحديث المنظم.",
          liveResults: "النتائج المباشرة",
          resultsDescription: "ترتيب الرؤى المنشورة والأصوات النشطة.",
          noPublishedResults: "لا توجد رؤى منشورة بعد.",
@@ -3313,6 +3346,23 @@
       if (liveStageOpen) renderLiveStage();
     }
 
+    function updateOrganizerAiProvider() {
+      if (!organizerAiProvider) return;
+      if (!organizerAiStatus || liveStageDemoMode) {
+        organizerAiProvider.dataset.provider = "gemini";
+        organizerAiProviderName.textContent = "—";
+        organizerAiProviderDetail.textContent = t("aiProviderUnavailable");
+        return;
+      }
+      const activeProvider = organizerAiStatus.activeProvider || organizerAiStatus.provider || "none";
+      const isGemini = activeProvider === "Google Gemini";
+      organizerAiProvider.dataset.provider = isGemini ? "gemini" : "cloudflare";
+      organizerAiProviderName.textContent = activeProvider;
+      organizerAiProviderDetail.textContent = isGemini
+        ? t("aiProviderGemini")
+        : t("aiProviderCloudflare") + " " + t("aiProviderBackup");
+    }
+
     function updateOrganizerSummary() {
       const summaryRecords = liveStageDemoMode ? liveStageDemoRecords : publishedOrganizerRecords;
       organizerPendingCount.textContent = String(pendingOrganizerRecords.length);
@@ -3320,6 +3370,7 @@
       organizerTotalCount.textContent = String(liveStageDemoMode ? pendingOrganizerRecords.length + summaryRecords.length : organizerAnalytics?.totalSubmissions ?? (pendingOrganizerRecords.length + summaryRecords.length));
       organizerVoteCount.textContent = String(liveStageDemoMode ? summaryRecords.reduce((sum, vision) => sum + (Number(vision.votes) || 0), 0) : organizerAnalytics?.activeVotes ?? summaryRecords.reduce((sum, vision) => sum + (Number(vision.votes) || 0), 0));
       organizerLastRefresh.textContent = new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
+      updateOrganizerAiProvider();
       renderResultsDashboard();
       renderLiveStage();
     }
@@ -3491,6 +3542,7 @@
           organizerWinner = data.winner || null;
           publicWinner = data.winner || publicWinner;
           organizerAnalytics = data.analytics || null;
+          organizerAiStatus = data.ai || null;
           updateReviewFilters();
           updateOrganizerSummary();
           rerenderReviewQueues();
