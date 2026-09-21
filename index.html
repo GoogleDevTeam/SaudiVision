@@ -687,6 +687,10 @@
     .field select option { background: #073B35; }
     .submit-actions { display: flex; align-items: center; justify-content: space-between; gap: 12px; grid-column: 1 / -1; }
     .form-note { color: var(--dim); font-family: "Cairo", sans-serif; font-size: .68rem; }
+    .form-note.is-success, .interaction-status.is-success { color: #9ee3bf; }
+    .form-note.is-pending, .interaction-status.is-pending { color: var(--yellow); }
+    .form-note.is-error, .interaction-status.is-error { color: #ffb3c5; }
+    .interaction-status { min-height: 1.2em; margin: 9px 0 0; color: var(--dim); font-family: "Cairo", sans-serif; font-size: .7rem; }
     .generate-button, .vote-button {
       border: 0;
       border-radius: 10px;
@@ -2125,8 +2129,14 @@
         status: "Submissions {submissions} · Voting {voting}.",
         open: "open",
         closed: "closed",
-         imageDemo: "One single AI image is generated with OpenRouter Nano Banana 2 Lite, with Cloudflare Workers AI as backup.",
+         imageDemo: "One single AI image is created for each accepted submission.",
          imageGenerating: "Creating your one-image AI visual...",
+         imageSending: "Sending your submission...",
+         imageStillProcessing: "Still processing — your submission may already be sent. Checking again...",
+         imageSent: "Sent successfully — waiting for review.",
+         imageFailed: "Error — please try again.",
+         imageNotSent: "Not sent. No AI image was created.",
+         confirmImageGeneration: "Continue? One AI image will be created for this submission.",
          trackEnhancerPrefix: "Image prompt enhancer: ",
          submissionAlreadyUsed: "You already submitted once in this round. Please wait for the next round.",
          resetSubmissions: "Reset participant submissions",
@@ -2149,10 +2159,13 @@
          demoBadge: "AI GENERATED",
          stockImage: "STOCK IMAGE",
          aiUnavailable: "Live image generation is temporarily unavailable. Please try again later.",
-         aiKeyMissing: "Image generation is not ready. Add OPENROUTER_API_KEY in Apps Script Project Settings; Cloudflare Workers AI can remain configured as backup.",
+         aiKeyMissing: "AI image generation is not ready. Please try again later.",
          conceptArt: "concept art",
          visionLabel: "VISION",
-        voteError: "The vote could not be saved. Please try again.",
+        voteSending: "Sending vote...",
+         voteSent: "Vote sent.",
+         voteRemoved: "Vote removed.",
+         voteError: "Vote error — please try again.",
         reviewEmpty: "No pending submissions.",
         reviewLoading: "Loading review queue...",
         approve: "Approve",
@@ -2162,10 +2175,10 @@
          organizerKeyLabel: "Organizer key",
          organizerUnlock: "Unlock",
          organizerCancel: "Cancel",
-                  aiProviderOpenRouter: "OpenRouter Nano Banana 2 Lite is the active image provider; Cloudflare Workers AI is the backup.",
-                   aiProviderCloudflare: "Cloudflare Workers AI is the active backup image provider.",
+                  aiProviderOpenRouter: "AI is ready for accepted submissions.",
+                   aiProviderCloudflare: "AI is ready for accepted submissions.",
                   aiProviderUnavailable: "Provider status is unavailable until the organizer refreshes.",
-         aiProviderCloudflareNoError: "Cloudflare Workers AI is active as the backup provider.",
+         aiProviderCloudflareNoError: "AI is ready for accepted submissions.",
          aiProviderReason: "Reason: {error}",
          liveResults: "Live results",
          resultsDescription: "A ranked view of published visions and active votes.",
@@ -2231,8 +2244,14 @@
         status: "المشاركات {submissions} · التصويت {voting}.",
         open: "مفتوحة",
         closed: "مغلقة",
-         imageDemo: "يتم إنشاء صورة واحدة فقط باستخدام OpenRouter Nano Banana 2 Lite، مع Cloudflare Workers AI كنسخة احتياطية.",
+         imageDemo: "يتم إنشاء صورة واحدة فقط لكل مشاركة مقبولة بالذكاء الاصطناعي.",
          imageGenerating: "يتم الآن إنشاء الصورة الوحيدة للمشاركة...",
+         imageSending: "جارٍ إرسال المشاركة...",
+         imageStillProcessing: "لا تزال المشاركة قيد المعالجة — ربما تم إرسالها، جارٍ التحقق مرة أخرى...",
+         imageSent: "تم الإرسال بنجاح — بانتظار المراجعة.",
+         imageFailed: "حدث خطأ — حاول مرة أخرى.",
+         imageNotSent: "لم يتم الإرسال. لم يتم إنشاء صورة بالذكاء الاصطناعي.",
+         confirmImageGeneration: "هل تريدون المتابعة؟ سيتم إنشاء صورة واحدة بالذكاء الاصطناعي لهذه المشاركة.",
          trackEnhancerPrefix: "مُحسّن مطالبة الصورة: ",
          submissionAlreadyUsed: "لقد أرسلتم مشاركة واحدة في هذه الجولة. انتظروا الجولة القادمة.",
          resetSubmissions: "إعادة فتح مشاركات المشاركين",
@@ -2255,10 +2274,13 @@
          demoBadge: "مولّد بالذكاء الاصطناعي",
          stockImage: "صورة مخزنة",
          aiUnavailable: "توليد الصور المباشر غير متاح مؤقتًا. حاولوا مرة أخرى لاحقًا.",
-         aiKeyMissing: "توليد الصور غير جاهز بعد. أضيفوا OPENROUTER_API_KEY في إعدادات مشروع Apps Script، ويمكن إبقاء Cloudflare Workers AI كنسخة احتياطية.",
+         aiKeyMissing: "توليد الصور بالذكاء الاصطناعي غير جاهز بعد. حاولوا مرة أخرى لاحقًا.",
          conceptArt: "تصور بصري",
          visionLabel: "رؤية",
-        voteError: "تعذر حفظ التصويت. حاول مرة أخرى.",
+        voteSending: "جارٍ إرسال التصويت...",
+         voteSent: "تم إرسال التصويت.",
+         voteRemoved: "تم إلغاء التصويت.",
+         voteError: "حدث خطأ في التصويت — حاول مرة أخرى.",
         reviewEmpty: "لا توجد مشاركات بانتظار المراجعة.",
         reviewLoading: "جارٍ تحميل قائمة المراجعة...",
         approve: "موافقة",
@@ -2268,10 +2290,10 @@
          organizerKeyLabel: "رمز المنظم",
          organizerUnlock: "فتح",
          organizerCancel: "إلغاء",
-                  aiProviderOpenRouter: "OpenRouter Nano Banana 2 Lite هو مزود الصور النشط، وCloudflare Workers AI هو النسخة الاحتياطية.",
-                   aiProviderCloudflare: "Cloudflare Workers AI هو مزود الصور الاحتياطي النشط.",
+                  aiProviderOpenRouter: "الذكاء الاصطناعي جاهز للمشاركات المقبولة.",
+                   aiProviderCloudflare: "الذكاء الاصطناعي جاهز للمشاركات المقبولة.",
                   aiProviderUnavailable: "تظهر حالة المزود بعد تحديث المنظم.",
-         aiProviderCloudflareNoError: "Cloudflare Workers AI هو المزود الاحتياطي النشط حاليًا.",
+         aiProviderCloudflareNoError: "الذكاء الاصطناعي جاهز للمشاركات المقبولة.",
          aiProviderReason: "السبب: {error}",
          liveResults: "النتائج المباشرة",
          resultsDescription: "ترتيب الرؤى المنشورة والأصوات النشطة.",
@@ -2639,35 +2661,42 @@
       if (!GOOGLE_APPS_SCRIPT_URL) return null;
       const method = options.method || "POST";
       const url = GOOGLE_APPS_SCRIPT_URL + (action ? "?action=" + encodeURIComponent(action) : "");
-      const controller = new AbortController();
-      const timeoutId = window.setTimeout(() => controller.abort(), options.timeout || 12000);
-      try {
-        const response = await fetch(url, {
-          method,
-          headers: method === "GET" ? undefined : { "Content-Type": "text/plain;charset=utf-8" },
-          body: method === "GET" ? undefined : JSON.stringify({ action, ...payload }),
-          cache: "no-store",
-          signal: controller.signal
-        });
-        if (!response.ok) {
-          if ([404, 502, 503, 504].includes(response.status)) throw new Error("Backend unavailable.");
-          throw new Error("Google backend returned " + response.status);
-        }
-        const raw = await response.text();
-        let result;
+      const maxAttempts = Math.max(0, Number(options.retries) || 0) + 1;
+      let lastError;
+      for (let attempt = 0; attempt < maxAttempts; attempt += 1) {
+        const controller = new AbortController();
+        const timeoutId = window.setTimeout(() => controller.abort(), options.timeout || 12000);
         try {
-          result = JSON.parse(raw);
-        } catch (parseError) {
-          throw new Error("Backend returned an invalid response.");
+          const response = await fetch(url, {
+            method,
+            headers: method === "GET" ? undefined : { "Content-Type": "text/plain;charset=utf-8" },
+            body: method === "GET" ? undefined : JSON.stringify({ action, ...payload }),
+            cache: "no-store",
+            signal: controller.signal
+          });
+          if (!response.ok) {
+            if ([404, 408, 429, 502, 503, 504].includes(response.status)) throw new Error("Backend unavailable.");
+            throw new Error("Google backend returned " + response.status);
+          }
+          const raw = await response.text();
+          let result;
+          try {
+            result = JSON.parse(raw);
+          } catch (parseError) {
+            throw new Error("Backend returned an invalid response.");
+          }
+          if (result.ok === false) throw new Error(result.error || "Google backend error");
+          return result;
+        } catch (error) {
+          lastError = error && error.name === "AbortError" ? new Error("Backend timeout.") : error;
+          const retryable = /timeout|backend unavailable|invalid response|502|503|504|failed to fetch|network/i.test(lastError?.message || "");
+          if (!retryable || attempt === maxAttempts - 1) throw lastError;
+          await new Promise((resolve) => window.setTimeout(resolve, 700 * (attempt + 1)));
+        } finally {
+          window.clearTimeout(timeoutId);
         }
-        if (result.ok === false) throw new Error(result.error || "Google backend error");
-        return result;
-      } catch (error) {
-        if (error && error.name === "AbortError") throw new Error("Backend timeout.");
-        throw error;
-      } finally {
-        window.clearTimeout(timeoutId);
       }
+      throw lastError || new Error("Backend unavailable.");
     }
 
     async function requestOrganizerSnapshot(keyOverride = "") {
@@ -3010,7 +3039,7 @@
 
     async function voteForVision(index) {
       const vision = activeVisions[index];
-      const voteButton = document.getElementById(`vote-${index}`);
+      const voteButton = document.getElementById("vote-" + index);
       const selectedVision = localStorage.getItem("imagineSaudiVote");
       const selectedVisionKey = vision ? visionKey(vision) : "";
       const isSelected = Boolean(vision) && (selectedVision === selectedVisionKey || selectedVision === vision.team);
@@ -3018,24 +3047,43 @@
       const action = isSelected ? "unvote" : "vote";
       voteInFlight = true;
       voteButton?.classList.add("is-processing");
+      setInteractionStatus(t("voteSending"), "pending");
       try {
         if (GOOGLE_APPS_SCRIPT_URL && !liveStageDemoMode) {
-          await googleRequest(action, { visionId: vision.id || vision.team, voterId });
+          await googleRequest(action, { visionId: vision.id || vision.team, voterId }, { timeout: 15000, retries: 1 });
         }
         vision.votes = Math.max(0, (vision.votes || 0) + (action === "vote" ? 1 : -1));
         if (action === "vote") localStorage.setItem("imagineSaudiVote", selectedVisionKey);
         else localStorage.removeItem("imagineSaudiVote");
         if (liveStageDemoMode) renderDemoSurfaces();
         else await syncGallery();
+        setInteractionStatus(action === "vote" ? t("voteSent") : t("voteRemoved"), "success");
       } catch (error) {
         voteButton?.classList.add("is-rejected");
-        alert(/RATE_LIMITED|rate limit/i.test(error?.message || "") ? t("rateLimited") : t("voteError"));
+        setInteractionStatus(/RATE_LIMITED|rate limit/i.test(error?.message || "") ? t("rateLimited") : t("voteError"), "error");
         console.error("Vote request failed:", error);
       } finally {
         voteButton?.classList.remove("is-processing");
         voteInFlight = false;
         voteCooldownUntil = Date.now() + 900;
       }
+    }
+
+    function setInteractionStatus(message, kind = "") {
+      if (!interactionStatus) return;
+      interactionStatus.textContent = message || "";
+      interactionStatus.className = "interaction-status" + (kind ? " is-" + kind : "");
+    }
+
+    async function waitForSubmissionStatus(submissionId) {
+      for (let attempt = 0; attempt < 24; attempt += 1) {
+        await new Promise((resolve) => window.setTimeout(resolve, attempt === 0 ? 800 : 3000));
+        const result = await googleRequest("submissionStatus", { submissionId, participantId }, { timeout: 12000 });
+        if (result?.status === "pending") return result;
+        if (result?.status === "failed") throw new Error(result.error || t("imageFailed"));
+        if (result?.status === "not_found") throw new Error(t("imageFailed"));
+      }
+      return { ok: true, status: "processing", submissionId };
     }
 
     async function ensureImageGenerationReady() {
@@ -3059,6 +3107,12 @@
       if (!team || !title || !prompt) return;
       if (!GOOGLE_APPS_SCRIPT_URL && !liveStageDemoMode) {
         formNote.textContent = t("aiUnavailable");
+        formNote.className = "form-note is-error";
+        return;
+      }
+      if (!liveStageDemoMode && !window.confirm(t("confirmImageGeneration"))) {
+        formNote.textContent = t("imageNotSent");
+        formNote.className = "form-note";
         return;
       }
 
@@ -3067,20 +3121,24 @@
       submissionPanel.classList.add("is-submitting");
       generateButton.disabled = true;
       generateButton.setAttribute("aria-busy", "true");
-       generateButton.classList.add("is-generating");
-       generateButton.textContent = t("imageGeneratingButton");
-      formNote.textContent = t("imageGenerating");
+      generateButton.classList.add("is-generating");
+      generateButton.classList.remove("is-rejected");
+      generateButton.textContent = t("imageGeneratingButton");
+      formNote.textContent = t("imageSending");
+      formNote.className = "form-note is-pending";
       const colors = {
         "Green Tech & Energy": "#2C7562",
         "Smart Mobility & Future Cities": "#9B8AC4",
         "Heritage, Culture & Tourism": "#D8D0ED",
-        "Human Potential & Wellbeing": "#2C7562",
-        "Water & Oceans": "#9B8AC4",
-        "Future Food & Agriculture": "#D8D0ED",
-        "Digital Society & Governance": "#2C7562"
-      };;;
+        "Human Potential & Wellbeing": "#A74461",
+        "Water & Oceans": "#5AA489",
+        "Future Food & Agriculture": "#D6AA62",
+        "Digital Society & Governance": "#6D8FD5"
+      };
+      const submissionId = "submission-" + (window.crypto && typeof window.crypto.randomUUID === "function" ? window.crypto.randomUUID() : Date.now() + "-" + Math.random().toString(36).slice(2));
       const newVision = {
-        id: `local-${Date.now()}`,
+        id: submissionId,
+        submissionId: submissionId,
         team,
         title,
         track,
@@ -3091,24 +3149,45 @@
         ...deviceMetadata,
         image: liveStageDemoMode ? createDemoPreviewImage(team + " " + title + " " + prompt) : "",
         color: colors[track] || "#D8D0ED",
-         height: 280 + (((sourceVisions.length + localPublishedVisions.length) * 37) % 100),
-         votes: 0,
-         status: "pending",
+        height: 280 + (((sourceVisions.length + localPublishedVisions.length) * 37) % 100),
+        votes: 0,
+        status: "pending",
         imageSource: liveStageDemoMode ? "demo-preview" : "generated",
         createdAt: new Date().toISOString()
       };
+      let submissionResult = null;
       try {
         if (liveStageDemoMode) {
           await new Promise((resolve) => window.setTimeout(resolve, 500));
           demoPendingRecords.unshift(newVision);
         } else {
           await ensureImageGenerationReady();
-          const submissionResult = await googleRequest("submit", newVision, { timeout: 240000 });
-          if (!submissionResult || submissionResult.status !== "pending") {
+          submissionResult = await googleRequest("submit", newVision, { timeout: 300000 });
+          if (!submissionResult || !["pending", "processing"].includes(submissionResult.status)) {
             throw new Error(t("submitError"));
           }
         }
       } catch (error) {
+        const uncertain = !liveStageDemoMode && /timeout|backend unavailable|invalid response|502|503|504/i.test(error?.message || "");
+        if (uncertain) {
+          formNote.textContent = t("imageStillProcessing");
+          formNote.className = "form-note is-pending";
+          try {
+            submissionResult = await waitForSubmissionStatus(submissionId);
+            if (submissionResult.status === "processing") {
+              formNote.textContent = t("imageStillProcessing");
+              formNote.className = "form-note is-pending";
+              generateButton.disabled = true;
+              generateButton.removeAttribute("aria-busy");
+              generateButton.classList.remove("is-generating");
+              form.classList.remove("is-submitting");
+              submissionPanel.classList.remove("is-submitting");
+              return;
+            }
+          } catch (statusError) {
+            error = statusError;
+          }
+        }
         generateButton.disabled = false;
         generateButton.removeAttribute("aria-busy");
         generateButton.classList.remove("is-generating", "is-complete");
@@ -3117,7 +3196,8 @@
         window.setTimeout(() => generateButton.classList.remove("is-rejected"), 600);
         form.classList.remove("is-submitting");
         submissionPanel.classList.remove("is-submitting");
-        formNote.textContent = /RATE_LIMITED|rate limit/i.test(error?.message || "") ? t("rateLimited") : error?.message || t("submitError");
+        formNote.textContent = /RATE_LIMITED|rate limit/i.test(error?.message || "") ? t("rateLimited") : t("imageFailed");
+        formNote.className = "form-note is-error";
         console.error("Live AI submission failed:", error);
         return;
       }
@@ -3135,9 +3215,8 @@
       generateButton.textContent = submissionComplete
         ? t("imageCompleteButton")
         : (currentLanguage === "ar" ? "✦ حوّلوا الفكرة إلى صورة" : "✦ Turn idea into image");
-      formNote.textContent = liveStageDemoMode
-        ? liveStageCopy("Submission received — it is waiting in the review queue.", "تم استلام المشاركة — وهي الآن بانتظار المراجعة.")
-        : t("imageQueued");
+      formNote.textContent = liveStageDemoMode ? liveStageCopy("Submission received — it is waiting in the review queue.", "تم استلام المشاركة — وهي الآن بانتظار المراجعة.") : t("imageSent");
+      formNote.className = "form-note is-success";
       if (liveStageDemoMode) {
         renderDemoSurfaces();
         return;
@@ -3418,24 +3497,11 @@
 
     function updateOrganizerAiProvider() {
       if (!organizerAiProvider) return;
-      if (!organizerAiStatus || liveStageDemoMode) {
-        organizerAiProvider.dataset.provider = "cloudflare";
-        organizerAiProviderName.textContent = "—";
-        organizerAiProviderDetail.textContent = t("aiProviderUnavailable");
-        organizerAiProviderError.textContent = "";
-        return;
-      }
-      const activeProvider = organizerAiStatus.activeProvider || organizerAiStatus.provider || "none";
-      const providerConfigured = activeProvider === "Cloudflare Workers AI";
-      const providerError = String(organizerAiStatus.lastFallbackError || "").trim();
-      organizerAiProvider.dataset.provider = "cloudflare";
-      organizerAiProviderName.textContent = activeProvider;
-      organizerAiProviderDetail.textContent = providerConfigured
-        ? (providerError ? t("aiProviderCloudflare") : t("aiProviderCloudflareNoError"))
-        : t("aiProviderUnavailable");
-      organizerAiProviderError.textContent = providerError
-        ? t("aiProviderReason").replace("{error}", providerError)
-        : "";
+      const ready = Boolean(organizerAiStatus && organizerAiStatus.configured && !liveStageDemoMode);
+      organizerAiProvider.dataset.provider = ready ? "ai" : "none";
+      organizerAiProviderName.textContent = ready ? "AI" : "—";
+      organizerAiProviderDetail.textContent = ready ? t("aiProviderOpenRouter") : t("aiProviderUnavailable");
+      organizerAiProviderError.textContent = "";
     }
 
     function updateOrganizerSummary() {
