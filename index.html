@@ -2025,8 +2025,17 @@
       };
     }
     const deviceMetadata = getDeviceMetadata();
+    function safeSessionGet(key) {
+      try { return window.sessionStorage.getItem(key) || ""; } catch (error) { return ""; }
+    }
+    function safeSessionSet(key, value) {
+      try { window.sessionStorage.setItem(key, value); } catch (error) { /* Private browsing/storage limits are non-fatal. */ }
+    }
+    function safeSessionRemove(key) {
+      try { window.sessionStorage.removeItem(key); } catch (error) { /* Private browsing/storage limits are non-fatal. */ }
+    }
     let currentLanguage = localStorage.getItem("imagineSaudiLanguage") || "ar";
-    let organizerKey = sessionStorage.getItem("imagineSaudiOrganizerKey") || "";
+    let organizerKey = safeSessionGet("imagineSaudiOrganizerKey");
     let organizerUnlocked = false;
     let pendingOrganizerRecords = [];
     let publishedOrganizerRecords = [];
@@ -2036,6 +2045,9 @@
     let organizerUnlockInFlight = null;
     let organizerUnlockKey = "";
     let organizerLoadInFlight = null;
+    let organizerUnlockGeneration = 0;
+    let organizerLoadGeneration = 0;
+    let organizerHasLoadedData = false;
     function readLocalArray(key) {
       try {
         const value = JSON.parse(localStorage.getItem(key) || "[]");
@@ -2697,7 +2709,7 @@
       if (hasSetting("submissionRound")) settings.submissionRound = String(nextSettings.submissionRound || settings.submissionRound || "1");
       if (hasSetting("winnerVisionId")) settings.winnerVisionId = String(nextSettings.winnerVisionId || "");
       if (hasSetting("winnerDeclaredAt")) settings.winnerDeclaredAt = String(nextSettings.winnerDeclaredAt || "");
-      localStorage.setItem("imagineSaudiSubmissionRound", settings.submissionRound);
+      try { localStorage.setItem("imagineSaudiSubmissionRound", settings.submissionRound); } catch (error) { /* Storage limits must not block dashboard rendering. */ }
       syncDeadlineInputs();
       syncControlInputs();
       updateCompetitionMode(false);
@@ -2758,17 +2770,28 @@
 
     function showOrganizerError(error) {
       const errorMessage = error?.message || "";
+      const isAuthError = /unauthorized|invalid organizer key|admin key/i.test(errorMessage);
       const message = /timeout|unknown action|backend unavailable/i.test(errorMessage)
         ? t("organizerSlow")
-        : /unauthorized|invalid organizer key/i.test(errorMessage)
+        : isAuthError
         ? t("organizerInvalidKey")
         : /backend unavailable|404|502|503|504/i.test(errorMessage)
           ? t("backendUnavailable")
           : t("settingsError");
       organizerStatus.textContent = message;
       organizerStatus.classList.add("is-error");
+      if (isAuthError) {
+        organizerUnlocked = false;
+        organizerDetails.open = false;
+        organizerDetails.hidden = true;
+        organizerAccess.classList.remove("is-unlocked", "is-processing");
+        organizerAccess.disabled = false;
+        organizerAccess.removeAttribute("aria-busy");
+        safeSessionRemove("imagineSaudiOrganizerKey");
+        organizerKey = "";
+        organizerLogin.hidden = false;
+      }
     }
-
 
     function animateInteraction(element, className = "interaction-pop") {
       if (!element) return;
@@ -2828,7 +2851,7 @@
       } catch (error) {
         if (/unauthorized|invalid organizer key|admin key|organizer/i.test(error.message || "")) {
           if (!keyOverride || key === organizerKey) organizerKey = "";
-          sessionStorage.removeItem("imagineSaudiOrganizerKey");
+          safeSessionRemove("imagineSaudiOrganizerKey");
         }
         throw error;
       }
@@ -2845,11 +2868,12 @@
         await organizerUnlockInFlight;
         if (organizerUnlocked && organizerKey === key) return true;
       }
+      const unlockGeneration = ++organizerUnlockGeneration;
       organizerUnlockKey = key;
       organizerAccess.disabled = true;
       organizerAccess.setAttribute("aria-busy", "true");
       organizerAccess.classList.add("is-processing");
-      organizerUnlockInFlight = (async () => {
+      const unlockWork = (async () => {
         try {
           let initialSnapshot = null;
           try {
@@ -2858,8 +2882,9 @@
             if (!/unknown action/i.test(error?.message || "")) throw error;
             initialSnapshot = await requestOrganizerSnapshot(key);
           }
+          if (unlockGeneration !== organizerUnlockGeneration) return false;
           organizerKey = key;
-          sessionStorage.setItem("imagineSaudiOrganizerKey", organizerKey);
+          safeSessionSet("imagineSaudiOrganizerKey", organizerKey);
           organizerUnlocked = true;
           organizerDetails.hidden = false;
           organizerDetails.open = true;
@@ -2868,16 +2893,17 @@
           hideOrganizerLogin();
           organizerStatus.textContent = t("organizerLoading");
           if (initialSnapshot) await loadReviewQueue(initialSnapshot);
-          else loadReviewQueue();
+          else await loadReviewQueue();
           return true;
         } catch (error) {
+          if (unlockGeneration !== organizerUnlockGeneration) return false;
           organizerKey = "";
           organizerUnlocked = false;
           organizerDetails.open = false;
           organizerDetails.hidden = true;
           organizerAccess.classList.remove("is-unlocked");
           organizerAccess.classList.add("is-rejected");
-          sessionStorage.removeItem("imagineSaudiOrganizerKey");
+          safeSessionRemove("imagineSaudiOrganizerKey");
           showOrganizerError(error);
           if (!options.silent) {
             organizerLogin.hidden = false;
@@ -2887,16 +2913,19 @@
           console.error("Organizer unlock failed:", error);
           return false;
         } finally {
-          organizerAccess.disabled = false;
-          organizerAccess.removeAttribute("aria-busy");
-          organizerAccess.classList.remove("is-processing");
-          organizerUnlockKey = "";
+          if (unlockGeneration === organizerUnlockGeneration) {
+            organizerAccess.disabled = false;
+            organizerAccess.removeAttribute("aria-busy");
+            organizerAccess.classList.remove("is-processing");
+            organizerUnlockKey = "";
+          }
         }
       })();
+      organizerUnlockInFlight = unlockWork;
       try {
-        return await organizerUnlockInFlight;
+        return await unlockWork;
       } finally {
-        organizerUnlockInFlight = null;
+        if (organizerUnlockInFlight === unlockWork) organizerUnlockInFlight = null;
       }
     }
 
@@ -3575,9 +3604,16 @@
 
     async function loadReviewQueue(snapshot = null) {
       if (liveStageDemoMode && !snapshot) { renderDemoSurfaces(); return true; }
-      if (!snapshot && organizerLoadInFlight) return organizerLoadInFlight;
+      if (organizerLoadInFlight) return organizerLoadInFlight;
+      const loadGeneration = ++organizerLoadGeneration;
+      const hadData = organizerHasLoadedData || pendingOrganizerRecords.length > 0 || publishedOrganizerRecords.length > 0;
       const work = (async () => {
-        reviewQueue.innerHTML = `<p class="review-empty">${t("reviewLoading")}</p>`;
+        if (!hadData) {
+          reviewQueue.innerHTML = `<p class="review-empty">${t("reviewLoading")}</p>`;
+          publishedQueue.innerHTML = `<p class="review-empty">${t("reviewLoading")}</p>`;
+        }
+        organizerStatus.textContent = t("organizerLoading");
+        organizerStatus.classList.remove("is-error");
         try {
           const data = snapshot || (GOOGLE_APPS_SCRIPT_URL
             ? await requestOrganizerSnapshot()
@@ -3588,26 +3624,32 @@
               data.ai = aiStatus?.imageGeneration || null;
             } catch (ignored) { /* Provider status is supplementary to the organizer data. */ }
           }
+          if (loadGeneration !== organizerLoadGeneration || !organizerUnlocked) return false;
           applyPublicSettings(data.settings);
-          pendingOrganizerRecords = data.pending || [];
-          publishedOrganizerRecords = data.published || [];
+          pendingOrganizerRecords = Array.isArray(data.pending) ? data.pending : [];
+          publishedOrganizerRecords = Array.isArray(data.published) ? data.published : [];
           organizerWinner = data.winner || null;
           publicWinner = data.winner || publicWinner;
           organizerAnalytics = data.analytics || null;
           organizerAiStatus = data.ai || null;
+          organizerHasLoadedData = true;
           updateReviewFilters();
           updateOrganizerSummary();
           rerenderReviewQueues();
           return true;
         } catch (error) {
-          reviewQueue.innerHTML = `<p class="review-empty">${t("reviewError")}</p>`;
-          publishedQueue.innerHTML = `<p class="review-empty">${t("reviewError")}</p>`;
+          if (loadGeneration !== organizerLoadGeneration || !organizerUnlocked) return false;
+          if (!organizerHasLoadedData && !pendingOrganizerRecords.length && !publishedOrganizerRecords.length) {
+            reviewQueue.innerHTML = `<p class="review-empty">${t("reviewError")}</p>`;
+            publishedQueue.innerHTML = `<p class="review-empty">${t("reviewError")}</p>`;
+          } else {
+            rerenderReviewQueues();
+          }
           showOrganizerError(error);
           console.error("Review queue failed:", error);
           return false;
         }
       })();
-      if (snapshot) return work;
       organizerLoadInFlight = work;
       try {
         return await work;
@@ -3615,6 +3657,7 @@
         if (organizerLoadInFlight === work) organizerLoadInFlight = null;
       }
     }
+
     async function moderateSubmission(id, action) {
       if (["delete", "deletePublished"].includes(action) && !confirm(t("confirmDelete"))) return;
       try {
@@ -3710,11 +3753,14 @@
         updateDemoControls();
       }
       closeLiveStage();
+      organizerUnlockGeneration += 1;
+      organizerLoadGeneration += 1;
       organizerKey = "";
       organizerUnlocked = false;
-      organizerUnlockInFlight = null;
+      organizerUnlockKey = "";
       organizerLoadInFlight = null;
-      sessionStorage.removeItem("imagineSaudiOrganizerKey");
+      organizerHasLoadedData = false;
+      safeSessionRemove("imagineSaudiOrganizerKey");
       organizerDetails.open = false;
       organizerDetails.hidden = true;
       organizerLogin.hidden = true;
@@ -3906,11 +3952,11 @@
     document.addEventListener("fullscreenchange", () => {
       liveStageFullscreen.textContent = document.fullscreenElement === liveStage ? liveStageCopy("⛶ Exit full screen", "⛶ إنهاء ملء الشاشة") : liveStageCopy("⛶ Full screen", "⛶ ملء الشاشة");
     });
-    organizerRefresh.addEventListener("click", loadReviewQueue);
+    organizerRefresh.addEventListener("click", () => loadReviewQueue());
     organizerExport.addEventListener("click", downloadOrganizerCsv);
     organizerExportJson.addEventListener("click", downloadOrganizerJson);
     organizerLock.addEventListener("click", lockOrganizerPanel);
-    reviewRefresh.addEventListener("click", loadReviewQueue);
+    reviewRefresh.addEventListener("click", () => loadReviewQueue());
     reviewSearch.addEventListener("input", rerenderReviewQueues);
     reviewTrackFilter.addEventListener("change", rerenderReviewQueues);
     gallerySearch.addEventListener("input", renderGallery);
