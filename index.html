@@ -3063,7 +3063,7 @@
           demoPendingRecords.unshift(newVision);
         } else {
           await ensureImageGenerationReady();
-          const submissionResult = await googleRequest("submit", newVision, { timeout: 90000 });
+          const submissionResult = await googleRequest("submit", newVision, { timeout: 240000 });
           if (!submissionResult || submissionResult.status !== "pending") {
             throw new Error(t("submitError"));
           }
