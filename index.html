@@ -373,7 +373,7 @@
     .organizer-ai-provider span { color: var(--dim); font-family: "Cairo", sans-serif; font-size: .68rem; }
     .organizer-ai-provider strong { color: var(--green); font-size: .76rem; }
     .organizer-ai-provider small { display: block; margin-top: 3px; color: var(--dim); font-family: "Cairo", sans-serif; font-size: .64rem; }
-    .organizer-ai-provider[data-provider="cloudflare"] strong { color: #D6AA62; }
+    .organizer-ai-provider[data-provider="cloudflare"] strong, .organizer-ai-provider[data-provider="openrouter"] strong { color: #D6AA62; }
     .organizer-details, .organizer-panel, .control-card, .organizer-ai-provider, .organizer-results, .review-panel { min-width: 0; }
     .organizer-panel { width: 100%; }
     .control-card > div:first-child, .organizer-ai-provider > div { min-width: 0; flex: 1 1 auto; }
@@ -1691,7 +1691,7 @@
       Google Apps Script setup:
       1. Create a Google Sheet and deploy the companion google-apps-script.gs as a web app.
       2. Paste the deployment URL below. Keep it empty for standalone demo mode.
-      3. Never put Cloudflare credentials in this file; keep them in Apps Script properties.
+      3. Never put OpenRouter or Cloudflare credentials in this file; keep them in Apps Script properties.
       4. Optional Firebase upgrade: create a Firebase project, enable Google Sign-In,
          then add the public web config here only when you are ready to use Firebase
          Auth. Keep organizer credentials and vote-authorizing writes on a trusted
@@ -2113,7 +2113,7 @@
         status: "Submissions {submissions} · Voting {voting}.",
         open: "open",
         closed: "closed",
-         imageDemo: "One single AI image is generated with Cloudflare FLUX.2 Dev.",
+         imageDemo: "One single AI image is generated with OpenRouter Nano Banana 2 Lite, with Cloudflare Workers AI as backup.",
          imageGenerating: "Creating your one-image AI visual...",
          trackEnhancerPrefix: "Image prompt enhancer: ",
          submissionAlreadyUsed: "You already submitted once in this round. Please wait for the next round.",
@@ -2137,7 +2137,7 @@
          demoBadge: "AI GENERATED",
          stockImage: "STOCK IMAGE",
          aiUnavailable: "Live image generation is temporarily unavailable. Please try again later.",
-         aiKeyMissing: "Image generation is not ready. Add the Cloudflare Workers AI settings in Apps Script Project Settings, then try again.",
+         aiKeyMissing: "Image generation is not ready. Add OPENROUTER_API_KEY in Apps Script Project Settings; Cloudflare Workers AI can remain configured as backup.",
          conceptArt: "concept art",
          visionLabel: "VISION",
         voteError: "The vote could not be saved. Please try again.",
@@ -2150,9 +2150,10 @@
          organizerKeyLabel: "Organizer key",
          organizerUnlock: "Unlock",
          organizerCancel: "Cancel",
-                  aiProviderCloudflare: "Cloudflare FLUX.2 Dev is the active image provider.",
+                  aiProviderOpenRouter: "OpenRouter Nano Banana 2 Lite is the active image provider; Cloudflare Workers AI is the backup.",
+                   aiProviderCloudflare: "Cloudflare Workers AI is the active backup image provider.",
                   aiProviderUnavailable: "Provider status is unavailable until the organizer refreshes.",
-         aiProviderCloudflareNoError: "Cloudflare is active as the configured provider.",
+         aiProviderCloudflareNoError: "Cloudflare Workers AI is active as the backup provider.",
          aiProviderReason: "Reason: {error}",
          liveResults: "Live results",
          resultsDescription: "A ranked view of published visions and active votes.",
@@ -2218,7 +2219,7 @@
         status: "المشاركات {submissions} · التصويت {voting}.",
         open: "مفتوحة",
         closed: "مغلقة",
-         imageDemo: "يتم إنشاء صورة واحدة فقط باستخدام Cloudflare FLUX.2 Dev.",
+         imageDemo: "يتم إنشاء صورة واحدة فقط باستخدام OpenRouter Nano Banana 2 Lite، مع Cloudflare Workers AI كنسخة احتياطية.",
          imageGenerating: "يتم الآن إنشاء الصورة الوحيدة للمشاركة...",
          trackEnhancerPrefix: "مُحسّن مطالبة الصورة: ",
          submissionAlreadyUsed: "لقد أرسلتم مشاركة واحدة في هذه الجولة. انتظروا الجولة القادمة.",
@@ -2242,7 +2243,7 @@
          demoBadge: "مولّد بالذكاء الاصطناعي",
          stockImage: "صورة مخزنة",
          aiUnavailable: "توليد الصور المباشر غير متاح مؤقتًا. حاولوا مرة أخرى لاحقًا.",
-         aiKeyMissing: "توليد الصور غير جاهز بعد. أضيفوا إعدادات Cloudflare Workers AI في إعدادات مشروع Apps Script ثم حاولوا مرة أخرى.",
+         aiKeyMissing: "توليد الصور غير جاهز بعد. أضيفوا OPENROUTER_API_KEY في إعدادات مشروع Apps Script، ويمكن إبقاء Cloudflare Workers AI كنسخة احتياطية.",
          conceptArt: "تصور بصري",
          visionLabel: "رؤية",
         voteError: "تعذر حفظ التصويت. حاول مرة أخرى.",
@@ -2255,9 +2256,10 @@
          organizerKeyLabel: "رمز المنظم",
          organizerUnlock: "فتح",
          organizerCancel: "إلغاء",
-                  aiProviderCloudflare: "Cloudflare FLUX.2 Dev هو مزود الصور النشط.",
+                  aiProviderOpenRouter: "OpenRouter Nano Banana 2 Lite هو مزود الصور النشط، وCloudflare Workers AI هو النسخة الاحتياطية.",
+                   aiProviderCloudflare: "Cloudflare Workers AI هو مزود الصور الاحتياطي النشط.",
                   aiProviderUnavailable: "تظهر حالة المزود بعد تحديث المنظم.",
-         aiProviderCloudflareNoError: "Cloudflare هو المزود النشط والمُعد حاليًا.",
+         aiProviderCloudflareNoError: "Cloudflare Workers AI هو المزود الاحتياطي النشط حاليًا.",
          aiProviderReason: "السبب: {error}",
          liveResults: "النتائج المباشرة",
          resultsDescription: "ترتيب الرؤى المنشورة والأصوات النشطة.",
